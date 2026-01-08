@@ -1,0 +1,16 @@
+# --- VISUAL STUDIO ---
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# --- JAVA ---
+.idea/
+target/
+.settings/
+
+# --- ANDROID ---
+.gradle/
+build/
+local.properties
