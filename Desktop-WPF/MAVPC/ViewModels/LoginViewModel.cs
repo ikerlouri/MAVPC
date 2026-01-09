@@ -1,46 +1,46 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace MAVPC.ViewModels
 {
     public partial class LoginViewModel : ObservableObject
     {
-        // SOLUCIÓN ERRORES NULL: Inicializamos con string.Empty
         [ObservableProperty]
-        private string _usuario = string.Empty;
+        private string _username = string.Empty;
 
+        // --- ¡AQUÍ ESTABA EL ERROR! Faltaba esta propiedad ---
         [ObservableProperty]
         private string _password = string.Empty;
+        // -----------------------------------------------------
 
         [ObservableProperty]
-        private string _mensajeError = string.Empty;
+        private bool _hasError;
 
         [ObservableProperty]
-        private bool _isCargando;
+        private string _errorMessage = string.Empty;
 
         [RelayCommand]
-        private async Task Login()
+        private void Login()
         {
-            IsCargando = true;
-            MensajeError = string.Empty;
-
-            // Simulación de espera
-            await Task.Delay(1000);
-
-            // Validación simple
-            if (Usuario == "admin" && Password == "1234")
+            // Ahora validamos también la contraseña
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
             {
-                MessageBox.Show("¡Login Correcto!", "Sistema MAVPC");
-                // Aquí navegaremos al Dashboard más adelante
+                ErrorMessage = "Usuario y contraseña requeridos.";
+                HasError = true;
             }
             else
             {
-                MensajeError = "Usuario o contraseña incorrectos";
+                HasError = false;
+                MessageBox.Show($"Login Correcto.\nUsuario: {Username}\nPass: {Password}");
+                // Aquí iría la navegación al MainView
             }
+        }
 
-            IsCargando = false;
+        [RelayCommand]
+        private void Exit()
+        {
+            Application.Current.Shutdown();
         }
     }
 }

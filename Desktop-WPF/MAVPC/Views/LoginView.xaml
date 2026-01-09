@@ -6,68 +6,103 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:MAVPC.ViewModels"
         mc:Ignorable="d"
-        Title="Login MAVPC" Height="450" Width="800"
-        WindowStartupLocation="CenterScreen"
+        Title="MAVPC Access" 
+        WindowState="Maximized" 
         WindowStyle="None"
         ResizeMode="NoResize"
-        Background="#121212"
-        MouseDown="Window_MouseDown">
+        AllowsTransparency="True"
+        Background="Black">
 
     <Window.DataContext>
         <vm:LoginViewModel/>
     </Window.DataContext>
 
     <Grid>
-        <Border Background="#F7C948" CornerRadius="0,0,150,0" Height="200" VerticalAlignment="Top"/>
+        <Border>
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#05080D" Offset="0.0"/>
+                    <GradientStop Color="#001E22" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
 
-        <materialDesign:Card Width="350" Padding="30" UniformCornerRadius="15"
-                             materialDesign:ElevationAssist.Elevation="Dp8"
-                             Background="#1E1E1E"
-                             VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,60,0,0">
+
+            <Image Source="/Assets/logo.png" 
+                   Width="350" Height="350" 
+                   HorizontalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality">
+                <Image.Effect>
+                    <DropShadowEffect BlurRadius="40" ShadowDepth="0" 
+                                      Color="{DynamicResource PrimaryHueMidColor}" Opacity="0.5"/>
+                </Image.Effect>
+            </Image>
+
+            <TextBlock Text="MAVPC CONTROL SYSTEM" 
+                       FontSize="22" 
+                       FontWeight="SemiBold" 
+                       Foreground="#E0E0E0" 
+                       HorizontalAlignment="Center" 
+                       Margin="0,5,0,0" 
+                       Opacity="0.8"
+                       TextOptions.TextFormattingMode="Display"/>
+        </StackPanel>
+
+        <Border Width="400" VerticalAlignment="Center" HorizontalAlignment="Center"
+                CornerRadius="12" Padding="40" Margin="0,360,0,0"
+                BorderThickness="1" BorderBrush="#30FFFFFF">
+
+            <Border.Background>
+                <SolidColorBrush Color="#151922" Opacity="0.90"/>
+            </Border.Background>
+
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="50" ShadowDepth="15" Opacity="0.9" Color="Black"/>
+            </Border.Effect>
 
             <StackPanel>
-                <TextBlock Text="INICIAR SESIÓN" Foreground="White" 
-                           FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                <TextBlock Text="IDENTIFICACIÓN REQUERIDA" 
+                           FontSize="13" FontWeight="Medium" 
+                           Foreground="White" Opacity="0.5"
+                           HorizontalAlignment="Center" Margin="0,0,0,30"/>
 
-                <TextBox Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}"
-                         materialDesign:HintAssist.Hint="Usuario"
-                         materialDesign:HintAssist.Foreground="#F7C948"
-                         Foreground="White"
-                         Margin="0,0,0,15"
-                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"/>
+                <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                         materialDesign:HintAssist.Hint="ID Operador"
+                         materialDesign:HintAssist.Foreground="{StaticResource PrimaryHueMidBrush}"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         Foreground="White" CaretBrush="{StaticResource PrimaryHueMidBrush}"
+                         Margin="0,0,0,25" FontSize="15"/>
 
-                <PasswordBox x:Name="txtPassword"
-                             materialDesign:HintAssist.Hint="Contraseña"
-                             materialDesign:HintAssist.Foreground="#F7C948"
-                             Foreground="White"
-                             Margin="0,0,0,20"
-                             PasswordChanged="PasswordBox_PasswordChanged"
-                             Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"/>
+                <PasswordBox materialDesign:HintAssist.Hint="Contraseña"
+                             materialDesign:HintAssist.Foreground="{StaticResource PrimaryHueMidBrush}"
+                             Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                             Foreground="White" CaretBrush="{StaticResource PrimaryHueMidBrush}"
+                             Margin="0,0,0,45" FontSize="15"
+                             PasswordChanged="PasswordBox_PasswordChanged"/>
 
-                <TextBlock Text="{Binding MensajeError}" Foreground="#FF5252" 
-                           HorizontalAlignment="Center" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding ErrorMessage}"
+                           Foreground="{StaticResource TrafficRed}"
+                           Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                           HorizontalAlignment="Center" Margin="0,0,0,20" TextWrapping="Wrap"/>
 
                 <Button Command="{Binding LoginCommand}"
-                        Content="ENTRAR"
-                        Height="45"
-                        Background="#F7C948"
-                        Foreground="Black"
-                        FontSize="16"
-                        FontWeight="Bold"
-                        Style="{StaticResource MaterialDesignRaisedButton}"/>
+                        Content="ACCEDER"
+                        Height="50" FontSize="14" FontWeight="Bold"
+                        materialDesign:ButtonAssist.CornerRadius="25"
+                        Background="{StaticResource PrimaryHueMidBrush}"
+                        Foreground="Black" Margin="0,0,0,20"
+                        Cursor="Hand" BorderThickness="0">
+                    <Button.Effect>
+                        <DropShadowEffect BlurRadius="15" ShadowDepth="0" Color="{DynamicResource PrimaryHueMidColor}" Opacity="0.4"/>
+                    </Button.Effect>
+                </Button>
+
+                <Button Command="{Binding ExitCommand}"
+                        Content="SALIR AL ESCRITORIO"
+                        Style="{StaticResource MaterialDesignFlatButton}"
+                        Foreground="#707070" FontSize="11" Opacity="0.8"/>
             </StackPanel>
-        </materialDesign:Card>
-
-        <Grid Visibility="{Binding IsCargando, Converter={StaticResource BooleanToVisibilityConverter}}" 
-              Background="#AA000000">
-            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
-                         Value="0" IsIndeterminate="True" Width="50" Height="50" Foreground="#F7C948"/>
-        </Grid>
-
-        <Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"
-                Background="Transparent" BorderBrush="Transparent" Foreground="White"
-                Click="BtnSalir_Click">
-            <materialDesign:PackIcon Kind="Close" Width="25" Height="25"/>
-        </Button>
+        </Border>
     </Grid>
 </Window>

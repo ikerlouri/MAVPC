@@ -1,0 +1,141 @@
+﻿<Window x:Class="MAVPC.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:MAVPC.ViewModels"
+        xmlns:views="clr-namespace:MAVPC.Views"
+        mc:Ignorable="d"
+        Title="MAVPC Traffic Control" Height="800" Width="1400"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Normal"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanResizeWithGrip">
+
+    <Window.DataContext>
+        <vm:MainViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <views:DashboardView/>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Border Background="#0F1115" CornerRadius="10" BorderBrush="#333" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" ShadowDepth="5" Opacity="0.5" Color="Black"/>
+        </Border.Effect>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#161920" CornerRadius="10,0,0,10" BorderBrush="#2A2E38" BorderThickness="0,0,1,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="30,40,0,50">
+                        <Border Width="45" Height="45" Background="#1A202C" CornerRadius="12" BorderBrush="{StaticResource PrimaryHueMidBrush}" BorderThickness="1">
+                            <materialDesign:PackIcon Kind="TrafficLight" Width="28" Height="28" Foreground="{StaticResource PrimaryHueMidBrush}" 
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Border>
+                        <StackPanel Margin="15,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="MAVPC" Foreground="White" FontSize="20" FontWeight="Heavy" FontFamily="Segoe UI"/>
+                            <TextBlock Text="SYSTEM V1.0" Foreground="Gray" FontSize="10"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Margin="15,0">
+                        <StackPanel.Resources>
+                            <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+                                <Setter Property="Height" Value="55"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                <Setter Property="Margin" Value="0,8"/>
+                                <Setter Property="Padding" Value="20,0"/>
+                                <Setter Property="Foreground" Value="#909090"/>
+                                <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="10"/>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#252A36"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Resources>
+
+                        <Button Command="{Binding NavigateToDashboardCommand}" Foreground="White" Background="#252A36">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ViewDashboard" Width="22" Height="22" Margin="0,0,15,0"/>
+                                <TextBlock Text="Dashboard" FontSize="15" FontWeight="Medium"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding NavigateToCamerasCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Cctv" Width="22" Height="22" Margin="0,0,15,0"/>
+                                <TextBlock Text="Cámaras Vivo" FontSize="15" FontWeight="Medium"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ChartBar" Width="22" Height="22" Margin="0,0,15,0"/>
+                                <TextBlock Text="Analíticas" FontSize="15" FontWeight="Medium"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <Button Grid.Row="2" Command="{Binding CerrarSesionCommand}" 
+                            Style="{StaticResource MaterialDesignFlatButton}" 
+                            Height="55" Margin="20,0,20,30" Foreground="#FF3D71">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Logout" Margin="0,0,15,0"/>
+                            <TextBlock Text="Cerrar Sesión" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="60"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Background="Transparent" MouseDown="TopBar_MouseDown">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0">
+
+                        <Border Background="#1A1D24" CornerRadius="20" Height="35" Padding="15,0" Margin="0,0,20,0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Ellipse Width="8" Height="8" Fill="#00E676" Margin="0,0,10,0"/>
+                                <TextBlock Text="Admin Activo" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Button Command="{Binding MinimizeWindowCommand}" Style="{StaticResource MaterialDesignIconForegroundButton}" Height="30" Width="30">
+                            <materialDesign:PackIcon Kind="WindowMinimize" Foreground="Gray"/>
+                        </Button>
+                        <Button Command="{Binding MaximizeWindowCommand}" Style="{StaticResource MaterialDesignIconForegroundButton}" Height="30" Width="30">
+                            <materialDesign:PackIcon Kind="WindowMaximize" Foreground="Gray"/>
+                        </Button>
+                        <Button Command="{Binding CloseWindowCommand}" Style="{StaticResource MaterialDesignIconForegroundButton}" Height="30" Width="30">
+                            <materialDesign:PackIcon Kind="WindowClose" Foreground="#FF3D71"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <ContentControl Grid.Row="1" Content="{Binding CurrentView}" Margin="30,0,30,30"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

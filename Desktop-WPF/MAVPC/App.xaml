@@ -6,19 +6,22 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <materialDesign:BundledTheme BaseTheme="Dark" PrimaryColor="Cyan" SecondaryColor="Blue" />
 
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <Color x:Key="NeonYellowColor">#EDFD34</Color>
-            <SolidColorBrush x:Key="NeonYellowBrush" Color="{StaticResource NeonYellowColor}"/>
-
-            <SolidColorBrush x:Key="MaterialDesignPaper" Color="#1E1E2E"/>
-            <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="#252535"/>
-            <SolidColorBrush x:Key="MaterialDesignBody" Color="#DDDDDD"/>
+            <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#00E5FF"/>
+            <SolidColorBrush x:Key="PrimaryHueMidForegroundBrush" Color="Black"/>
+            <SolidColorBrush x:Key="MaterialDesignPaper" Color="#0B0E14"/>
+            <SolidColorBrush x:Key="MaterialDesignCardBackground" Color="#151922"/>
+            <SolidColorBrush x:Key="TrafficRed" Color="#FF3D71"/>
 
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+            <Style TargetType="{x:Type TextBlock}">
+                <Setter Property="FontFamily" Value="Segoe UI" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
