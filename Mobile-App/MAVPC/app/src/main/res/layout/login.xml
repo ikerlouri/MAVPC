@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_blue"
@@ -10,163 +10,133 @@
 
     <TextView
         android:id="@+id/tvTitle"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
         android:text="@string/login_title"
-        android:textColor="@color/white"
-        android:textSize="32sp"
+        android:textColor="@android:color/white"
+        android:textSize="36sp"
         android:textStyle="bold"
+        android:fontFamily="@font/jost_family"
 
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="32dp"
+
+        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-
-        app:layout_constraintVertical_bias="0.05"
-        app:layout_constraintHorizontal_bias="0.5"/>
+        app:layout_constraintBottom_toTopOf="@+id/tvEmailLabel"/>
 
     <TextView
         android:id="@+id/tvEmailLabel"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
         android:text="@string/login_email"
-        android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:fontFamily="@font/jost_family"
 
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        app:layout_constraintBottom_toTopOf="@+id/etCorreo"/>
 
-        app:layout_constraintVertical_bias="0.2"
-        app:layout_constraintHorizontal_bias="0"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/layoutEmail"
-
+    <EditText
+        android:id="@+id/etCorreo"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+
+        android:background="@drawable/bg_yellow_input"
+        android:inputType="textEmailAddress"
+        android:textColor="@android:color/white"
+        android:paddingHorizontal="16dp"
+        android:fontFamily="@font/jost_family"
+
         android:layout_marginTop="8dp"
 
-        app:boxStrokeColor="@color/neon_yellow"
-
-        app:boxCornerRadiusTopStart="10dp"
-        app:boxCornerRadiusTopEnd="10dp"
-        app:boxCornerRadiusBottomStart="10dp"
-        app:boxCornerRadiusBottomEnd="10dp"
-
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.25">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/tiEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:inputType="textEmailAddress"
-            android:hint="Email"
-
-            android:textColor="@color/white"
-            android:maxLines="1"/>
-    </com.google.android.material.textfield.TextInputLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvEmailLabel"
+        app:layout_constraintBottom_toTopOf="@+id/tvPasswordLabel"/>
 
     <TextView
         android:id="@+id/tvPasswordLabel"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
         android:text="@string/login_pass"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-
-        app:layout_constraintVertical_bias="0.35"
-        app:layout_constraintHorizontal_bias="0"/>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/layoutPass"
-
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-
-        app:boxStrokeColor="@color/neon_yellow"
-
-        app:boxCornerRadiusTopStart="10dp"
-        app:boxCornerRadiusTopEnd="10dp"
-        app:boxCornerRadiusBottomStart="10dp"
-        app:boxCornerRadiusBottomEnd="10dp"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.4">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/tiPass"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-
-            android:inputType="textPassword"
-            android:hint="Contraseña"
-
-            android:textColor="@color/white"
-            android:maxLines="1"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <Button
-        android:id="@+id/btnLogin"
-
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-
-        android:backgroundTint="@color/neon_yellow"
-
-        android:text="@string/login_enter"
-        android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold"
-
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-
-        app:layout_constraintVertical_bias="0.7"
-        app:layout_constraintHorizontal_bias="0.5"/>
-
-    <TextView
-        android:id="@+id/tvRegister"
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="20sp"
+        android:fontFamily="@font/jost_family"
 
         android:layout_marginTop="24dp"
 
-        android:text="@string/login_register"
-        android:textColor="@color/link_blue"
-        android:textSize="16sp"
-
-        android:padding="8dp"
-
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etCorreo"
+        app:layout_constraintBottom_toTopOf="@+id/etPass"/>
 
-        app:layout_constraintVertical_bias="0.78"
-        app:layout_constraintHorizontal_bias="0.5"/>
+    <EditText
+        android:id="@+id/etPass"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+
+        android:background="@drawable/bg_yellow_input"
+        android:inputType="textPassword"
+        android:textColor="@android:color/white"
+        android:paddingHorizontal="16dp"
+        android:fontFamily="@font/jost_family"
+
+        android:layout_marginTop="8dp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvPasswordLabel"
+        app:layout_constraintBottom_toTopOf="@+id/btnLogin"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLogin"
+
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+
+        android:text="@string/login_enter"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="@font/jost_family"
+        android:textAllCaps="false"
+
+        android:background="@drawable/bg_yellow_button"
+        app:backgroundTint="@null"
+
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+
+        android:layout_marginTop="40dp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etPass"
+        app:layout_constraintBottom_toTopOf="@+id/tvRegister"/>
+
+    <TextView
+        android:id="@+id/tvRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="@string/login_register"
+        android:textColor="#4287f5"
+        android:textSize="20sp"
+        android:fontFamily="@font/jost_family"
+
+        android:padding="16dp"
+        android:layout_marginTop="8dp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
