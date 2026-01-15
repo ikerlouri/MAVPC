@@ -1,8 +1,10 @@
 ﻿using GMap.NET;
 using GMap.NET.MapProviders;
-using GMap.NET.WindowsPresentation; // Necesario para GMapMarker
-using MAVPC.MVVM.ViewModels;        // Necesario para ver el MapViewModel
-using System.Collections.Specialized; // Necesario para detectar cambios en la lista
+using GMap.NET.WindowsPresentation;
+using MAVPC.Models;
+using MAVPC.MVVM.ViewModels;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,43 +13,101 @@ namespace MAVPC.MVVM.Views
 {
     public partial class MapView : UserControl
     {
+        private MapViewModel? _viewModel;
+
         public MapView()
         {
             InitializeComponent();
+            this.Unloaded += MapView_Unloaded;
         }
 
         private void MainMap_Loaded(object sender, RoutedEventArgs e)
         {
-            // 1. Configuración obligatoria
             GMaps.Instance.Mode = AccessMode.ServerAndCache;
-            // MainMap.MapProvider = GMapProviders.OpenStreetMap;
             MainMap.MapProvider = GMapProviders.ArcGIS_World_Street_Map;
-            MainMap.Position = new PointLatLng(42.8467, -2.6716); // Vitoria
+            MainMap.Position = new PointLatLng(42.8467, -2.6716);
             MainMap.DragButton = MouseButton.Left;
             MainMap.ShowCenter = false;
 
-            // 2. CONEXIÓN MANUAL CON EL VIEWMODEL
             if (DataContext is MapViewModel vm)
             {
-                // Limpiamos por si acaso
-                MainMap.Markers.Clear();
+                _viewModel = vm;
+                ActualizarMapaCompleto();
 
-                // Añadimos los marcadores que ya tenga el ViewModel cargados
-                foreach (var marker in vm.Markers)
+                // Suscripciones
+                _viewModel.Markers.CollectionChanged += OnMarkersCollectionChanged;
+
+                // NUEVO: Escuchar cuando el usuario elige algo en el Buscador
+                _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+            }
+        }
+
+        private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            // Si el usuario seleccionó un resultado en la lista desplegable...
+            if (e.PropertyName == nameof(MapViewModel.SelectedResult))
+            {
+                var result = _viewModel?.SelectedResult;
+                if (result != null)
                 {
-                    MainMap.Markers.Add(marker);
+                    // 1. Movemos el mapa
+                    MainMap.Position = new PointLatLng(result.Lat, result.Lon);
+                    MainMap.Zoom = 14;
+
+                    // 2. Abrimos la ventana correspondiente automáticamente
+                    if (result.DataObject is Camara cam) new CameraWindow(cam).Show();
+                    else if (result.DataObject is Incidencia inc) new IncidentWindow(inc).Show();
                 }
+            }
+        }
 
-                // 3. (Opcional pero recomendado) Si la lista cambia en el futuro, actualizamos el mapa
-                vm.Markers.CollectionChanged += (s, args) =>
+        private void MapView_Unloaded(object sender, RoutedEventArgs e)
+        {
+            if (_viewModel != null)
+            {
+                _viewModel.Markers.CollectionChanged -= OnMarkersCollectionChanged;
+                _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+                MainMap.Dispose();
+            }
+        }
+
+        // ... (OnMarkersCollectionChanged y ActualizarMapaCompleto igual que antes) ...
+        private void OnMarkersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
+            {
+                foreach (GMapMarker m in e.NewItems) { MainMap.Markers.Add(m); ConfigurarClickMarcador(m); }
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Reset) MainMap.Markers.Clear();
+        }
+
+        private void ActualizarMapaCompleto()
+        {
+            MainMap.Markers.Clear();
+            if (_viewModel != null)
+            {
+                foreach (GMapMarker marker in _viewModel.Markers) { MainMap.Markers.Add(marker); ConfigurarClickMarcador(marker); }
+            }
+        }
+
+        // Configuración de CLIC EN EL MAPA
+        private void ConfigurarClickMarcador(GMapMarker marker)
+        {
+            if (marker.Shape is UIElement shape)
+            {
+                shape.MouseLeftButtonDown += (s, e) =>
                 {
-                    if (args.Action == NotifyCollectionChangedAction.Add)
+                    // 1. Es Cámara
+                    if (marker.Tag is Camara camaraSeleccionada)
                     {
-                        foreach (GMapMarker m in args.NewItems!) MainMap.Markers.Add(m);
+                        new CameraWindow(camaraSeleccionada).Show();
+                        e.Handled = true;
                     }
-                    else if (args.Action == NotifyCollectionChangedAction.Reset)
+                    // 2. NUEVO: Es Incidencia
+                    else if (marker.Tag is Incidencia incidenciaSeleccionada)
                     {
-                        MainMap.Markers.Clear();
+                        new IncidentWindow(incidenciaSeleccionada).Show();
+                        e.Handled = true;
                     }
                 };
             }

@@ -4,7 +4,6 @@ using LiveCharts.Wpf;
 using MAVPC.Services;
 using System;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace MAVPC.MVVM.ViewModels
@@ -16,12 +15,12 @@ namespace MAVPC.MVVM.ViewModels
         // Propiedades de Datos
         [ObservableProperty] private SeriesCollection _incidenciasSeries;
         [ObservableProperty] private SeriesCollection _camarasSeries;
-        [ObservableProperty] private SeriesCollection _carreterasSeries; // <--- NUEVO
+        [ObservableProperty] private SeriesCollection _carreterasSeries;
 
         [ObservableProperty] private string[] _labels;
-        [ObservableProperty] private string[] _carreterasLabels; // <--- NUEVO
+        [ObservableProperty] private string[] _carreterasLabels;
 
-        [ObservableProperty] private Func<double, string> _formatter; // Para quitar decimales
+        [ObservableProperty] private Func<double, string> _formatter;
 
         public StatsViewModel(ITrafficService trafficService)
         {
@@ -35,6 +34,7 @@ namespace MAVPC.MVVM.ViewModels
             // Formateador: Convierte 10.0 en "10"
             Formatter = value => value.ToString("N0");
 
+            // Cargamos los datos (async void es aceptable en constructor/eventos de UI)
             LoadStats();
         }
 
@@ -47,9 +47,12 @@ namespace MAVPC.MVVM.ViewModels
 
                 if (incidencias == null || camaras == null) return;
 
-                // 1. GRÁFICO CIRCULAR (Tipos)
+                // ==========================================
+                // 1. GRÁFICO CIRCULAR (Por Tipo de Incidencia)
+                // ==========================================
+                // CAMBIO: Usamos 'IncidenceType' en lugar de 'Tipo'
                 var incidenciasPorTipo = incidencias
-                    .GroupBy(x => x.Tipo)
+                    .GroupBy(x => x.IncidenceType ?? "OTROS") // Agrupamos, si es null ponemos OTROS
                     .Select(g => new { Tipo = g.Key, Cantidad = g.Count() });
 
                 var pieSeries = new SeriesCollection();
@@ -65,7 +68,9 @@ namespace MAVPC.MVVM.ViewModels
                 }
                 IncidenciasSeries = pieSeries;
 
+                // ==========================================
                 // 2. GRÁFICO COLUMNAS (Totales)
+                // ==========================================
                 CamarasSeries = new SeriesCollection
                 {
                     new ColumnSeries
@@ -77,11 +82,13 @@ namespace MAVPC.MVVM.ViewModels
                 };
                 Labels = new[] { "Cámaras", "Incidencias" };
 
-                // 3. GRÁFICO BARRAS HORIZONTALES (Top 5 Carreteras) - NUEVO
-                // Agrupamos por nombre de carretera, ordenamos descendente y cogemos 5
+                // ==========================================
+                // 3. GRÁFICO BARRAS HORIZONTALES (Top 5 Carreteras)
+                // ==========================================
+                // CAMBIO: Usamos 'Road' en lugar de 'Carretera'
                 var topRoads = incidencias
-                    .Where(x => !string.IsNullOrEmpty(x.Carretera)) // Filtramos vacíos
-                    .GroupBy(x => x.Carretera)
+                    .Where(x => !string.IsNullOrEmpty(x.Road)) // Filtramos nulos
+                    .GroupBy(x => x.Road)
                     .OrderByDescending(g => g.Count())
                     .Take(5)
                     .Select(g => new { Carretera = g.Key, Cantidad = g.Count() })
@@ -89,7 +96,7 @@ namespace MAVPC.MVVM.ViewModels
 
                 CarreterasSeries = new SeriesCollection
                 {
-                    new RowSeries // RowSeries hace barras horizontales
+                    new RowSeries
                     {
                         Title = "Incidencias",
                         Values = new ChartValues<int>(topRoads.Select(x => x.Cantidad)),
@@ -97,11 +104,12 @@ namespace MAVPC.MVVM.ViewModels
                     }
                 };
 
+                // Asignamos las etiquetas (eje Y) con los nombres de las carreteras
                 CarreterasLabels = topRoads.Select(x => x.Carretera).ToArray();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Manejo de errores
+                System.Diagnostics.Debug.WriteLine($"Error cargando estadísticas: {ex.Message}");
             }
         }
     }

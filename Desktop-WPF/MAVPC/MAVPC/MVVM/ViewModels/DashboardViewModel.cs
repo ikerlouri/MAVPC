@@ -1,271 +1,148 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-
 using CommunityToolkit.Mvvm.Input;
-
 using MAVPC.Models;
-
-using MAVPC.MVVM.Views; // Necesario para abrir la ventana
-
+using MAVPC.MVVM.Views;
 using MAVPC.Services;
-
+using System;
 using System.Collections.ObjectModel;
-
+using System.ComponentModel; // [NUEVO] Necesario para ICollectionView
 using System.Threading.Tasks;
-
-using System.Windows; // Para crear la ventana flotante
-
-
+using System.Windows;
+using System.Windows.Data; // [NUEVO] Necesario para CollectionViewSource
+using System.Windows.Media;
 
 namespace MAVPC.MVVM.ViewModels
-
 {
-
     public partial class DashboardViewModel : ObservableObject
-
     {
-
         private readonly ITrafficService _trafficService;
 
-
-
-        // Lista de cámaras (Usamos la clase nueva 'Camara')
-
+        // --- COLECCIONES ---
         [ObservableProperty] private ObservableCollection<Camara> _cameras;
-
-        // Lista de incidencias
-
         [ObservableProperty] private ObservableCollection<Incidencia> _incidencias;
 
+        // [NUEVO] VISTA FILTRABLE PARA EL XAML
+        public ICollectionView CamerasView { get; private set; }
 
+        // [NUEVO] TEXTO DE BÚSQUEDA
+        private string _searchText;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (SetProperty(ref _searchText, value))
+                {
+                    // Cada vez que escribes, refrescamos el filtro
+                    CamerasView?.Refresh();
+                }
+            }
+        }
 
-        // Propiedad para enlazar con el Formulario
-
-        [ObservableProperty] private Camara _newCamera;
-
-
-
-        [ObservableProperty] private int _activeIncidents;
-
-        // KPIs
-
+        // --- KPIs Y ESTADO ---
         [ObservableProperty] private int _totalCameras;
-
+        [ObservableProperty] private int _activeIncidents;
         [ObservableProperty] private string _systemStatus = "CONECTADO";
-
         [ObservableProperty] private bool _isLoading;
 
-
-
-        // Ventana del formulario (para poder cerrarla desde código)
-
-        private Window? _formWindow;
-
-
-
         public DashboardViewModel(ITrafficService trafficService)
-
         {
-
             _trafficService = trafficService;
-
             Cameras = new ObservableCollection<Camara>();
-
             Incidencias = new ObservableCollection<Incidencia>();
 
-            NewCamera = new Camara(); // Inicializamos vacía
-
-
-
+            // Carga inicial
             LoadDataCommand.Execute(null);
-
         }
 
-
-
         [RelayCommand]
-
         private async Task LoadData()
-
         {
-
+            if (IsLoading) return;
             IsLoading = true;
-
             SystemStatus = "SINCRONIZANDO...";
 
+            try
+            {
+                // 1. Cargar Cámaras
+                var dataCam = await _trafficService.GetCamarasAsync();
+                Cameras.Clear();
+                if (dataCam != null) foreach (var item in dataCam) Cameras.Add(item);
 
+                // [NUEVO] Inicializar la Vista Filtrable sobre la lista de Cámaras
+                CamerasView = CollectionViewSource.GetDefaultView(Cameras);
+                CamerasView.Filter = FilterCameras; // Asignamos la función de filtrado
+                OnPropertyChanged(nameof(CamerasView)); // Avisamos al XAML
 
-            // Cargar Cámaras
+                // 2. Cargar Incidencias
+                var dataInc = await _trafficService.GetIncidenciasAsync();
+                Incidencias.Clear();
+                if (dataInc != null) foreach (var item in dataInc) Incidencias.Add(item);
 
-            var dataCam = await _trafficService.GetCamarasAsync();
-
-            Cameras.Clear();
-
-            foreach (var item in dataCam) Cameras.Add(item);
-
-
-
-            // Cargar Incidencias (NUEVO)
-
-            var dataInc = await _trafficService.GetIncidenciasAsync();
-
-            Incidencias.Clear();
-
-            foreach (var item in dataInc) Incidencias.Add(item);
-
-
-
-            // Actualizar KPIs
-
-            TotalCameras = Cameras.Count;
-
-            ActiveIncidents = Incidencias.Count; // Usamos la cuenta real ahora
-
-
-
-            SystemStatus = "EN LÍNEA";
-
-            IsLoading = false;
-
+                // 3. Actualizar KPIs
+                TotalCameras = Cameras.Count;
+                ActiveIncidents = Incidencias.Count;
+                SystemStatus = "EN LÍNEA";
+            }
+            catch (Exception ex)
+            {
+                SystemStatus = "ERROR DE RED";
+                MessageBox.Show($"Error al cargar datos: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
+        // [NUEVO] LÓGICA DEL FILTRO
+        private bool FilterCameras(object item)
+        {
+            if (item is Camara cam)
+            {
+                // Si el buscador está vacío, mostrar todo
+                if (string.IsNullOrWhiteSpace(SearchText))
+                    return true;
 
+                string search = SearchText.ToLower();
 
-        // --- COMANDOS PARA AÑADIR ---
-
-
+                // Buscamos por Nombre, Carretera o Kilómetro
+                // Usamos ?.ToString() para evitar errores si algún dato viene nulo
+                return (cam.Nombre != null && cam.Nombre.ToLower().Contains(search)) ||
+                       (cam.Carretera != null && cam.Carretera.ToLower().Contains(search)) ||
+                       (cam.Kilometro != null && cam.Kilometro.ToString().Contains(search));
+            }
+            return false;
+        }
 
         [RelayCommand]
-
-        private void OpenAddForm()
-
+        private async Task OpenAddForm()
         {
-
-            // Limpiamos el objeto para una nueva inserción
-
-            NewCamera = new Camara();
-
-
-
-            // Creamos una ventana flotante rápida
-
-            _formWindow = new Window
-
+            var window = new Window
             {
-
-                Title = "Añadir Dispositivo",
-
-                Content = new CameraFormView(), // Cargamos la vista que creamos antes
-
-                DataContext = this, // Compartimos este ViewModel
-
+                Title = "Añadir Nuevo Punto",
                 SizeToContent = SizeToContent.WidthAndHeight,
-
+                ResizeMode = ResizeMode.NoResize,
                 WindowStyle = WindowStyle.None,
-
                 AllowsTransparency = true,
-
-                Background = System.Windows.Media.Brushes.Transparent,
-
-                WindowStartupLocation = WindowStartupLocation.CenterScreen,
-
-                ResizeMode = ResizeMode.NoResize
-
+                Background = Brushes.Transparent,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
             };
 
+            Action closeAction = () => window.Close();
+            var addItemVm = new AddItemViewModel(_trafficService, closeAction);
+            var view = new AddItemView { DataContext = addItemVm };
 
+            window.Content = view;
+            window.ShowDialog();
 
-            _formWindow.ShowDialog(); // Mostramos modal (bloquea la de atrás)
-
+            await LoadData();
         }
 
-
-
         [RelayCommand]
-
-        private async Task Save()
-
-        {
-
-            if (string.IsNullOrWhiteSpace(NewCamera.Id) || string.IsNullOrWhiteSpace(NewCamera.Nombre))
-
-            {
-
-                MessageBox.Show("El ID y el Nombre son obligatorios.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-
-                return;
-
-            }
-
-
-
-            IsLoading = true;
-
-
-
-            // Enviamos a la API
-
-            bool success = await _trafficService.AddCamaraAsync(NewCamera);
-
-
-
-            if (success)
-
-            {
-
-                // Cerramos ventana
-
-                _formWindow?.Close();
-
-                _formWindow = null;
-
-
-
-                // Recargamos la tabla para ver el cambio
-
-                await LoadData();
-
-                MessageBox.Show("Cámara guardada correctamente en el servidor.", "Éxito");
-
-            }
-
-            else
-
-            {
-
-                MessageBox.Show("Error al conectar con 10.10.16.93. Verifica que el servidor está encendido.", "Error de Conexión");
-
-            }
-
-
-
-            IsLoading = false;
-
-        }
-
-
-
-        [RelayCommand]
-
-        private void Cancel()
-
-        {
-
-            _formWindow?.Close();
-
-        }
-
-
-
-        [RelayCommand]
-
         private void ExportPdf()
-
         {
-
-            MessageBox.Show("Función PDF pendiente.");
-
+            MessageBox.Show("Función de PDF pendiente de implementar.", "Info");
         }
-
     }
-
 }

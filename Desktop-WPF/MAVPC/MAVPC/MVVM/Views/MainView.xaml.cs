@@ -16,15 +16,12 @@ namespace MAVPC.MVVM.Views
                 DragMove();
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                GMap.NET.GMaps.Instance.CancelTileCaching();
-            }
-            catch { /* Ignorar si falla */ }
+            // Opcional: Desvincula el DataContext para que LiveCharts deje de escuchar
+            this.DataContext = null;
 
-            // Mata la aplicación completa inmediatamente
+            // Mata el proceso de golpe. Al ser un evento directo, no da error de Reflexión.
             Environment.Exit(0);
         }
     }

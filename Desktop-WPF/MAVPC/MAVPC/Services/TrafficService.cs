@@ -2,102 +2,73 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Json; // Importante para PostAsJsonAsync
+using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MAVPC.Services
 {
-
-
     public class TrafficService : ITrafficService
     {
         private readonly HttpClient _httpClient;
-        private const string BASE_URL = "http://10.10.16.93:8080/api/camaras";
+        private readonly JsonSerializerOptions _jsonOptions;
 
         public TrafficService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            // Aumentamos el timeout por si la red es lenta
-            _httpClient.Timeout = TimeSpan.FromSeconds(10);
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                // Esto es vital para que [JsonPropertyName] funcione al enviar
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
         }
 
-        public async Task<List<Camara>> GetCamarasAsync()
+        public async Task<bool> AddCamaraAsync(Camara camara)
         {
             try
             {
-                // 1. Descargar JSON
-                var jsonString = await _httpClient.GetStringAsync(BASE_URL);
-
-                // 2. Configurar opciones (importante para leer números como strings si hace falta)
-                var options = new System.Text.Json.JsonSerializerOptions
+                var response = await _httpClient.PostAsJsonAsync("http://10.10.16.93:8080/api/camaras/guardar", camara, _jsonOptions);
+                if (!response.IsSuccessStatusCode)
                 {
-                    PropertyNameCaseInsensitive = true,
-                    NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
-                };
-
-                // 3. Deserializar la lista directa
-                var datos = System.Text.Json.JsonSerializer.Deserialize<List<Camara>>(jsonString, options);
-
-                return datos ?? new List<Camara>();
+                    string error = await response.Content.ReadAsStringAsync();
+                    System.Windows.MessageBox.Show($"Error Servidor (Cámara):\n{error}");
+                    return false;
+                }
+                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                // Si falla, lista vacía para no romper la app
-                return new List<Camara>();
-            }
-        }
-
-        public async Task<bool> AddCamaraAsync(Camara nuevaCamara)
-        {
-            try
-            {
-                // Envia los datos al servidor (POST)
-                var response = await _httpClient.PostAsJsonAsync(BASE_URL, nuevaCamara);
-                return response.IsSuccessStatusCode;
-            }
-            catch
-            {
+                System.Diagnostics.Debug.WriteLine($"Excepción: {ex.Message}");
                 return false;
             }
         }
 
-        public async Task<List<Incidencia>> GetIncidenciasAsync()
+        public async Task<bool> AddIncidenciaAsync(Incidencia incidencia)
         {
-            string url = "http://10.10.16.93:8080/api/incidencias";
             try
             {
-                var jsonString = await _httpClient.GetStringAsync(url);
-
-                var options = new System.Text.Json.JsonSerializerOptions
+                var response = await _httpClient.PostAsJsonAsync("http://10.10.16.93:8080/api/incidencias/guardar", incidencia, _jsonOptions);
+                if (!response.IsSuccessStatusCode)
                 {
-                    PropertyNameCaseInsensitive = true,
-                    NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
-                };
-
-                // 1. Deserializamos usando la clase "Envoltorio" que hemos creado abajo
-                var respuestaApi = System.Text.Json.JsonSerializer.Deserialize<IncidenciasResponse>(jsonString, options);
-
-                // 2. Devolvemos solo la lista que hay dentro. Si es nula, devolvemos lista vacía.
-                return respuestaApi?.Incidencias ?? new List<Incidencia>();
+                    string error = await response.Content.ReadAsStringAsync();
+                    System.Windows.MessageBox.Show($"Error Servidor (Incidencia):\n{error}");
+                    return false;
+                }
+                return true;
             }
             catch (Exception ex)
             {
-                // Si falla, muestra el error por si acaso, pero ya no debería fallar.
-                System.Diagnostics.Debug.WriteLine($"ERROR API: {ex.Message}");
-                return new List<Incidencia>();
+                System.Diagnostics.Debug.WriteLine($"Excepción: {ex.Message}");
+                return false;
             }
         }
-    } // <--- Cierre de la clase TrafficService
 
-    // --- AÑADE ESTA CLASE AL FINAL DEL ARCHIVO (fuera de TrafficService pero dentro del namespace) ---
+        public async Task<List<Camara>> GetCamarasAsync() =>
+            await _httpClient.GetFromJsonAsync<List<Camara>>("http://10.10.16.93:8080/api/camaras", _jsonOptions) ?? new();
 
-    public class IncidenciasResponse
-    {
-        // Esta propiedad debe llamarse igual que en el JSON ("incidences")
-        [JsonPropertyName("incidences")]
-        public List<Incidencia> Incidencias { get; set; }
+        public async Task<List<Incidencia>> GetIncidenciasAsync() =>
+            await _httpClient.GetFromJsonAsync<List<Incidencia>>("http://10.10.16.93:8080/api/incidencias/listarActual", _jsonOptions) ?? new();
     }
-} // <--- Cierre del namespace
-
-    
+}

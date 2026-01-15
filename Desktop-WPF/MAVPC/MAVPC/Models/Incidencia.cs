@@ -5,89 +5,73 @@ namespace MAVPC.Models
 {
     public class Incidencia
     {
-        // El JSON envía "328096" (String), así que lo recogemos como string para evitar errores
+        // --- PROPIEDADES RAW (Tal cual vienen del JSON) ---
+
         [JsonPropertyName("incidenceId")]
-        public string Id { get; set; } = string.Empty;
+        public int IncidenceId { get; set; }
 
         [JsonPropertyName("incidenceType")]
-        public string Tipo { get; set; } = string.Empty; // Ej: Obras, Accidente
-
-        [JsonPropertyName("cause")]
-        public string Causa { get; set; } = string.Empty; // Ej: Obras
+        public string? IncidenceType { get; set; }
 
         [JsonPropertyName("incidenceLevel")]
-        public string Nivel { get; set; } = string.Empty; // Ej: Blanco, Amarillo, Rojo
+        public string? IncidenceLevel { get; set; }
 
         [JsonPropertyName("road")]
-        public string Carretera { get; set; } = string.Empty; // Ej: AP-1
-
-        [JsonPropertyName("pkStart")]
-        public string Kilometro { get; set; } = string.Empty; // Ej: "112.0"
+        public string? Road { get; set; }
 
         [JsonPropertyName("cityTown")]
-        public string Municipio { get; set; } = string.Empty; // Ej: Legutiano
+        public string? CityTown { get; set; }
 
         [JsonPropertyName("province")]
-        public string Provincia { get; set; } = string.Empty; // Ej: ARABA
+        public string? Province { get; set; }
+
+        [JsonPropertyName("cause")]
+        public string? Cause { get; set; }
 
         [JsonPropertyName("direction")]
-        public string Direccion { get; set; } = string.Empty; // Ej: Madrid
+        public string? Direction { get; set; }
 
-        [JsonPropertyName("startDate")]
-        public DateTime FechaInicio { get; set; }
-
-        // Las coordenadas vienen como string en tu JSON ("42.96046")
-        // Es mejor guardarlas como string y convertirlas solo si necesitas pintar un mapa.
         [JsonPropertyName("latitude")]
-        public string Latitud { get; set; } = string.Empty;
+        public double? Latitude { get; set; }
 
         [JsonPropertyName("longitude")]
-        public string Longitud { get; set; } = string.Empty;
+        public double? Longitude { get; set; }
+
+        [JsonPropertyName("startDate")]
+        public DateTime? StartDate { get; set; }
 
 
-        // --- EXTRAS VISUALES (Calculados automáticamente) ---
+        // --- HELPERS VISUALES (Lógica de presentación únicamente) ---
 
-        // Icono dinámico: Mira el TIPO de incidencia
-        [JsonIgnore]
-        public string IconKind
-        {
-            get
-            {
-                var t = Tipo?.ToLower() ?? "";
-                var c = Causa?.ToLower() ?? "";
-
-                if (t.Contains("accidente") || c.Contains("accidente")) return "CarCrash";
-                if (t.Contains("obra") || c.Contains("obra")) return "Cone";
-                if (t.Contains("nieve") || t.Contains("hielo") || c.Contains("meteorolo")) return "Snowflake";
-                if (t.Contains("retención") || t.Contains("retencion")) return "CarSide";
-
-                return "AlertCircle"; // Icono por defecto
-            }
-        }
-
-        // Color dinámico: Ahora mira el NIVEL (Amarillo, Rojo...) que es más preciso
-        [JsonIgnore]
         public string StatusColor
         {
             get
             {
-                var n = Nivel?.ToLower() ?? "";
-
-                if (n.Contains("rojo")) return "#FF003C";     // Rojo Neón (Crítico)
-                if (n.Contains("negro")) return "#000000";    // Negro (Corte total) - Podríamos poner borde rojo
-                if (n.Contains("amarillo")) return "#FFA500"; // Naranja (Precaución)
-                if (n.Contains("blanco")) return "#94F2E2";   // Cian/Blanco (Fluido/Leve) #00FFCC
-
-                // Si no hay nivel, miramos el tipo por si acaso
-                var t = Tipo?.ToLower() ?? "";
-                if (t.Contains("accidente")) return "#FF003C";
-
-                return "#CCCCCC"; // Gris por defecto
+                var level = IncidenceLevel?.ToLower() ?? "";
+                if (level.Contains("rojo") || level.Contains("red")) return "#FF003C"; // Rojo Neón
+                if (level.Contains("negro") || level.Contains("black")) return "#000000";
+                if (level.Contains("amarillo") || level.Contains("yellow")) return "#FFD700";
+                if (level.Contains("verde") || level.Contains("green")) return "#00FF00";
+                return "#00D4FF"; // Azul Cyan (Default)
             }
         }
 
-        // Propiedad extra para mostrar ubicación completa en la lista
-        [JsonIgnore]
-        public string UbicacionCompleta => $"{Carretera} (Km {Kilometro}) - {Municipio}";
+        public string IconKind
+        {
+            get
+            {
+                var t = IncidenceType?.ToLower() ?? "";
+                var c = Cause?.ToLower() ?? "";
+
+                if (t.Contains("obra") || c.Contains("obra") || c.Contains("mantenimiento")) return "Cone";
+                if (t.Contains("accidente") || c.Contains("vuelco") || c.Contains("choque") || c.Contains("alcance")) return "CarCrash";
+                if (c.Contains("avería") || c.Contains("averia")) return "CarWrench";
+                if (c.Contains("gasoil") || c.Contains("aceite")) return "Oil";
+                if (t.Contains("meteo") || c.Contains("nieve") || c.Contains("lluvia")) return "WeatherPouring";
+                if (t.Contains("evento")) return "CalendarStar";
+
+                return "AlertCircle";
+            }
+        }
     }
 }
