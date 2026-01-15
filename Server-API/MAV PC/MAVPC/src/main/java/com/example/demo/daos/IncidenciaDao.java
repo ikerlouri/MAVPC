@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface IncidenciaDao extends JpaRepository<Incidencia, Integer> {
 
-	List<Incidencia> findByTipo(String tipo);
+	
+	List<Incidencia> findByProvincia(String provincia);
 	
 }
