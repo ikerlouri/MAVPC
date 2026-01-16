@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_blue"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="@color/light_grey"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="false">
 
     <TextView
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:text="cipote largote"
+        android:text="favoritos"
         android:textColor="@color/white"
         android:textSize="50dp"
 
@@ -23,18 +25,23 @@
         app:layout_constraintVertical_bias="0.5"
         app:layout_constraintHorizontal_bias="0.5"/>
 
+    <!-- navbar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
+
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="#1A1A2E"
-        app:itemIconTint="@android:color/white"
-        app:itemTextColor="@android:color/white"
 
+        android:elevation="16dp"
+
+        app:labelVisibilityMode="labeled"
+        android:background="@color/dark_grey"
+        app:itemIconTint="@color/nav_selector"
+        app:itemTextColor="@color/white"
         app:menu="@menu/bottom_navbar"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,11 +6,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.mavpc.R;
 
-public class Login extends AppCompatActivity {
+public class Login extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +29,7 @@ public class Login extends AppCompatActivity {
         if(true){
             Intent intent = new Intent(Login.this, Explorar.class);
             startActivity(intent);
+            overridePendingTransition(0, 0);
 
             this.finish();
         } else{

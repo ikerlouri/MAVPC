@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MAV PC</string>
+    <string name="app_name">Bidea</string>
 
     <!-- login -->
     <string name="login_title">Inicio de Sesión</string>
@@ -9,23 +9,24 @@
     <string name="login_register"><u>Registrate</u></string>
 
     <!-- explorar -->
-
+    
     <!-- datos -->
 
     <!-- favoritos -->
 
     <!-- incidencias -->
     <string name="incid_title">Crear incidencia</string>
-    <string name="incid_type">Tipo de incidencia</string>x
-    <string name="incid_road">Carretera</string>x
+    <string name="incid_type">Tipo de incidencia</string>
+    <string name="incid_road">Carretera</string>
     <string name="incid_cause">Causa</string>
     <string name="incid_iniKm">Km</string>
     <string name="incid_endKm">Km</string>
     <string name="incid_direct">Dirección</string>
     <string name="incid_lat">Latitud</string>
     <string name="incid_long">longitud</string>
-    <string name="incid_lvl">Gravedad</string>x
+    <string name="incid_lvl">Gravedad</string>
     <string name="incid_iniDate">Fecha y Hora inicial</string>
     <string name="incid_endDate">Fecga y Hora final</string>
     <string name="incid_Desc">Descripción</string>
+    <string name="title_activity_maps">MapsActivity</string>
 </resources>
