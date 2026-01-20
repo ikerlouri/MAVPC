@@ -1,0 +1,94 @@
+﻿/* Configuración base */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background-color: #111;
+    font-family: 'Segoe UI', sans-serif;
+    overflow: hidden; /* Evita barras de scroll */
+}
+
+#map {
+    height: 100%;
+    width: 100%;
+}
+
+/* --- TOOLTIPS (La cajita al pasar el ratón) --- */
+/* Quitamos los estilos default de Leaflet para el tooltip y ponemos los nuestros */
+.leaflet-tooltip.custom-tooltip {
+    background-color: rgba(20, 20, 30, 0.95);
+    border: 1px solid #00F0FF; /* Borde Cyan Neon */
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    padding: 4px 8px;
+}
+
+/* La flechita pequeña debajo del tooltip */
+.leaflet-tooltip-top:before {
+    border-top-color: #00F0FF;
+}
+
+/* --- MARCADORES PERSONALIZADOS --- */
+.custom-pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 14px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+    border: 2px solid white;
+    transition: transform 0.2s;
+    background-color: #444; /* Default */
+}
+
+    .custom-pin:hover {
+        transform: scale(1.2);
+        z-index: 1000 !important;
+        cursor: pointer;
+    }
+
+/* Colores por tipo */
+.pin-camara {
+    background-color: #0088cc;
+    border-color: #00F0FF;
+}
+
+.pin-obra {
+    background-color: #ff9900;
+    border-color: #ffe600;
+    color: #000;
+}
+
+.pin-nieve {
+    background-color: #ffffff;
+    border-color: #aaddff;
+    color: #0066cc;
+}
+
+/* INCIDENCIAS: Rojo con animación */
+.pin-incidencia {
+    background-color: #D50000;
+    border-color: #FF003C;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 0, 60, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 0, 60, 0);
+    }
+}

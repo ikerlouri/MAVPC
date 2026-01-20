@@ -9,14 +9,33 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="Assets\css\estilos.css" />
+	  <None Remove="Assets\js\logica.js" />
+	  <None Remove="Assets\mapa.html" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Assets\css\estilos.css">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\js\logica.js">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\mapa.html">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="GMap.NET.WinPresentation" Version="2.1.7" />
+		<PackageReference Include="leaflet" Version="0.7.3" />
 		<PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
 
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
 
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3796-prerelease" />
 	</ItemGroup>
 
 </Project>

@@ -1,153 +1,112 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using GMap.NET;
-using GMap.NET.MapProviders;
-using GMap.NET.WindowsPresentation;
-using MAVPC.Models;
+using MAVPC.Models; // Necesario para MapMarkerModel
 using MAVPC.MVVM.ViewModels;
+using Microsoft.Web.WebView2.Core;
 
 namespace MAVPC.MVVM.Views
 {
     public partial class MapView : UserControl
     {
         private MapViewModel? _viewModel;
+        private bool _isMapLoaded = false;
 
         public MapView()
         {
             InitializeComponent();
-            this.Unloaded += MapView_Unloaded;
-
-            // --- OPTIMIZACIÓN DE ARRASTRE ---
-            // "ShowMarkers" no existe en WPF, usamos nuestra función ToggleMarkers
-            MainMap.MouseLeftButtonDown += (s, e) => ToggleMarkers(false);
-            MainMap.MouseLeftButtonUp += (s, e) => ToggleMarkers(true);
-
-            // Soporte para botón derecho
-            MainMap.MouseRightButtonDown += (s, e) => ToggleMarkers(false);
-            MainMap.MouseRightButtonUp += (s, e) => ToggleMarkers(true);
-
-            // Evento para el Zoom
-            MainMap.OnMapZoomChanged += MainMap_OnMapZoomChanged;
+            InitializeAsync();
+            this.DataContextChanged += MapView_DataContextChanged;
         }
 
-        private void MainMap_Loaded(object sender, RoutedEventArgs e)
+        private async void InitializeAsync()
         {
-            GMaps.Instance.Mode = AccessMode.ServerAndCache;
-            MainMap.MapProvider = GMapProviders.ArcGIS_World_Street_Map;
-            MainMap.Position = new PointLatLng(42.8467, -2.6716);
-            MainMap.DragButton = MouseButton.Left;
-            MainMap.ShowCenter = false;
+            await MapBrowser.EnsureCoreWebView2Async();
 
+            string currentDir = AppDomain.CurrentDomain.BaseDirectory;
+            string mapPath = Path.Combine(currentDir, "Assets", "mapa.html");
+
+            if (File.Exists(mapPath))
+            {
+                // AÑADIDO: Escuchar mensajes desde JS (los clicks en iconos)
+                MapBrowser.WebMessageReceived += MapBrowser_WebMessageReceived;
+
+                MapBrowser.CoreWebView2.Navigate(mapPath);
+                MapBrowser.NavigationCompleted += MapBrowser_NavigationCompleted;
+            }
+            else
+            {
+                MessageBox.Show($"No se encuentra el mapa en: {mapPath}", "Error de Archivo");
+            }
+        }
+
+        // --- NUEVO: Manejador del mensaje que viene de JS ---
+        private void MapBrowser_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                // 1. Obtenemos el JSON crudo del marcador pulsado
+                string jsonString = e.TryGetWebMessageAsString();
+
+                // 2. Configuramos opciones para evitar problemas de mayúsculas/minúsculas
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                // 3. Convertimos a nuestro modelo genérico
+                var markerClicked = JsonSerializer.Deserialize<MapMarkerModel>(jsonString, options);
+
+                // 4. Si todo va bien, ejecutamos el comando del ViewModel
+                if (_viewModel != null && markerClicked != null)
+                {
+                    _viewModel.MarkerClickedCommand.Execute(markerClicked);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error recibiendo click del mapa: {ex.Message}");
+            }
+        }
+
+        private void MapBrowser_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            _isMapLoaded = true;
+            RefrescarMapa();
+        }
+
+        private void MapView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
             if (DataContext is MapViewModel vm)
             {
                 _viewModel = vm;
-                ActualizarMapaCompleto();
-
-                // Suscripciones
-                _viewModel.Markers.CollectionChanged += OnMarkersCollectionChanged;
-                _viewModel.PropertyChanged += ViewModel_PropertyChanged;
-            }
-        }
-
-        // Detectar selección en el buscador
-        private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(MapViewModel.SelectedResult))
-            {
-                var result = _viewModel?.SelectedResult;
-                if (result != null)
+                _viewModel.PropertyChanged += (s, args) =>
                 {
-                    // 1. Movemos el mapa
-                    MainMap.Position = new PointLatLng(result.Lat, result.Lon);
-                    MainMap.Zoom = 15; // Ajustado a un zoom más cercano para ver detalle
-
-                    // 2. Abrimos la ventana correspondiente
-                    if (result.DataObject is Camara cam) new CameraWindow(cam).Show();
-                    else if (result.DataObject is Incidencia inc) new IncidentWindow(inc).Show();
-                }
-            }
-        }
-
-        private void MapView_Unloaded(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel != null)
-            {
-                _viewModel.Markers.CollectionChanged -= OnMarkersCollectionChanged;
-                _viewModel.PropertyChanged -= ViewModel_PropertyChanged;
-                MainMap.Dispose();
-            }
-        }
-
-        private void OnMarkersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems != null)
-            {
-                foreach (GMapMarker m in e.NewItems) { MainMap.Markers.Add(m); ConfigurarClickMarcador(m); }
-            }
-            else if (e.Action == NotifyCollectionChangedAction.Reset)
-            {
-                MainMap.Markers.Clear();
-            }
-        }
-
-        private void ActualizarMapaCompleto()
-        {
-            MainMap.Markers.Clear();
-            if (_viewModel != null)
-            {
-                foreach (GMapMarker marker in _viewModel.Markers) { MainMap.Markers.Add(marker); ConfigurarClickMarcador(marker); }
-            }
-        }
-
-        private void ConfigurarClickMarcador(GMapMarker marker)
-        {
-            if (marker.Shape is UIElement shape)
-            {
-                shape.MouseLeftButtonDown += (s, e) =>
-                {
-                    if (marker.Tag is Camara camaraSeleccionada)
+                    if (args.PropertyName == "Markers")
                     {
-                        new CameraWindow(camaraSeleccionada).Show();
-                        e.Handled = true;
-                    }
-                    else if (marker.Tag is Incidencia incidenciaSeleccionada)
-                    {
-                        new IncidentWindow(incidenciaSeleccionada).Show();
-                        e.Handled = true;
+                        RefrescarMapa();
                     }
                 };
+                RefrescarMapa();
             }
         }
 
-        // --- LÓGICA DE OPTIMIZACIÓN (Reemplaza a ShowMarkers) ---
-
-        private void MainMap_OnMapZoomChanged()
+        private async void RefrescarMapa()
         {
-            ToggleMarkers(false); // Ocultar
+            if (!_isMapLoaded || _viewModel == null || _viewModel.Markers == null) return;
 
-            Dispatcher.InvokeAsync(async () =>
+            try
             {
-                await Task.Delay(300); // Esperar a que renderice
-                ToggleMarkers(true);   // Mostrar
-            });
-        }
+                // Serializamos ignorando nomenclatura para asegurar que JS lo lea bien
+                var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
+                var json = JsonSerializer.Serialize(_viewModel.Markers, options);
 
-        // Esta función hace el trabajo sucio de ocultar los iconos uno a uno
-        private void ToggleMarkers(bool visible)
-        {
-            var visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-
-            foreach (var marker in MainMap.Markers)
+                await MapBrowser.CoreWebView2.ExecuteScriptAsync($"CargarMarcadores('{json}')");
+            }
+            catch (Exception ex)
             {
-                if (marker.Shape != null)
-                {
-                    marker.Shape.Visibility = visibility;
-                }
+                System.Diagnostics.Debug.WriteLine("Error al pintar mapa: " + ex.Message);
             }
         }
     }
