@@ -28,6 +28,7 @@ public class Login extends BaseActivity {
 
         if(true){
             Intent intent = new Intent(Login.this, Explorar.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);
 

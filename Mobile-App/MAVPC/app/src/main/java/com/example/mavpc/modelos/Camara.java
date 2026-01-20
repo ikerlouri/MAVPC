@@ -1,13 +1,27 @@
 package com.example.mavpc.modelos;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Camara {
+
+    @SerializedName("cameraId")
     private String id;
+
+    @SerializedName("cameraName")
     private String name;
+
     private String urlImage;
+
     private String latitude;
+
     private String longitude;
+
     private String road;
+
+    @SerializedName("kilometer")
     private String km;
+
+    @SerializedName("address")
     private String direction;
 
     public Camara(String id, String name, String urlImage, String latitude, String longitude, String road, String km, String direction) {

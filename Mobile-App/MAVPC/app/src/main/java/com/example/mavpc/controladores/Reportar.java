@@ -150,16 +150,12 @@ public class Reportar extends BaseActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
-
-                this.finish();
             }
             if (id == R.id.nav_favoritos) {
                 Intent intent = new Intent(Reportar.this, Favoritos.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
-
-                this.finish();
             }
             if (id == R.id.nav_reportar) return true;
             if (id == R.id.nav_perfil) {
@@ -167,8 +163,6 @@ public class Reportar extends BaseActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
-
-                this.finish();
             }
             return false;
         });

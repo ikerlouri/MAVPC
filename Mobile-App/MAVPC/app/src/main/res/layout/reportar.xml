@@ -421,51 +421,11 @@
                         android:id="@+id/etDireccion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="20dp"
                         android:backgroundTint="@color/white"
                         android:hint="ej: Donosti"
                         android:inputType="textCapSentences"
                         android:textColor="@color/white"
                         android:textColorHint="#80FFFFFF" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:text="Tramo:"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:textSize="16sp" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <EditText
-                            android:id="@+id/etKmInicio"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="10dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/white"
-                            android:hint="Km Inicio"
-                            android:inputType="numberDecimal"
-                            android:textColor="@color/white"
-                            android:textColorHint="#80FFFFFF" />
-
-                        <EditText
-                            android:id="@+id/etKmFin"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:backgroundTint="@color/white"
-                            android:hint="Km Fin"
-                            android:inputType="numberDecimal"
-                            android:textColor="@color/white"
-                            android:textColorHint="#80FFFFFF" />
-                    </LinearLayout>
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

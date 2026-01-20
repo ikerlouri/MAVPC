@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- para conectar con apis, y trabajar con ubicaciones -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +21,19 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
 
+        <!-- para ajustar la pfp al cambiarla -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+        <!-- para poner el modo inmersivo en la ventana de ajustar la pfp-->
+        <activity
+            android:name=".controladores.AjustePfp"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+        <!-- api googlemaps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao" />

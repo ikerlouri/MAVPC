@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -53,6 +52,8 @@ dependencies {
     // para cargar la foto de perfil desde una URL
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation(libs.play.services.maps)
+    // para ajustar la pfp al cambiarla
+    implementation("com.github.yalantis:ucrop:2.2.8")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

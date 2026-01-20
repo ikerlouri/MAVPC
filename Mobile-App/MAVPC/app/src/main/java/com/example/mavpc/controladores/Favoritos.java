@@ -33,8 +33,6 @@ public class Favoritos extends BaseActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
-
-                this.finish();
             }
             if (id == R.id.nav_favoritos) return true;
             if (id == R.id.nav_reportar) {
@@ -42,16 +40,12 @@ public class Favoritos extends BaseActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
-
-                this.finish();
             }
             if (id == R.id.nav_perfil) {
                 Intent intent = new Intent(Favoritos.this, Perfil.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
                 startActivity(intent);
                 overridePendingTransition(0, 0);
-
-                this.finish();
             }
             return false;
         });

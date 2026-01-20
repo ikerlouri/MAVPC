@@ -1,29 +1,40 @@
 package com.example.mavpc.modelos;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Incidencia {
+    @SerializedName("incidenceId")
     private String id;
+
+    @SerializedName("incidenceType")
     private String type;
+
     private String cause;
+
+    @SerializedName("incidenceLevel")
     private String level;
+
     private String road;
-    private String startKm;
-    private String endKm;
+
     private String cityTown;
+
     private String province;
+
     private String direction;
+
     private String startDate;
+
     private String latitude;
+
     private String longitude;
 
-    public Incidencia(String longitude, String latitude, String startDate, String direction, String province, String cityTown, String endKm, String startKm, String road, String level, String cause, String type, String id) {
+    public Incidencia(String longitude, String latitude, String startDate, String direction, String province, String cityTown, String road, String level, String cause, String type, String id) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.startDate = startDate;
         this.direction = direction;
         this.province = province;
         this.cityTown = cityTown;
-        this.endKm = endKm;
-        this.startKm = startKm;
         this.road = road;
         this.level = level;
         this.cause = cause;
@@ -69,22 +80,6 @@ public class Incidencia {
 
     public void setRoad(String road) {
         this.road = road;
-    }
-
-    public String getStartKm() {
-        return startKm;
-    }
-
-    public void setStartKm(String startKm) {
-        this.startKm = startKm;
-    }
-
-    public String getEndKm() {
-        return endKm;
-    }
-
-    public void setEndKm(String endKm) {
-        this.endKm = endKm;
     }
 
     public String getCityTown() {

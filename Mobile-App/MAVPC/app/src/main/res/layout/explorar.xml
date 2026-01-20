@@ -8,6 +8,7 @@
 
     android:fitsSystemWindows="false">
 
+    <!-- mapa -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
@@ -21,6 +22,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- boton filtros -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnFiltros"
         android:layout_width="50dp"
@@ -42,16 +44,20 @@
             app:tint="@color/white" />
     </androidx.cardview.widget.CardView>
 
+    <!-- buscador -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardSearch"
+
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="50dp"
         android:layout_marginEnd="16dp"
+
         app:cardBackgroundColor="@color/dark_grey"
         app:cardCornerRadius="25dp"
         app:cardElevation="8dp"
+
         app:layout_constraintEnd_toStartOf="@+id/btnFiltros"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -73,6 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
+
                 android:hint="Buscar aquí"
                 android:textColor="@android:color/white"
                 android:textColorHint="#B3FFFFFF"
@@ -80,8 +87,10 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- boton capas -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnMapLayers"
+
         android:layout_width="50dp"
         android:layout_height="50dp"
 
@@ -104,14 +113,16 @@
             app:tint="@android:color/white" />
     </androidx.cardview.widget.CardView>
 
+    <!-- fondo negro para ventanas emergentes -->
     <View
-        android:id="@+id/filterBackground"
+        android:id="@+id/darkBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#66000000"
         android:elevation="20dp"
         android:visibility="gone" />
 
+    <!-- ventana filtros -->
     <androidx.cardview.widget.CardView
         android:id="@+id/filterWindow"
 
@@ -126,7 +137,7 @@
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.76"
+        app:layout_constraintHeight_percent="0.74"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintWidth_percent="0.9">
@@ -200,6 +211,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
+
                             android:text="Fecha"
                             android:textColor="@color/white"
                             android:textSize="16sp"
@@ -257,31 +269,32 @@
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
-                        <RadioGroup
-                            android:id="@+id/rgProvincia"
+                        <LinearLayout
+                            android:id="@+id/containerProvincias"
 
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
 
                             android:gravity="center_horizontal"
-
                             android:orientation="horizontal">
 
-                            <RadioButton
-                                android:id="@+id/rbAlava"
+                            <CheckBox
+                                android:id="@+id/cbAlava"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="15dp"
 
                                 android:buttonTint="@color/white"
+
+                                android:checked="true"
 
                                 android:text="Álava"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
 
-                            <RadioButton
-                                android:id="@+id/rbVizcaya"
+                            <CheckBox
+                                android:id="@+id/cbVizcaya"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -289,22 +302,27 @@
 
                                 android:buttonTint="@color/white"
 
+                                android:checked="true"
+
                                 android:text="Vizcaya"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
 
-                            <RadioButton
-                                android:id="@+id/rbGuipuzkoa"
+                            <CheckBox
+                                android:id="@+id/cbGuipuzkoa"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
 
                                 android:buttonTint="@color/white"
 
+                                android:checked="true"
+
                                 android:text="Guipúzcoa"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
-                        </RadioGroup>
+
+                        </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -332,29 +350,41 @@
                             android:textStyle="bold" />
 
                         <CheckBox
-                            android:id="@+id/checkObras"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:buttonTint="@color/white"
-                            android:checked="true"
-                            android:text="Obras"
-                            android:textColor="@color/white" />
-
-                        <CheckBox
                             android:id="@+id/checkAccidentes"
+
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:buttonTint="@color/white"
+
+                            android:buttonTint="#FF4444"
+
                             android:checked="true"
+
                             android:text="Accidentes"
                             android:textColor="@color/white" />
 
                         <CheckBox
-                            android:id="@+id/checkCamaras"
+                            android:id="@+id/checkObras"
+
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:buttonTint="@color/white"
+
+                            android:buttonTint="#FFBB33"
+
                             android:checked="true"
+
+                            android:text="Obras"
+                            android:textColor="@color/white" />
+
+                        <CheckBox
+                            android:id="@+id/checkCamaras"
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+
+                            android:buttonTint="#42bfdb"
+
+                            android:checked="true"
+
                             android:text="Cámaras"
                             android:textColor="@color/white" />
                     </LinearLayout>
@@ -429,6 +459,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
+
                             android:text="Gravedad"
                             android:textColor="@color/white"
                             android:textSize="16sp"
@@ -441,31 +472,43 @@
 
                             <CheckBox
                                 android:id="@+id/checkGrave"
+
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:buttonTint="#FF4444"
+
+                                android:buttonTint="@color/white"
+
                                 android:checked="true"
+
                                 android:text="Grave"
                                 android:textColor="@color/white" />
 
                             <CheckBox
                                 android:id="@+id/checkMedio"
+
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:buttonTint="#FFBB33"
+
+                                android:buttonTint="@color/white"
+
                                 android:checked="true"
+
                                 android:text="Medio"
                                 android:textColor="@color/white" />
 
                             <CheckBox
                                 android:id="@+id/checkLeve"
+
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:buttonTint="#42bfdb"
+
+                                android:buttonTint="@color/white"
+
                                 android:checked="true"
+
                                 android:text="Leve"
                                 android:textColor="@color/white" />
                         </LinearLayout>
@@ -485,6 +528,128 @@
         </ScrollView>
     </androidx.cardview.widget.CardView>
 
+    <!-- ventana detalles marcador-->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/markerWindow"
+
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        android:visibility="gone"
+
+        app:cardBackgroundColor="@color/light_grey"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="21dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="0.9">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical"
+
+            android:padding="20dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="25dp">
+
+                <TextView
+                    android:id="@+id/tvTituloDetalles"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@+id/btnCerrarDetalles"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+
+                    android:textColor="@color/white"
+                    android:textSize="24sp"
+                    android:textStyle="bold"/>
+
+                <Button
+                    android:id="@+id/btnCerrarDetalles"
+
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+
+                    android:backgroundTint="@color/dark_grey"
+
+                    android:insetLeft="0dp"
+                    android:insetTop="0dp"
+                    android:insetRight="0dp"
+                    android:insetBottom="0dp"
+
+                    android:padding="0dp"
+
+                    android:text="X"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+
+                    app:cornerRadius="20dp" />
+            </RelativeLayout>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+
+                app:contentPadding="15dp"
+
+                app:cardBackgroundColor="@color/dark_grey"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <TextView
+                    android:id="@+id/tvInfoDetalles"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:lineSpacingExtra="4dp"
+
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
+
+                app:cardBackgroundColor="@color/dark_grey"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <ImageView
+                    android:id="@+id/ivCamara"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+
+                    android:scaleType="centerCrop"
+
+                    android:background="#EEEEEE"
+
+                    android:visibility="gone"
+
+                    android:contentDescription="Imagen de la cámara" />
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- navbar -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
 

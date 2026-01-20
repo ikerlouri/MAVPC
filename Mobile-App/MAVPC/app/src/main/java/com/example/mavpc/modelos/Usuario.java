@@ -15,6 +15,8 @@ public class Usuario {
         this.pfpUrl = pfpUrl;
     }
 
+    public Usuario() {}
+
     public String getId() {
         return id;
     }

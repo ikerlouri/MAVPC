@@ -16,6 +16,9 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+
+        // para ajustar la pfp al cambiarla
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
