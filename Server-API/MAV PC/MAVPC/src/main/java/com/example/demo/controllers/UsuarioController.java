@@ -56,10 +56,15 @@ public class UsuarioController {
 	public void borrarFavoritos(@RequestParam int id) {
 		camaraFavoritaUsuarioDao.deleteById(id);	
 	}
-	
-	@PostMapping("/comprobarUsuario")
+ 	
+	@GetMapping("/comprobarUsuario")
 	public boolean comprobarUsuario(@RequestParam String usuario, @RequestParam String contrasena) {
 	return usuarioDao.existsByUsuarioAndContrasena(usuario, contrasena);
+	}
+	
+	@GetMapping("/comprobarUsuarioEmail")
+	public boolean comprobarUsuarioEmail(@RequestParam String usuario, @RequestParam String email) {
+	return usuarioDao.existsByUsuarioOrEmail(usuario, email);
 	}
 	
 	@PostMapping("/buscarUsuarioPorNombre")
