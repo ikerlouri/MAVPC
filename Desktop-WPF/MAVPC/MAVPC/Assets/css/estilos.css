@@ -92,3 +92,31 @@ body, html {
         box-shadow: 0 0 0 0 rgba(255, 0, 60, 0);
     }
 }
+
+/* --- CONTROL DE CAPAS (El selector Mapa/Satélite) --- */
+.leaflet-control-layers {
+    background-color: rgba(10, 10, 15, 0.9) !important; /* Fondo casi negro */
+    border: 1px solid #00F0FF !important; /* Borde Cyan */
+    border-radius: 8px !important;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) !important;
+    color: white !important;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 10px !important;
+}
+
+/* El texto de las opciones */
+.leaflet-control-layers-base label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+    .leaflet-control-layers-base label:hover {
+        color: #00F0FF; /* Texto cyan al pasar el ratón */
+    }
+
+/* Personalizar los radio buttons (los circulitos) es complejo en CSS puro,
+   pero con el fondo oscuro y texto blanco ya queda bastante integrado */

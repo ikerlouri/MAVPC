@@ -5,16 +5,37 @@ var markersLayer;
 // Inicialización del mapa
 document.addEventListener("DOMContentLoaded", function () {
 
-    // Configuración del mapa (Centro Euskadi)
-    map = L.map('map', { zoomControl: false }).setView([43.0, -2.5], 9);
+    // --- 1. DEFINICIÓN DE CAPAS BASE ---
 
-    // Capa base oscura (CartoDB)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    // A) Capa Oscura (La que ya tenías)
+    var capaOscura = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         attribution: '© OpenStreetMap, © CARTO',
         maxZoom: 19
-    }).addTo(map);
+    });
 
-    // Capa para los marcadores
+    // B) Capa Satélite (Esri World Imagery - Muy buena calidad)
+    var capaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri',
+        maxZoom: 19
+    });
+
+    // --- 2. INICIALIZAR EL MAPA ---
+    // En 'layers' ponemos [capaOscura] para que arranque con esa por defecto
+    map = L.map('map', {
+        zoomControl: false,
+        layers: [capaOscura]
+    }).setView([43.0, -2.5], 9);
+
+    // --- 3. AÑADIR CONTROL DE CAPAS (El botón para cambiar) ---
+    var baseMaps = {
+        "MODO OSCURO": capaOscura,
+        "SATÉLITE": capaSatelite
+    };
+
+    // Añadimos el control en la esquina inferior derecha (o donde prefieras)
+    L.control.layers(baseMaps, null, { position: 'bottomright' }).addTo(map);
+
+    // Capa para los marcadores (siempre encima de todo)
     markersLayer = L.layerGroup().addTo(map);
 });
 
