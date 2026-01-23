@@ -48,7 +48,7 @@ public class IncidenciaController {
     @GetMapping("/sincronizar")
     public String sincronizarTodo() {
         try {
-            traficoService.SubirIncidencias2026();
+            traficoService.SubirIncidenciasDelDia();
             return "Sincronización completa finalizada con éxito.";
         } catch (Exception e) {
             return "Error durante la sincronización: " + e.getMessage();

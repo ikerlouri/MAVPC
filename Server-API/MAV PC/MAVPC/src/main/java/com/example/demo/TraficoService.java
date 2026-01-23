@@ -3,11 +3,13 @@ package com.example.demo;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -202,52 +204,84 @@ public class TraficoService {
         }
     }
     
-    public void SubirIncidencias2026() {
+    @Scheduled(fixedRate = 240000) // Cada 4 minutos
+    public void SubirIncidenciasDelDia() {
+        // Obtener fecha actual
+        LocalDate hoy = LocalDate.now();
+        String anio = String.valueOf(hoy.getYear());
+        String mes = String.format("%02d", hoy.getMonthValue());
+        String dia = String.format("%02d", hoy.getDayOfMonth());
+        
         int paginaActual = 1;
         int totalPaginas = 1;
-        String URL_BASE_EUSKADI = "https://api.euskadi.eus/traffic/v1.0/incidences/byYear/2026";
+        int nuevasIncidencias = 0;
+        int duplicadas = 0;
+        
+        // URL para obtener incidencias del día actual
+        String URL_BASE = "https://api.euskadi.eus/traffic/v1.0/incidences/byDate/" 
+                          + anio + "/" + mes + "/" + dia;
 
         do {
-            // El parámetro correcto es _page (con guion bajo)
-            String urlConPagina = URL_BASE_EUSKADI + "?_page=" + paginaActual;
+            String urlConPagina = URL_BASE + "?_page=" + paginaActual;
             
             try {
                 JsonNode root = restTemplate.getForObject(urlConPagina, JsonNode.class);
 
                 if (root != null && root.has("incidences")) {
-                    // 1. En la primera página, leemos cuántas hay en total
+                    // Obtener total de páginas en la primera iteración
                     if (paginaActual == 1) {
                         totalPaginas = root.get("totalPages").asInt();
-                        System.out.println("Total de páginas detectadas: " + totalPaginas);
+                        System.out.println("📅 Sincronizando incidencias del " + dia + "/" + mes + "/" + anio);
+                        System.out.println("Total de páginas: " + totalPaginas);
                     }
 
-                    // 2. Extraer y convertir la lista de cámaras de la página actual
+                    // Convertir JSON a lista de objetos
                     JsonNode incidenciasNode = root.get("incidences");
                     ObjectMapper mapper = new ObjectMapper();
                     List<Incidencia> listaPagina = mapper.convertValue(
-                        incidenciasNode, 
+                        incidenciasNode,
                         new TypeReference<List<Incidencia>>() {}
                     );
 
-                    // 3. Guardar en BD (Hibernate hará Insert o Update según el ID)
-                    incidenciaDao.saveAll(listaPagina);
-                    System.out.println("Procesada página " + paginaActual + " de " + totalPaginas);
+                    // Filtrar solo las que NO existan en la BD
+                    List<Incidencia> incidenciasNuevas = new ArrayList<>();
+                    
+                    for (Incidencia incidencia : listaPagina) {
+                        // Verificar si ya existe por su ID
+                        if (!incidenciaDao.existsById(incidencia.getId())) {
+                            incidenciasNuevas.add(incidencia);
+                        } else {
+                            duplicadas++;
+                        }
+                    }
+
+                    // Guardar solo las nuevas
+                    if (!incidenciasNuevas.isEmpty()) {
+                        incidenciaDao.saveAll(incidenciasNuevas);
+                        nuevasIncidencias += incidenciasNuevas.size();
+                        System.out.println("✅ Página " + paginaActual + "/" + totalPaginas 
+                                         + " - Nuevas: " + incidenciasNuevas.size() 
+                                         + " | Ya existían: " + (listaPagina.size() - incidenciasNuevas.size()));
+                    } else {
+                        System.out.println("⏭️  Página " + paginaActual + "/" + totalPaginas 
+                                         + " - Todas las incidencias ya estaban registradas");
+                    }
 
                     paginaActual++;
-                    
-                    // Opcional: una pequeña pausa para ser respetuosos con la API
-                    Thread.sleep(100); 
+                    Thread.sleep(100); // Pausa para no saturar la API
 
                 } else {
                     break;
                 }
             } catch (Exception e) {
-                System.err.println("Error en la página " + paginaActual + ": " + e.getMessage());
+                System.err.println("❌ Error en página " + paginaActual + ": " + e.getMessage());
                 break;
             }
 
         } while (paginaActual <= totalPaginas);
-        
-        System.out.println("Sincronización finalizada con éxito.");
+
+        System.out.println("🏁 Sincronización completada:");
+        System.out.println("   - Nuevas incidencias guardadas: " + nuevasIncidencias);
+        System.out.println("   - Incidencias duplicadas omitidas: " + duplicadas);
     }
 }
