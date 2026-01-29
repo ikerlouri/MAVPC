@@ -29,7 +29,9 @@ public class TraficoService {
     private CamaraDao camaraDao;
 	@Autowired
     private IncidenciaDao incidenciaDao;
-    private final RestTemplate restTemplate = new RestTemplate();
+	
+	@Autowired
+    private RestTemplate restTemplate;
     private final String BASE_URL = "https://api.euskadi.eus/traffic/v1.0";
 
     // 1. Todas las incidencias 
