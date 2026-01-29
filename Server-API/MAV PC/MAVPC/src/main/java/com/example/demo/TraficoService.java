@@ -204,9 +204,8 @@ public class TraficoService {
         }
     }
     
-    @Scheduled(fixedRate = 240000) // Cada 4 minutos
+    @Scheduled(fixedRate = 900000) // Cada 15 minutos
     public void SubirIncidenciasDelDia() {
-        // Obtener fecha actual
         LocalDate hoy = LocalDate.now();
         String anio = String.valueOf(hoy.getYear());
         String mes = String.format("%02d", hoy.getMonthValue());
@@ -215,11 +214,12 @@ public class TraficoService {
         int paginaActual = 1;
         int totalPaginas = 1;
         int nuevasIncidencias = 0;
-        int duplicadas = 0;
+        int duplicadasTotal = 0;
         
-        // URL para obtener incidencias del día actual
         String URL_BASE = "https://api.euskadi.eus/traffic/v1.0/incidences/byDate/" 
                           + anio + "/" + mes + "/" + dia;
+
+        ObjectMapper mapper = new ObjectMapper(); // Instanciar una sola vez fuera del bucle
 
         do {
             String urlConPagina = URL_BASE + "?_page=" + paginaActual;
@@ -228,47 +228,41 @@ public class TraficoService {
                 JsonNode root = restTemplate.getForObject(urlConPagina, JsonNode.class);
 
                 if (root != null && root.has("incidences")) {
-                    // Obtener total de páginas en la primera iteración
                     if (paginaActual == 1) {
                         totalPaginas = root.get("totalPages").asInt();
-                        System.out.println("📅 Sincronizando incidencias del " + dia + "/" + mes + "/" + anio);
-                        System.out.println("Total de páginas: " + totalPaginas);
+                        System.out.println("📅 Sincronizando: " + dia + "/" + mes + "/" + anio);
                     }
 
-                    // Convertir JSON a lista de objetos
                     JsonNode incidenciasNode = root.get("incidences");
-                    ObjectMapper mapper = new ObjectMapper();
                     List<Incidencia> listaPagina = mapper.convertValue(
                         incidenciasNode,
                         new TypeReference<List<Incidencia>>() {}
                     );
 
-                    // Filtrar solo las que NO existan en la BD
-                    List<Incidencia> incidenciasNuevas = new ArrayList<>();
-                    
+                    List<Incidencia> incidenciasAInsertar = new ArrayList<>();
+                    int duplicadasEnPagina = 0;
+
                     for (Incidencia incidencia : listaPagina) {
-                        // Verificar si ya existe por su ID
-                        if (!incidenciaDao.existsById(incidencia.getId())) {
-                            incidenciasNuevas.add(incidencia);
+                        // COMPROBACIÓN: ¿Existe ya este incidence_id en la BD?
+                        if (!incidenciaDao.existsByIncidenceId(incidencia.getIncidenceId())) {
+                            incidenciasAInsertar.add(incidencia);
                         } else {
-                            duplicadas++;
+                            duplicadasEnPagina++;
                         }
                     }
 
-                    // Guardar solo las nuevas
-                    if (!incidenciasNuevas.isEmpty()) {
-                        incidenciaDao.saveAll(incidenciasNuevas);
-                        nuevasIncidencias += incidenciasNuevas.size();
-                        System.out.println("✅ Página " + paginaActual + "/" + totalPaginas 
-                                         + " - Nuevas: " + incidenciasNuevas.size() 
-                                         + " | Ya existían: " + (listaPagina.size() - incidenciasNuevas.size()));
-                    } else {
-                        System.out.println("⏭️  Página " + paginaActual + "/" + totalPaginas 
-                                         + " - Todas las incidencias ya estaban registradas");
+                    if (!incidenciasAInsertar.isEmpty()) {
+                        incidenciaDao.saveAll(incidenciasAInsertar);
+                        nuevasIncidencias += incidenciasAInsertar.size();
                     }
+                    
+                    duplicadasTotal += duplicadasEnPagina;
+                    System.out.println("📄 Página " + paginaActual + "/" + totalPaginas 
+                                       + " -> Nuevas: " + incidenciasAInsertar.size() 
+                                       + " | Omitidas: " + duplicadasEnPagina);
 
                     paginaActual++;
-                    Thread.sleep(100); // Pausa para no saturar la API
+                    Thread.sleep(100); 
 
                 } else {
                     break;
@@ -280,8 +274,6 @@ public class TraficoService {
 
         } while (paginaActual <= totalPaginas);
 
-        System.out.println("🏁 Sincronización completada:");
-        System.out.println("   - Nuevas incidencias guardadas: " + nuevasIncidencias);
-        System.out.println("   - Incidencias duplicadas omitidas: " + duplicadas);
+        System.out.println("🏁 Sincronización finalizada. Nuevas: " + nuevasIncidencias + " | Duplicadas: " + duplicadasTotal);
     }
 }

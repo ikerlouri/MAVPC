@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,14 +35,19 @@ public class IncidenciaController {
     
     @GetMapping
     public Object verTrafico() {
-        return traficoService.obtenerTodasIncidencias();
+        return incidenciaDao.findAll();
     }
     
   //guardar incidencias creadas
-    @PostMapping("/guardar")
+    @PostMapping
     public void guardarIncidencia(@RequestBody Incidencia incidencia) {
         IncidenciaCreada nuevaIncidencia = modelMapper.map(incidencia, IncidenciaCreada.class);     
         incidenciaCreadaDao.save(nuevaIncidencia);
+    }
+    
+    @DeleteMapping
+    public void eliminarIncidencia(@RequestParam Integer id) {
+        incidenciaDao.deleteById(id);
     }
     
     //guardar las de este año
@@ -54,8 +60,9 @@ public class IncidenciaController {
             return "Error durante la sincronización: " + e.getMessage();
         }
     }
+    
     //Listar incidencias pasandole año, mes y dia. URL ej.()/listarIncidencias?anio=2026&mes=01&dia=15
-    @GetMapping("/listar/byDate")
+    @GetMapping("/byDate")
     public List<Incidencia> listarIncidenciasPorFecha(
             @RequestParam String anio, 
             @RequestParam String mes, 
@@ -69,10 +76,7 @@ public class IncidenciaController {
         return incidenciasApi;
     }
     
-    @GetMapping("/eliminar")
-    public void eliminarIncidencia(@RequestParam Integer id) {
-        incidenciaDao.deleteById(id);
-    }
+    
     
     @GetMapping("/listarActual")
     public List<Incidencia> listarIncidenciasHoy() {

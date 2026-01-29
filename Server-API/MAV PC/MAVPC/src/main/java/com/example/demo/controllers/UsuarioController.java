@@ -3,6 +3,7 @@ package com.example.demo.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,18 +31,18 @@ public class UsuarioController {
 		return usuarioDao.findAll();
 	}
 	
-	@GetMapping("/eliminar")
+	@DeleteMapping
 	public void BorrarUsuario(@RequestParam int idUsuario) {
 		usuarioDao.deleteById(idUsuario);
 	}
 	
 	
-	@PostMapping("/guardarUsuario")
+	@PostMapping
 	public void GuardarUsuario(@RequestBody Usuario usuario) {
 		usuarioDao.save(usuario);
 	}
 	
-	@GetMapping("/guardarFavoritos")
+	@PostMapping("/favoritos")
 	public void guardarFavoritos(
 			@RequestParam int idCamara,
 			@RequestParam int idUsuario) {
@@ -52,7 +53,7 @@ public class UsuarioController {
 	camaraFavoritaUsuarioDao.save(camaraFavoritaUsuario);	
 	}
 	
-	@GetMapping("/eliminarFavoritos")
+	@DeleteMapping("/favoritos")
 	public void borrarFavoritos(@RequestParam int id) {
 		camaraFavoritaUsuarioDao.deleteById(id);	
 	}
@@ -67,7 +68,7 @@ public class UsuarioController {
 	return usuarioDao.existsByUsuarioOrEmail(usuario, email);
 	}
 	
-	@PostMapping("/buscarUsuarioPorNombre")
+	@GetMapping("/buscarUsuarioPorNombre")
 	public Usuario buscarUsuarioPorNombre(@RequestParam String usuario) {
 		return usuarioDao.findByUsuario(usuario);
 	}

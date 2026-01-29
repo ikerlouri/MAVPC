@@ -2,6 +2,7 @@ package com.example.demo.modelos;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -19,9 +20,13 @@ public class Incidencia {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    @JsonProperty("incidenceId")
+    @JsonIgnore
     @Column(name = "id")
     private int id;
+    @JsonProperty("incidenceId")
+    @Column(name = "incidence_id", unique = true, nullable = false)
+    private String incidenceId;  // ID de la API (para detectar duplicados)
+    
    @JsonProperty("incidenceType")
     private String tipo;
    @JsonProperty("autonomousRegion")
@@ -45,7 +50,7 @@ public class Incidencia {
    @JsonProperty("longitude")
     private Double longitud;                                      
 
-
+   
     // Constructor vacío obligatorio para JPA
     public Incidencia() {}
 
@@ -57,6 +62,15 @@ public class Incidencia {
 	public void setId(int id) {
 		this.id = id;
 	}
+
+	public String getIncidenceId() {
+		return incidenceId;
+	}
+
+	public void setIncidenceId(String incidenceId) {
+		this.incidenceId = incidenceId;
+	}
+
 
 	public String getTipo() {
 		return tipo;
