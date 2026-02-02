@@ -38,7 +38,7 @@ public class CamaraController {
     public String guardarCamara(@RequestBody Camara camara) {
     	try {  		
             camaraDao.save(camara);
-            return "Sincronización completa finalizada con éxito.";
+            return "Camara guardada con éxito.";
         } catch (Exception e) {
             return "Error durante la sincronización: " + e.getMessage();
         }

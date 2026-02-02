@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.daos.CamaraFavoritaUsuarioDao;
 import com.example.demo.daos.UsuarioDao;
+import com.example.demo.modelos.Camara;
 import com.example.demo.modelos.CamaraFavoritaUsuario;
 import com.example.demo.modelos.Usuario;
 import com.example.demo.servicios.EmailSchedulerService;
@@ -45,12 +46,17 @@ public class UsuarioController {
 	@PostMapping
 	public void GuardarUsuario(@RequestBody Usuario usuario) {
 		usuarioDao.save(usuario);
-		eService.enviarCorreoBienvenida(usuario.getUsuario(), usuario.getEmail());
+		eService.enviarCorreoBienvenida(usuario.getEmail(), usuario.getUsuario());
 	}
 	
 	@PutMapping
 	public void ActualizarUsuario(@RequestBody Usuario usuario) {
 		usuarioDao.save(usuario);
+	}
+	
+	@GetMapping("/favoritos")
+	public List<CamaraFavoritaUsuario> listarFavoritos(@RequestParam int idUsuario) {	
+		return camaraFavoritaUsuarioDao.findByIdUsuario(idUsuario) ; 
 	}
 	
 	@PostMapping("/favoritos")
