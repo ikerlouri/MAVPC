@@ -14,7 +14,9 @@ import java.util.ArrayList;
 @Service
 public class EmailSchedulerService {
 
-    private final String BREVO_API_KEY = "xkeysib-TU_CLAVE_LARGA_AQUI";
+	@org.springframework.beans.factory.annotation.Value("${BREVO_API_KEY}")
+	private String brevoApiKey;
+	
     private final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
     @Async // Mantenemos la asincronía para que sea rápido
@@ -25,7 +27,7 @@ public class EmailSchedulerService {
             // 1. Configurar Cabeceras (Headers)
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("api-key", BREVO_API_KEY);
+            headers.set("api-key", brevoApiKey);
 
             // 2. Construir el cuerpo del JSON (Payload) manualmente con Mapas
             Map<String, Object> body = new HashMap<>();
@@ -33,7 +35,7 @@ public class EmailSchedulerService {
             // Remitente
             Map<String, String> sender = new HashMap<>();
             sender.put("name", "Soporte MAVPC");
-            sender.put("email", "no-reply@mavpc.com"); // Puedes poner tu correo de registro en Brevo
+            sender.put("email", "mavpc1459@gmail.com"); // Puedes poner tu correo de registro en Brevo
             body.put("sender", sender);
 
             // Destinatario (es una lista)
