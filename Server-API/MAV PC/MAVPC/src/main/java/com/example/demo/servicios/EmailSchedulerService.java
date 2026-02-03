@@ -6,6 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -47,12 +48,21 @@ public class EmailSchedulerService {
             body.put("to", toList);
 
             // Asunto y Contenido
-            body.put("subject", "Bienvenido a MAVPC - ¡Ya puedes empezar!");
-            String htmlContent = "<html><body>"
-                    + "<h1>Hola, " + nombreUsuario + "!</h1>"
-                    + "<p>¡Es un placer tenerte con nosotros en MAVPC!</p>"
-                    + "<p>Esta notificación ha sido enviada vía API HTTPS.</p>"
-                    + "</body></html>";
+            body.put("subject", "Bienvenido a MAVPC");
+            
+            String htmlContent = "<html>" +
+                "<body style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>" +
+                "<div style='max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);'>" +
+                "<h2 style='color: #333;'>¡Hola, " + nombreUsuario + "!</h2>" +
+                "<p style='font-size: 16px; color: #555;'>Gracias por registrarte en nuestra aplicación. Estamos encantados de tenerte con nosotros.</p>" +
+                "<p style='font-size: 16px; color: #555;'>Tu cuenta ha sido creada con éxito y ya puedes empezar a explorar todas las funcionalidades que ofrecemos.</p>" +
+                "<br>" +
+                "<p style='font-size: 14px; color: #777;'>Si tienes alguna pregunta, no dudes en contactarnos.</p>" +
+                "<p style='font-size: 14px; color: #777;'>Saludos,<br>El equipo de MAVPC</p>" +
+                "</div>" +
+                "</body>" +
+                "</html>";
+                
             body.put("htmlContent", htmlContent);
 
             // 3. Empaquetar la petición
