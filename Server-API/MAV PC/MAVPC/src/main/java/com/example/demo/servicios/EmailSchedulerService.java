@@ -3,6 +3,7 @@ package com.example.demo.servicios;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
@@ -13,7 +14,7 @@ public class EmailSchedulerService {
     @Autowired
     private JavaMailSender mailSender;
 
-
+    @Async
     public void enviarCorreoBienvenida(String email, String usuario) {
         if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             System.err.println("Correo no enviado: La dirección de email es inválida o está vacía.");
