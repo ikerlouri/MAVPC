@@ -2,6 +2,7 @@ package com.example.demo.modelos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +24,7 @@ public class Usuario {
 	
 	private String email;
 	
+	@Column(name = "url_image")
 	private String urlImage;
 
 	public Usuario() {

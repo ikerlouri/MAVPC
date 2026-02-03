@@ -77,7 +77,7 @@ public class IncidenciaController {
     }
     
     
-    
+    //lista las incidencias de hoy
     @GetMapping("/listarActual")
     public List<Incidencia> listarIncidenciasHoy() {
         LocalDate hoy = LocalDate.now();
