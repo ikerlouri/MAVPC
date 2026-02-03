@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.daos.CamaraFavoritaUsuarioDao;
 import com.example.demo.daos.UsuarioDao;
-import com.example.demo.modelos.Camara;
 import com.example.demo.modelos.CamaraFavoritaUsuario;
 import com.example.demo.modelos.Usuario;
 import com.example.demo.servicios.EmailSchedulerService;

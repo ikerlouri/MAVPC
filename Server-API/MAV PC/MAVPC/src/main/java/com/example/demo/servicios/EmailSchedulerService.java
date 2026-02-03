@@ -1,44 +1,69 @@
 package com.example.demo.servicios;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import jakarta.mail.internet.MimeMessage;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Async;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 
 @Service
 public class EmailSchedulerService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final String BREVO_API_KEY = "xkeysib-TU_CLAVE_LARGA_AQUI";
+    private final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-    @Async
-    public void enviarCorreoBienvenida(String email, String usuario) {
-        if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            System.err.println("Correo no enviado: La dirección de email es inválida o está vacía.");
-            return; 
-        }
-
+    @Async // Mantenemos la asincronía para que sea rápido
+    public void enviarCorreoBienvenida(String emailDestino, String nombreUsuario) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
-            
-            helper.setFrom("Mavpc soporte <mavpc1459@gmail.com>");
-            helper.setTo(email);
-            helper.setSubject("Bienvenido a MAVPC - ¡Ya puedes empezar!");
-            
-            String textoCuerpo = "Hola, " + usuario + ":\n\n"
-                    + "¡Es un placer tenerte con nosotros! Te has unido a la app de MAVPC...";
-            
-            helper.setText(textoCuerpo);
+            RestTemplate restTemplate = new RestTemplate();
 
-            mailSender.send(message);
-            System.out.println("Correo enviado con éxito a: " + email);
+            // 1. Configurar Cabeceras (Headers)
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", BREVO_API_KEY);
+
+            // 2. Construir el cuerpo del JSON (Payload) manualmente con Mapas
+            Map<String, Object> body = new HashMap<>();
             
+            // Remitente
+            Map<String, String> sender = new HashMap<>();
+            sender.put("name", "Soporte MAVPC");
+            sender.put("email", "no-reply@mavpc.com"); // Puedes poner tu correo de registro en Brevo
+            body.put("sender", sender);
+
+            // Destinatario (es una lista)
+            List<Map<String, String>> toList = new ArrayList<>();
+            Map<String, String> toUser = new HashMap<>();
+            toUser.put("email", emailDestino);
+            toUser.put("name", nombreUsuario);
+            toList.add(toUser);
+            body.put("to", toList);
+
+            // Asunto y Contenido
+            body.put("subject", "Bienvenido a MAVPC - ¡Ya puedes empezar!");
+            String htmlContent = "<html><body>"
+                    + "<h1>Hola, " + nombreUsuario + "!</h1>"
+                    + "<p>¡Es un placer tenerte con nosotros en MAVPC!</p>"
+                    + "<p>Esta notificación ha sido enviada vía API HTTPS.</p>"
+                    + "</body></html>";
+            body.put("htmlContent", htmlContent);
+
+            // 3. Empaquetar la petición
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+            // 4. ¡ENVIAR! (Esto sale por el puerto 443, que Railway SÍ permite)
+            restTemplate.postForEntity(BREVO_API_URL, request, String.class);
+            
+            System.out.println("ÉXITO: Correo enviado vía API a " + emailDestino);
+
         } catch (Exception e) {
-            System.err.println("Error silencioso al enviar correo a " + email + ": " + e.getMessage());
+            System.err.println("ERROR API: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
