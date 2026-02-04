@@ -15,7 +15,6 @@ body, html {
 }
 
 /* --- TOOLTIPS (La cajita al pasar el ratón) --- */
-/* Quitamos los estilos default de Leaflet para el tooltip y ponemos los nuestros */
 .leaflet-tooltip.custom-tooltip {
     background-color: rgba(20, 20, 30, 0.95);
     border: 1px solid #00F0FF; /* Borde Cyan Neon */
@@ -27,7 +26,6 @@ body, html {
     padding: 4px 8px;
 }
 
-/* La flechita pequeña debajo del tooltip */
 .leaflet-tooltip-top:before {
     border-top-color: #00F0FF;
 }
@@ -95,8 +93,8 @@ body, html {
 
 /* --- CONTROL DE CAPAS (El selector Mapa/Satélite) --- */
 .leaflet-control-layers {
-    background-color: rgba(10, 10, 15, 0.9) !important; /* Fondo casi negro */
-    border: 1px solid #00F0FF !important; /* Borde Cyan */
+    background-color: rgba(10, 10, 15, 0.9) !important;
+    border: 1px solid #00F0FF !important;
     border-radius: 8px !important;
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) !important;
     color: white !important;
@@ -106,7 +104,6 @@ body, html {
     padding: 10px !important;
 }
 
-/* El texto de las opciones */
 .leaflet-control-layers-base label {
     cursor: pointer;
     display: flex;
@@ -115,8 +112,279 @@ body, html {
 }
 
     .leaflet-control-layers-base label:hover {
-        color: #00F0FF; /* Texto cyan al pasar el ratón */
+        color: #00F0FF;
     }
 
-/* Personalizar los radio buttons (los circulitos) es complejo en CSS puro,
-   pero con el fondo oscuro y texto blanco ya queda bastante integrado */
+/* Ajuste para que los controles de Leaflet no se peguen al borde */
+.leaflet-left .leaflet-control {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+/* --- PANEL DE FILTROS (Arriba Derecha) --- */
+.filter-panel {
+    background-color: rgba(10, 10, 15, 0.95);
+    border: 1px solid #00F0FF;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    min-width: 150px;
+}
+
+.filter-title {
+    color: #00F0FF;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    cursor: pointer;
+    color: #888;
+    transition: all 0.3s ease;
+}
+
+    .filter-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .filter-item:hover {
+        color: white;
+    }
+
+.filter-check {
+    width: 14px;
+    height: 14px;
+    border: 1px solid #666;
+    margin-right: 10px;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+}
+
+.filter-item.active {
+    color: white;
+    text-shadow: 0 0 5px rgba(255,255,255,0.5);
+}
+
+    .filter-item.active .filter-check {
+        background-color: #00F0FF;
+        border-color: #00F0FF;
+        box-shadow: 0 0 8px #00F0FF;
+    }
+
+.filter-check i {
+    font-size: 10px;
+    color: black;
+    display: none;
+}
+
+.filter-item.active .filter-check i {
+    display: block;
+}
+
+/* --- BUSCADOR DINÁMICO (Arriba Izquierda) --- */
+.search-container {
+    background-color: rgba(10, 10, 15, 0.95);
+    border: 1px solid #00F0FF;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    display: flex;
+    align-items: center;
+    width: 250px;
+    transition: width 0.3s ease;
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 100%;
+    margin-left: 10px;
+    outline: none;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+}
+
+    .search-input::placeholder {
+        color: #555;
+    }
+
+.search-icon {
+    color: #00F0FF;
+}
+
+/* LISTA DE RESULTADOS */
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: rgba(10, 10, 15, 0.98);
+    border: 1px solid #00F0FF;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    z-index: 2000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.result-item {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+    .result-item:hover {
+        background-color: rgba(0, 240, 255, 0.1);
+        color: white;
+        padding-left: 15px;
+    }
+
+    .result-item i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+
+.search-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+}
+
+    .search-results::-webkit-scrollbar-thumb:hover {
+        background: #00F0FF;
+    }
+
+/* --- NUEVA BARRA DE NAVEGACIÓN --- */
+.nav-bar {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(10, 10, 15, 0.9);
+    border: 1px solid #00F0FF;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    margin-bottom: 5px;
+}
+
+.nav-btn {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+    .nav-btn:last-child {
+        border-bottom: none;
+    }
+
+    .nav-btn:hover {
+        background-color: #00F0FF;
+        color: black;
+    }
+
+/* --- TELEMETRÍA (Coordenadas y Escala) --- */
+.telemetry-bar {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #00F0FF;
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    pointer-events: none;
+}
+
+/* Personalizar la escala de Leaflet */
+.leaflet-control-scale {
+    margin-left: 10px !important;
+    margin-bottom: 5px !important;
+    border: none !important;
+}
+
+.leaflet-control-scale-line {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border-color: #555 !important;
+    color: #aaa !important;
+    font-family: 'Consolas', monospace;
+}
+
+/* --- ESTILOS DE CLUSTERS (MODO OSCURO/NEON) --- */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+    background-color: rgba(20, 20, 30, 0.85); /* Fondo oscuro */
+    border: 2px solid #555;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    font-weight: bold;
+    border-radius: 50%;
+}
+
+/* Cluster Pequeño - AZUL */
+.marker-cluster-small {
+    border-color: #00F0FF;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+    .marker-cluster-small div {
+        background-color: transparent;
+    }
+
+/* Cluster Mediano - NARANJA */
+.marker-cluster-medium {
+    border-color: #FFA500;
+    box-shadow: 0 0 10px rgba(255, 165, 0, 0.4);
+}
+
+    .marker-cluster-medium div {
+        background-color: transparent;
+    }
+
+/* Cluster Grande - ROJO */
+.marker-cluster-large {
+    border-color: #FF003C;
+    box-shadow: 0 0 10px rgba(255, 0, 60, 0.4);
+}
+
+    .marker-cluster-large div {
+        background-color: transparent;
+    }
+
+/* Texto Cluster */
+.marker-cluster div {
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    text-align: center;
+    line-height: 26px;
+    font-size: 14px;
+}

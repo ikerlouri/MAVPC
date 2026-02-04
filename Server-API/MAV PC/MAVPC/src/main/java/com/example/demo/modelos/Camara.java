@@ -4,28 +4,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+// Entidad que guarda la info de las cámaras en la base de datos
 @Entity
 @Table(name = "camaras")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true) // Si la API trae datos extra que no usamos, los ignora
 public class Camara {
 
     @Id
-    @JsonProperty("cameraId")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private String id; 
+    private Integer id; // Identificador único (se autogenera)
 
+    // Mapeo: la API lo llama "cameraName", nosotros lo guardamos como "nombre"
     @JsonProperty("cameraName")
     private String nombre;
 
     @JsonProperty("urlImage")
-    private String urlImage;
+    private String urlImage; // Enlace a la foto actual de la cámara
 
+    // Coordenadas de ubicación
     @JsonProperty("latitude")
     private String latitud; 
 
     @JsonProperty("longitude")
     private String longitud;
 
+    // Detalles de la ubicación física
     @JsonProperty("road")
     private String carretera;
 
@@ -35,68 +39,69 @@ public class Camara {
     @JsonProperty("address")
     private String direccion;
 
-	public String getId() {
-		return id;
-	}
+    // --- Getters y Setters (Necesarios para acceder a los datos) ---
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public String getNombre() {
-		return nombre;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
+    public String getNombre() {
+        return nombre;
+    }
 
-	public String getUrlImage() {
-		return urlImage;
-	}
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
 
-	public void setUrlImage(String urlImage) {
-		this.urlImage = urlImage;
-	}
+    public String getUrlImage() {
+        return urlImage;
+    }
 
-	public String getLatitud() {
-		return latitud;
-	}
+    public void setUrlImage(String urlImage) {
+        this.urlImage = urlImage;
+    }
 
-	public void setLatitud(String latitud) {
-		this.latitud = latitud;
-	}
+    public String getLatitud() {
+        return latitud;
+    }
 
-	public String getLongitud() {
-		return longitud;
-	}
+    public void setLatitud(String latitud) {
+        this.latitud = latitud;
+    }
 
-	public void setLongitud(String longitud) {
-		this.longitud = longitud;
-	}
+    public String getLongitud() {
+        return longitud;
+    }
 
-	public String getCarretera() {
-		return carretera;
-	}
+    public void setLongitud(String longitud) {
+        this.longitud = longitud;
+    }
 
-	public void setCarretera(String carretera) {
-		this.carretera = carretera;
-	}
+    public String getCarretera() {
+        return carretera;
+    }
 
-	public String getKilometro() {
-		return kilometro;
-	}
+    public void setCarretera(String carretera) {
+        this.carretera = carretera;
+    }
 
-	public void setKilometro(String kilometro) {
-		this.kilometro = kilometro;
-	}
+    public String getKilometro() {
+        return kilometro;
+    }
 
-	public String getDireccion() {
-		return direccion;
-	}
+    public void setKilometro(String kilometro) {
+        this.kilometro = kilometro;
+    }
 
-	public void setDireccion(String direccion) {
-		this.direccion = direccion;
-	}
-   
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
 }

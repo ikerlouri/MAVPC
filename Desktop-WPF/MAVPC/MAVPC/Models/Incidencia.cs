@@ -5,10 +5,10 @@ namespace MAVPC.Models
 {
     public class Incidencia
     {
-        // --- PROPIEDADES RAW (Tal cual vienen del JSON) ---
+        // --- PROPIEDADES RAW (Coinciden 100% con tu JSON) ---
 
         [JsonPropertyName("incidenceId")]
-        public int IncidenceId { get; set; }
+        public string IncidenceId { get; set; } // CRÍTICO: En el JSON viene con comillas "", es string.
 
         [JsonPropertyName("incidenceType")]
         public string? IncidenceType { get; set; }
@@ -41,18 +41,22 @@ namespace MAVPC.Models
         public DateTime? StartDate { get; set; }
 
 
-        // --- HELPERS VISUALES (Lógica de presentación únicamente) ---
+        // --- HELPERS VISUALES (Esto se mantiene igual, es lógica tuya) ---
 
         public string StatusColor
         {
             get
             {
+                // Protección contra nulos
                 var level = IncidenceLevel?.ToLower() ?? "";
+
                 if (level.Contains("rojo") || level.Contains("red")) return "#FF003C"; // Rojo Neón
                 if (level.Contains("negro") || level.Contains("black")) return "#000000";
                 if (level.Contains("amarillo") || level.Contains("yellow")) return "#FFD700";
                 if (level.Contains("verde") || level.Contains("green")) return "#00FF00";
-                return "#00D4FF"; // Azul Cyan (Default)
+
+                // Por defecto (blanco o desconocido) -> Cyan
+                return "#00D4FF";
             }
         }
 
@@ -67,9 +71,10 @@ namespace MAVPC.Models
                 if (t.Contains("accidente") || c.Contains("vuelco") || c.Contains("choque") || c.Contains("alcance")) return "CarCrash";
                 if (c.Contains("avería") || c.Contains("averia")) return "CarWrench";
                 if (c.Contains("gasoil") || c.Contains("aceite")) return "Oil";
-                if (t.Contains("meteo") || c.Contains("nieve") || c.Contains("lluvia")) return "WeatherPouring";
+                if (t.Contains("meteo") || c.Contains("nieve") || c.Contains("lluvia") || c.Contains("hielo")) return "WeatherPouring";
                 if (t.Contains("evento")) return "CalendarStar";
 
+                // Seguridad vial o genérico
                 return "AlertCircle";
             }
         }

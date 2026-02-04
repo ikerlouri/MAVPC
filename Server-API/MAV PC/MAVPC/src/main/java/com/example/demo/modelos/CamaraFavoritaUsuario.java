@@ -2,7 +2,10 @@ package com.example.demo.modelos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -12,10 +15,14 @@ import jakarta.persistence.Table;
 public class CamaraFavoritaUsuario {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
 	private int id;
 	
+	@Column(name = "id_camara")
 	private int idCamara;
 	
+	@Column(name = "id_usuario")
 	private int idUsuario;
 
 	public CamaraFavoritaUsuario() {

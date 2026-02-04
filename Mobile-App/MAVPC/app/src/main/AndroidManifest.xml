@@ -47,7 +47,8 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
+        
+        <activity android:name=".controladores.Registro" />
         <activity android:name=".controladores.Explorar" />
         <activity android:name=".controladores.Favoritos" />
         <activity android:name=".controladores.Reportar" />

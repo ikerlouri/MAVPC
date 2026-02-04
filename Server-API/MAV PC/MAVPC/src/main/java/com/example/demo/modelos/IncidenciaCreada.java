@@ -19,7 +19,6 @@ public class IncidenciaCreada {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    @JsonProperty("incidenceId")
     @Column(name = "id")
     private int id;
    @JsonProperty("incidenceType")
@@ -43,7 +42,9 @@ public class IncidenciaCreada {
    @JsonProperty("latitude")
     private Double latitud;
    @JsonProperty("longitude")
-    private Double longitud;                                      
+    private Double longitud;   
+   @Column(name = "id_usuario") 
+   private Integer idUsuario;
 
 
     // Constructor vacío obligatorio para JPA
@@ -144,6 +145,14 @@ public class IncidenciaCreada {
 
 	public void setLongitud(Double longitud) {
 		this.longitud = longitud;
+	}
+
+	public Integer getIdUsuario() {
+		return idUsuario;
+	}
+
+	public void setIdUsuario(Integer idUsuario) {
+		this.idUsuario = idUsuario;
 	}
 	
 }

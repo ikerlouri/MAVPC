@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -66,6 +65,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap gMap;
+    private Marker marcadorTemporal;
     private BottomNavigationView navbar;
     private Button btnCloseFilter, btnAplicarFiltros, btnCloseMarkerWindow;
     private View darkBackground;
@@ -157,6 +157,38 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    private void mostrarDialogoCrearIncidencia(LatLng latLng) {
+        new AlertDialog.Builder(Explorar.this)
+                .setTitle("Nueva Incidencia")
+                .setMessage("Crear incidencia en este punto")
+                .setPositiveButton("Crear", (dialog, which) -> {
+                    // se pulsa si -> formulario de creación
+                    Intent intent = new Intent(Explorar.this, Reportar.class);
+
+                    // Pasamos las coordenadas
+                    intent.putExtra("LATITUD", latLng.latitude);
+                    intent.putExtra("LONGITUD", latLng.longitude);
+
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+
+                    // borrar el marcador temporal al irnos
+                    if (marcadorTemporal != null) {
+                        marcadorTemporal.remove();
+                        marcadorTemporal = null;
+                    }
+                })
+                .setNegativeButton("Cancelar", (dialog, which) -> {
+                    // se pulsa no -> borrar marcador temporal
+                    if (marcadorTemporal != null) {
+                        marcadorTemporal.remove();
+                        marcadorTemporal = null;
+                    }
+                })
+                .show();
+    }
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         gMap = googleMap;
@@ -181,6 +213,23 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         marcarIncidenciasMapa();
         marcarCamarasMapa();
+
+        // mantener pulsado para añadir marcador
+        gMap.setOnMapLongClickListener(latLng -> {
+            // 1. Si ya había un marcador de selección previo, lo borramos
+            if (marcadorTemporal != null) {
+                marcadorTemporal.remove();
+            }
+
+            // 2. Añadimos un marcador visual donde el usuario pulsó
+            marcadorTemporal = gMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title("Nueva ubicación")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))); // Color distinto
+
+            // 3. Mostramos el diálogo de confirmación
+            mostrarDialogoCrearIncidencia(latLng);
+        });
     }
 
     private void obtenerUbicacionActual() {
@@ -212,7 +261,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private void marcarIncidenciasMapa() {
         // conf retrofit
-        String BASE_URL = "http://10.10.16.93:8080/api/";
+        String BASE_URL = "https://mavpc.up.railway.app/api/";
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -222,7 +271,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         ApiService service = retrofit.create(ApiService.class);
 
         // llamada a la api
-        Call<List<Incidencia>> call = service.obtenerIncidencias();
+        Call<List<Incidencia>> call = service.obtenerIncidenciasHoy();
 
         call.enqueue(new Callback<List<Incidencia>>() {
             @Override
@@ -305,40 +354,38 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private void prepararDetallesIncidencia(Incidencia i) {
         // titulo
-        String titulo = i.getType(); // Ej: "Obras"
+        String titulo;
+        if(i.getType() == null || i.getType().toLowerCase().trim().contains("otro")){
+            titulo = "Otro";
+        } else{
+            titulo = i.getType();
+        }
 
         String info = "";
-
         String gravedad = i.getLevel();
         if (gravedad != null){
             info += "Gravedad: " + gravedad + "\n" + "\n";
         }
-
         String causa = i.getCause();
         if (causa != null){
             info += "Causa: " + causa + "\n" + "\n";
         }
-
         String ciudad = i.getCityTown();
         if (ciudad != null){
             info += "Ciudad: " + ciudad + "\n" + "\n";
         }
-
         String carretera = i.getRoad();
         if (carretera != null){
             info += "Carretera: " + carretera + "\n" + "\n";
         }
-
         String direccion = i.getDirection();
         if (direccion != null){
             info += "Dirección: " + direccion + "\n" + "\n";
         }
-
         String latitud = i.getLatitude();
         if (latitud != null){
             info += "Latitud: " + latitud + "\n" + "\n";
         }
-
         String longitud = i.getLongitude();
         if (longitud != null){
             info += "Longitud: " + longitud;
@@ -349,7 +396,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private void marcarCamarasMapa() {
         // url base
-        String BASE_URL = "http://10.10.16.93:8080/api/";
+        String BASE_URL = "https://mavpc.up.railway.app/api/";
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -378,7 +425,6 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                                 Marker marker = gMap.addMarker(new MarkerOptions()
                                         .position(posicion)
                                         .title(c.getName())
-                                        .snippet("Ver imagen")
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
                                 // guardamos la camara dentro del marcador para enseñar su informacion
@@ -468,7 +514,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             ivCamara.setVisibility(View.GONE);
 
             // cambiar altura al 50%
-            params.matchConstraintPercentHeight = 0.45f;
+            params.matchConstraintPercentHeight = 0.4f;
         }
 
         // aplicar los cambios de tamaño al cardview

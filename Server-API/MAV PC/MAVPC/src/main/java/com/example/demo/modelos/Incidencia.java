@@ -2,6 +2,7 @@ package com.example.demo.modelos;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,17 +18,29 @@ import jakarta.persistence.Table;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Incidencia {
     
+	//ID personal de la api para manejar las incidencias
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) 
-    @JsonProperty("incidenceId")
+    @JsonIgnore
     @Column(name = "id")
     private int id;
+    @JsonProperty("incidenceId")
+    @Column(name = "incidence_id", unique = true, nullable = false)
+    private String incidenceId;  // ID de la API (para detectar duplicados)
+    
+    //tipo de incidencias
    @JsonProperty("incidenceType")
     private String tipo;
+   
+   //Region autonoma donde ha ocurrido la incidencia
    @JsonProperty("autonomousRegion")
     private String regionAutonoma;
+   
+   //Provincia donde ha ocurrido la incidencia
    @JsonProperty("province")
     private String provincia;
+   
+   //
    @JsonProperty("cause")
     private String causa;
    @JsonProperty("cityTown")
@@ -45,7 +58,7 @@ public class Incidencia {
    @JsonProperty("longitude")
     private Double longitud;                                      
 
-
+   
     // Constructor vacío obligatorio para JPA
     public Incidencia() {}
 
@@ -57,6 +70,15 @@ public class Incidencia {
 	public void setId(int id) {
 		this.id = id;
 	}
+
+	public String getIncidenceId() {
+		return incidenceId;
+	}
+
+	public void setIncidenceId(String incidenceId) {
+		this.incidenceId = incidenceId;
+	}
+
 
 	public String getTipo() {
 		return tipo;

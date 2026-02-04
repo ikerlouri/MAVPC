@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ASCII"?>
 <application:Application xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_Vfy-cexjEfCNv4WdNCX36g" elementId="org.eclipse.e4.legacy.ide.application" contributorURI="platform:/plugin/org.eclipse.platform" selectedElement="_VfzlgOxjEfCNv4WdNCX36g" bindingContexts="_VfzliexjEfCNv4WdNCX36g">
-  <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;workbench>&#xD;&#xA;&lt;mruList>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;Incidencia.java&quot; tooltip=&quot;MAVPC/src/main/java/modelos/Incidencia.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/modelos/Incidencia.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;IncidenciaDao.java&quot; tooltip=&quot;MAVPC/src/main/java/daos/IncidenciaDao.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/daos/IncidenciaDao.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;HolaController.java&quot; tooltip=&quot;MAVPC/src/main/java/com/example/demo/HolaController.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/com/example/demo/HolaController.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;MavpcApplication.java&quot; tooltip=&quot;MAVPC/src/main/java/com/example/demo/MavpcApplication.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/com/example/demo/MavpcApplication.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;SpringBootPropertyEditor&quot; name=&quot;application.properties&quot; tooltip=&quot;MAVPC/src/main/resources/application.properties&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/resources/application.properties&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.m2e.editor.MavenPomEditor&quot; name=&quot;pom.xml&quot; tooltip=&quot;MAVPC/pom.xml&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/pom.xml&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.m2e.editor.MavenPomEditor&quot; name=&quot;pom.xml&quot; tooltip=&quot;MavPC_API/pom.xml&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/pom.xml&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;Incidencia.java&quot; tooltip=&quot;MavPC_API/src/main/java/modelos/Incidencia.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/modelos/Incidencia.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.ui.genericeditor.GenericEditor&quot; name=&quot;mvnw.cmd&quot; tooltip=&quot;MavPC_API/mvnw.cmd&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/mvnw.cmd&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;HolaController.java&quot; tooltip=&quot;MavPC_API/src/main/java/com/example/demo/HolaController.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/com/example/demo/HolaController.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;MavPcApiApplication.java&quot; tooltip=&quot;MavPC_API/src/main/java/com/example/demo/MavPcApiApplication.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/com/example/demo/MavPcApiApplication.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;SpringBootPropertyEditor&quot; name=&quot;application.properties&quot; tooltip=&quot;MavPC_API/src/main/resources/application.properties&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/resources/application.properties&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;IncidenciaDAO.java&quot; tooltip=&quot;MavPC_API/src/main/java/daos/IncidenciaDAO.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/daos/IncidenciaDAO.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;TraficoService.java&quot; tooltip=&quot;MavPC_API/src/main/java/com/example/demo/TraficoService.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/com/example/demo/TraficoService.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;/mruList>&#xD;&#xA;&lt;/workbench>"/>
+  <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;workbench>&#xD;&#xA;&lt;mruList>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.m2e.editor.MavenPomEditor&quot; name=&quot;pom.xml&quot; tooltip=&quot;MAVPC/pom.xml&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/pom.xml&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;Incidencia.java&quot; tooltip=&quot;MAVPC/src/main/java/modelos/Incidencia.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/modelos/Incidencia.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;IncidenciaDao.java&quot; tooltip=&quot;MAVPC/src/main/java/daos/IncidenciaDao.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/daos/IncidenciaDao.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;HolaController.java&quot; tooltip=&quot;MAVPC/src/main/java/com/example/demo/HolaController.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/com/example/demo/HolaController.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;MavpcApplication.java&quot; tooltip=&quot;MAVPC/src/main/java/com/example/demo/MavpcApplication.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/java/com/example/demo/MavpcApplication.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;SpringBootPropertyEditor&quot; name=&quot;application.properties&quot; tooltip=&quot;MAVPC/src/main/resources/application.properties&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MAVPC/src/main/resources/application.properties&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.m2e.editor.MavenPomEditor&quot; name=&quot;pom.xml&quot; tooltip=&quot;MavPC_API/pom.xml&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/pom.xml&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;Incidencia.java&quot; tooltip=&quot;MavPC_API/src/main/java/modelos/Incidencia.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/modelos/Incidencia.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.ui.genericeditor.GenericEditor&quot; name=&quot;mvnw.cmd&quot; tooltip=&quot;MavPC_API/mvnw.cmd&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/mvnw.cmd&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;HolaController.java&quot; tooltip=&quot;MavPC_API/src/main/java/com/example/demo/HolaController.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/com/example/demo/HolaController.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;MavPcApiApplication.java&quot; tooltip=&quot;MavPC_API/src/main/java/com/example/demo/MavPcApiApplication.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/com/example/demo/MavPcApiApplication.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;SpringBootPropertyEditor&quot; name=&quot;application.properties&quot; tooltip=&quot;MavPC_API/src/main/resources/application.properties&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/resources/application.properties&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;IncidenciaDAO.java&quot; tooltip=&quot;MavPC_API/src/main/java/daos/IncidenciaDAO.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/daos/IncidenciaDAO.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;file factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;TraficoService.java&quot; tooltip=&quot;MavPC_API/src/main/java/com/example/demo/TraficoService.java&quot;>&#xD;&#xA;&lt;persistable path=&quot;/MavPC_API/src/main/java/com/example/demo/TraficoService.java&quot;/>&#xD;&#xA;&lt;/file>&#xD;&#xA;&lt;/mruList>&#xD;&#xA;&lt;/workbench>"/>
   <tags>activeSchemeId:org.eclipse.ui.defaultAcceleratorConfiguration</tags>
   <children xsi:type="basic:TrimmedWindow" xmi:id="_VfzlgOxjEfCNv4WdNCX36g" elementId="IDEWindow" contributorURI="platform:/plugin/org.eclipse.platform" selectedElement="_V0CwIuxjEfCNv4WdNCX36g" label="%trimmedwindow.label.eclipseSDK" x="0" y="0" width="1024" height="768">
     <persistedState key="coolBarVisible" value="true"/>
@@ -79,10 +79,6 @@
           <tags>persp.newWizSC:org.eclipse.jpt.jpa.ui.wizard.newJpaProject</tags>
           <tags>persp.perspSC:org.eclipse.jpt.ui.jpaPerspective</tags>
           <tags>persp.actionSet:org.springsource.ide.eclipse.commons.launch.actionSet</tags>
-          <tags>persp.editorOnboardingText:Open a file or drop files here to open them.</tags>
-          <tags>persp.editorOnboardingCommand:Find Actions$$$Ctrl+3</tags>
-          <tags>persp.editorOnboardingCommand:Show Key Assist$$$Ctrl+Shift+L</tags>
-          <tags>persp.editorOnboardingCommand:New$$$Ctrl+N</tags>
           <children xsi:type="basic:PartSashContainer" xmi:id="_WAtTIexjEfCNv4WdNCX36g" selectedElement="_WAtTLuxjEfCNv4WdNCX36g" horizontal="true">
             <children xsi:type="basic:PartStack" xmi:id="_WAtTIuxjEfCNv4WdNCX36g" elementId="topLeft" containerData="2000" selectedElement="_WAtTI-xjEfCNv4WdNCX36g">
               <children xsi:type="advanced:Placeholder" xmi:id="_WAtTI-xjEfCNv4WdNCX36g" elementId="org.eclipse.ui.navigator.ProjectExplorer" ref="_WAhF4OxjEfCNv4WdNCX36g" closeable="true">
@@ -130,7 +126,7 @@
                 <tags>categoryTag:Debug</tags>
               </children>
             </children>
-            <children xsi:type="basic:PartSashContainer" xmi:id="_WAtTLuxjEfCNv4WdNCX36g" containerData="8000" selectedElement="_WAtTL-xjEfCNv4WdNCX36g">
+            <children xsi:type="basic:PartSashContainer" xmi:id="_WAtTLuxjEfCNv4WdNCX36g" containerData="8000" selectedElement="_WAtTNexjEfCNv4WdNCX36g">
               <children xsi:type="basic:PartSashContainer" xmi:id="_WAtTL-xjEfCNv4WdNCX36g" containerData="8053" selectedElement="_WAtTMOxjEfCNv4WdNCX36g" horizontal="true">
                 <children xsi:type="advanced:Placeholder" xmi:id="_WAtTMOxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.editorss" containerData="8000" ref="_WAYjAOxjEfCNv4WdNCX36g"/>
                 <children xsi:type="basic:PartStack" xmi:id="_WAtTMexjEfCNv4WdNCX36g" elementId="topRight" containerData="2000" selectedElement="_WAtTMuxjEfCNv4WdNCX36g">
@@ -150,6 +146,7 @@
               </children>
               <children xsi:type="basic:PartStack" xmi:id="_WAtTNexjEfCNv4WdNCX36g" elementId="bottomRight" containerData="1947" selectedElement="_WAtTP-xjEfCNv4WdNCX36g">
                 <tags>Oomph</tags>
+                <tags>active</tags>
                 <children xsi:type="advanced:Placeholder" xmi:id="_WAtTNuxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.views.ProblemView" ref="_WAi7FexjEfCNv4WdNCX36g" closeable="true">
                   <tags>View</tags>
                   <tags>categoryTag:General</tags>
@@ -254,15 +251,9 @@
           <tags>persp.newWizSC:org.eclipse.ui.editors.wizards.UntitledTextFileWizard</tags>
           <tags>persp.perspSC:org.eclipse.jdt.ui.JavaBrowsingPerspective</tags>
           <tags>persp.perspSC:org.eclipse.debug.ui.DebugPerspective</tags>
-          <tags>persp.editorOnboardingImageUri:platform:/plugin/org.eclipse.jdt.ui/$nl$/icons/full/onboarding_jperspective.svg</tags>
-          <tags>persp.editorOnboardingText:Open a file or drop files here to open them.</tags>
           <tags>persp.showIn:org.eclipse.jdt.ui.PackageExplorer</tags>
           <tags>persp.showIn:org.eclipse.team.ui.GenericHistoryView</tags>
           <tags>persp.showIn:org.eclipse.ui.navigator.ProjectExplorer</tags>
-          <tags>persp.editorOnboardingCommand:Find Actions$$$Ctrl+3</tags>
-          <tags>persp.editorOnboardingCommand:Show Key Assist$$$Ctrl+Shift+L</tags>
-          <tags>persp.editorOnboardingCommand:New$$$Ctrl+N</tags>
-          <tags>persp.editorOnboardingCommand:Open Type$$$Ctrl+Shift+T</tags>
           <tags>persp.viewSC:org.eclipse.mylyn.tasks.ui.views.tasks</tags>
           <tags>persp.newWizSC:org.eclipse.mylyn.tasks.ui.wizards.new.repository.task</tags>
           <tags>persp.viewSC:org.eclipse.terminal.view.ui.TerminalsView</tags>
@@ -277,6 +268,12 @@
           <tags>persp.newWizSC:org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard</tags>
           <tags>persp.actionSet:org.eclipse.jdt.junit.JUnitActionSet</tags>
           <tags>persp.viewSC:org.eclipse.ant.ui.views.AntView</tags>
+          <tags>persp.editorOnboardingImageUri:platform:/plugin/org.eclipse.jdt.ui/$nl$/icons/full/onboarding_jperspective.svg</tags>
+          <tags>persp.editorOnboardingText:Open a file or drop files here to open them.</tags>
+          <tags>persp.editorOnboardingCommand:Find Actions$$$Ctrl+3</tags>
+          <tags>persp.editorOnboardingCommand:Show Key Assist$$$Ctrl+Shift+L</tags>
+          <tags>persp.editorOnboardingCommand:New$$$Ctrl+N</tags>
+          <tags>persp.editorOnboardingCommand:Open Type$$$Ctrl+Shift+T</tags>
           <children xsi:type="basic:PartSashContainer" xmi:id="_vdt1kfHgEfCC5ZNfRKBaGQ" selectedElement="_vdt1mvHgEfCC5ZNfRKBaGQ" horizontal="true">
             <children xsi:type="basic:PartSashContainer" xmi:id="_vdt1kvHgEfCC5ZNfRKBaGQ" containerData="2500">
               <children xsi:type="basic:PartStack" xmi:id="_vdt1k_HgEfCC5ZNfRKBaGQ" elementId="left" containerData="6000" selectedElement="_vdt1lPHgEfCC5ZNfRKBaGQ">
@@ -416,29 +413,20 @@
       <tags>categoryTag:Help</tags>
     </sharedElements>
     <sharedElements xsi:type="advanced:Area" xmi:id="_WAYjAOxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.editorss" selectedElement="_WAYjAexjEfCNv4WdNCX36g">
-      <children xsi:type="basic:PartStack" xmi:id="_WAYjAexjEfCNv4WdNCX36g" elementId="org.eclipse.e4.primaryDataStack" selectedElement="_8GkUQOyBEfCeR48805vnVw">
+      <children xsi:type="basic:PartStack" xmi:id="_WAYjAexjEfCNv4WdNCX36g" elementId="org.eclipse.e4.primaryDataStack" selectedElement="_gXvYEPKoEfCBg50E5rN2sQ">
         <tags>EditorStack</tags>
         <tags>org.eclipse.e4.primaryDataStack</tags>
-        <tags>active</tags>
         <children xsi:type="basic:Part" xmi:id="_BCnCYOyAEfCeR48805vnVw" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="MAVPC/pom.xml" iconURI="platform:/plugin/org.eclipse.m2e.editor/icons/editor-pom.gif" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.m2e.editor.MavenPomEditor&quot; name=&quot;pom.xml&quot; partName=&quot;MAVPC/pom.xml&quot; title=&quot;MAVPC/pom.xml&quot; tooltip=&quot;MAVPC/pom.xml&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/MAVPC/pom.xml&quot;/>&#xD;&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.eclipse.m2e.editor.MavenPomEditor</tags>
         </children>
-        <children xsi:type="basic:Part" xmi:id="_WLQ3IOyAEfCeR48805vnVw" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="application.properties" iconURI="platform:/plugin/org.springframework.tooling.boot.ls/icons/spring_obj.gif" closeable="true">
-          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;SpringBootPropertyEditor&quot; name=&quot;application.properties&quot; partName=&quot;application.properties&quot; title=&quot;application.properties&quot; tooltip=&quot;MAVPC/src/main/resources/application.properties&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/MAVPC/src/main/resources/application.properties&quot;/>&#xD;&#xA;&lt;/editor>"/>
-          <tags>Editor</tags>
-          <tags>removeOnHide</tags>
-          <tags>SpringBootPropertyEditor</tags>
-        </children>
         <children xsi:type="basic:Part" xmi:id="_8GkUQOyBEfCeR48805vnVw" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="MavpcApplication.java" iconURI="platform:/plugin/org.eclipse.jdt.ui/icons/full/obj16/jcu_obj.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;MavpcApplication.java&quot; partName=&quot;MavpcApplication.java&quot; title=&quot;MavpcApplication.java&quot; tooltip=&quot;MAVPC/src/main/java/com/example/demo/MavpcApplication.java&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/MAVPC/src/main/java/com/example/demo/MavpcApplication.java&quot;/>&#xD;&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;307&quot; selectionTopPixel=&quot;0&quot;/>&#xD;&#xA;&lt;/editor>"/>
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.eclipse.jdt.ui.CompilationUnitEditor</tags>
-          <tags>active</tags>
-          <tags>activeOnClose</tags>
         </children>
         <children xsi:type="basic:Part" xmi:id="_8mIlIOyBEfCeR48805vnVw" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="HolaController.java" iconURI="platform:/plugin/org.eclipse.jdt.ui/icons/full/obj16/jcu_obj.svg" closeable="true">
           <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.jdt.ui.CompilationUnitEditor&quot; name=&quot;HolaController.java&quot; partName=&quot;HolaController.java&quot; title=&quot;HolaController.java&quot; tooltip=&quot;MAVPC/src/main/java/com/example/demo/HolaController.java&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/MAVPC/src/main/java/com/example/demo/HolaController.java&quot;/>&#xD;&#xA;&lt;editorState selectionHorizontalPixel=&quot;0&quot; selectionLength=&quot;0&quot; selectionOffset=&quot;0&quot; selectionTopPixel=&quot;0&quot;/>&#xD;&#xA;&lt;/editor>"/>
@@ -451,6 +439,13 @@
           <tags>Editor</tags>
           <tags>removeOnHide</tags>
           <tags>org.eclipse.jdt.ui.CompilationUnitEditor</tags>
+        </children>
+        <children xsi:type="basic:Part" xmi:id="_gXvYEPKoEfCBg50E5rN2sQ" elementId="org.eclipse.e4.ui.compatibility.editor" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityEditor" label="MAVPC/pom.xml" iconURI="platform:/plugin/org.eclipse.m2e.editor/icons/editor-pom.gif" closeable="true">
+          <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;editor id=&quot;org.eclipse.m2e.editor.MavenPomEditor&quot; name=&quot;pom.xml&quot; partName=&quot;MAVPC/pom.xml&quot; title=&quot;MAVPC/pom.xml&quot; tooltip=&quot;MAVPC/pom.xml&quot;>&#xD;&#xA;&lt;input factoryID=&quot;org.eclipse.ui.part.FileEditorInputFactory&quot; path=&quot;/MAVPC/pom.xml&quot;/>&#xD;&#xA;&lt;/editor>"/>
+          <tags>Editor</tags>
+          <tags>removeOnHide</tags>
+          <tags>org.eclipse.m2e.editor.MavenPomEditor</tags>
+          <tags>activeOnClose</tags>
         </children>
       </children>
     </sharedElements>
@@ -562,6 +557,7 @@
       <persistedState key="memento" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?>&#xD;&#xA;&lt;view/>"/>
       <tags>View</tags>
       <tags>categoryTag:General</tags>
+      <tags>active</tags>
       <menus xmi:id="_90GoYOxmEfCVkcsIaLndTA" elementId="org.eclipse.ui.console.ConsoleView">
         <tags>ViewMenu</tags>
         <tags>menuContribution:menu</tags>
@@ -682,7 +678,7 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_V2xUAOxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.workbench.file">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_vLe2EPHgEfCC5ZNfRKBaGQ" elementId="print" visible="false" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.svg" tooltip="Print" command="_Vg05TexjEfCNv4WdNCX36g"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_m3AbMPUREfCFYt0KYpcb5w" elementId="print" visible="false" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/print_edit.svg" tooltip="Print" command="_Vg05TexjEfCNv4WdNCX36g"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_V2xUAexjEfCNv4WdNCX36g" elementId="group.edit" toBeRendered="false">
         <tags>toolbarSeparator</tags>
@@ -690,17 +686,17 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_V2xUA-xjEfCNv4WdNCX36g" elementId="org.eclipse.ui.workbench.edit">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_vLhSUPHgEfCC5ZNfRKBaGQ" elementId="undo" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/undo_edit.svg" tooltip="Undo" enabled="false" command="_Vgwn2exjEfCNv4WdNCX36g"/>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_vLh5YPHgEfCC5ZNfRKBaGQ" elementId="redo" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/redo_edit.svg" tooltip="Redo" enabled="false" command="_Vgx2BuxjEfCNv4WdNCX36g"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_m3CQYPUREfCFYt0KYpcb5w" elementId="undo" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/undo_edit.svg" tooltip="Undo" enabled="false" command="_Vgwn2exjEfCNv4WdNCX36g"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_m3DegPUREfCFYt0KYpcb5w" elementId="redo" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/redo_edit.svg" tooltip="Redo" enabled="false" command="_Vgx2BuxjEfCNv4WdNCX36g"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_V2x7EOxjEfCNv4WdNCX36g" elementId="additions" toBeRendered="false">
         <tags>toolbarSeparator</tags>
         <children xsi:type="menu:ToolBarSeparator" xmi:id="_V2x7EexjEfCNv4WdNCX36g" elementId="additions" toBeRendered="false"/>
       </children>
-      <children xsi:type="menu:ToolBar" xmi:id="_wKYuUPHgEfCC5ZNfRKBaGQ" elementId="org.eclipse.jdt.ui.JavaElementCreationActionSet">
+      <children xsi:type="menu:ToolBar" xmi:id="_wKYuUPHgEfCC5ZNfRKBaGQ" elementId="org.eclipse.jdt.ui.JavaElementCreationActionSet" visible="false">
         <tags>Draggable</tags>
       </children>
-      <children xsi:type="menu:ToolBar" xmi:id="_q_AAEOxlEfCVkcsIaLndTA" elementId="org.eclipse.ui.edit.text.actionSet.presentation">
+      <children xsi:type="menu:ToolBar" xmi:id="_q_AAEOxlEfCVkcsIaLndTA" elementId="org.eclipse.ui.edit.text.actionSet.presentation" visible="false">
         <tags>Draggable</tags>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_WCeNsOxjEfCNv4WdNCX36g" elementId="org.eclipse.debug.ui.launchActionSet">
@@ -724,7 +720,7 @@
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_V2x7FOxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.workbench.navigate">
         <tags>Draggable</tags>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_vLjHgPHgEfCC5ZNfRKBaGQ" elementId="org.eclipse.ui.window.pinEditor" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.svg" tooltip="Pin Editor" type="Check" command="_Vg0SfexjEfCNv4WdNCX36g"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_m3EsoPUREfCFYt0KYpcb5w" elementId="org.eclipse.ui.window.pinEditor" iconURI="platform:/plugin/org.eclipse.ui/icons/full/etool16/pin_editor.svg" tooltip="Pin Editor" enabled="false" type="Check" command="_Vg0SfexjEfCNv4WdNCX36g"/>
       </children>
       <children xsi:type="menu:ToolBar" xmi:id="_V2yiIOxjEfCNv4WdNCX36g" elementId="group.editor" toBeRendered="false">
         <tags>toolbarSeparator</tags>
@@ -3361,7 +3357,7 @@
   </addons>
   <addons xmi:id="_VfzlluxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.workbench.addon.0" contributorURI="platform:/plugin/org.eclipse.platform" contributionURI="bundleclass://org.eclipse.e4.ui.workbench/org.eclipse.e4.ui.internal.workbench.addons.HandlerProcessingAddon"/>
   <addons xmi:id="_VgFSUOxjEfCNv4WdNCX36g" elementId="SplitterAddon" contributionURI="bundleclass://org.eclipse.e4.ui.workbench.addons.swt/org.eclipse.e4.ui.workbench.addons.splitteraddon.SplitterAddon"/>
-  <addons xmi:id="_u5jYkfHgEfCC5ZNfRKBaGQ" elementId="org.eclipse.ui.ide.addon.0" contributionURI="bundleclass://org.eclipse.ui.ide/org.eclipse.ui.internal.ide.addons.SaveAllDirtyPartsAddon"/>
+  <addons xmi:id="_IYS0IKimEeS11vbz3f9ezw" elementId="org.eclipse.ui.ide.addon.0" contributorURI="platform:/plugin/org.eclipse.ui.ide" contributionURI="bundleclass://org.eclipse.ui.ide/org.eclipse.ui.internal.ide.addons.SaveAllDirtyPartsAddon"/>
   <addons xmi:id="_dz0JgGOlEeSMMaPQU2nlzw" elementId="org.eclipse.ui.ide.application.addon.0" contributorURI="platform:/plugin/org.eclipse.ui.ide.application" contributionURI="bundleclass://org.eclipse.ui.ide.application/org.eclipse.ui.internal.ide.application.addons.ModelCleanupAddon"/>
   <categories xmi:id="_VgkagOxjEfCNv4WdNCX36g" elementId="org.eclipse.ui.category.edit" name="Edit"/>
   <categories xmi:id="_VgkagexjEfCNv4WdNCX36g" elementId="org.eclipse.mylyn.wikitext.ui.editor.category" name="WikiText Markup Editing Commands" description="commands for editing lightweight markup"/>

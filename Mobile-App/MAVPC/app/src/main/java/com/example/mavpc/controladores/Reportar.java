@@ -3,6 +3,7 @@ package com.example.mavpc.controladores;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.example.mavpc.R;
@@ -21,6 +22,7 @@ import java.time.LocalTime;
 public class Reportar extends BaseActivity {
 
     private BottomNavigationView navbar;
+    private EditText etLatitud, etLongitud;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,14 +31,32 @@ public class Reportar extends BaseActivity {
 
         navbar = findViewById(R.id.bottomNav);
 
+        etLatitud = findViewById(R.id.etLatitud);
+        etLongitud = findViewById(R.id.etLongitud);
+
         setupBottomNav();
 
         // inicializar spinners de fecha y hora
         inicializarSpinnersFecha();
         inicializarSpinnersHora();
 
+        // por si viene del mapa con unas coordenadas
+        verificarCoordenadasIntent();
+
         // TIENE QUE SER EL FINAL DEL onCreate!! fuerza al Navbar a no tener relleno inferior
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
+    }
+
+    private void verificarCoordenadasIntent() {
+        // si no existen devuelve 0.0
+        double lat = getIntent().getDoubleExtra("LATITUD", 0.0);
+        double lng = getIntent().getDoubleExtra("LONGITUD", 0.0);
+
+        // Si son distintos de 0, es que venimos del Mapa
+        if (lat != 0.0 && lng != 0.0) {
+            etLatitud.setText(String.valueOf(lat));
+            etLongitud.setText(String.valueOf(lng));
+        }
     }
 
     private void inicializarSpinnersFecha() {

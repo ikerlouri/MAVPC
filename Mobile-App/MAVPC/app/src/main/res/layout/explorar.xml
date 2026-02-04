@@ -309,7 +309,7 @@
                                 android:textSize="13sp" />
 
                             <CheckBox
-                                android:id="@+id/cbGuipuzkoa"
+                                android:id="@+id/cbGuipuzcoa"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -350,7 +350,7 @@
                             android:textStyle="bold" />
 
                         <CheckBox
-                            android:id="@+id/checkAccidentes"
+                            android:id="@+id/cbAlerta"
 
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -363,7 +363,7 @@
                             android:textColor="@color/white" />
 
                         <CheckBox
-                            android:id="@+id/checkObras"
+                            android:id="@+id/cbObra"
 
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -376,7 +376,7 @@
                             android:textColor="@color/white" />
 
                         <CheckBox
-                            android:id="@+id/checkCamaras"
+                            android:id="@+id/cbCamara"
 
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -387,57 +387,6 @@
 
                             android:text="Cámaras"
                             android:textColor="@color/white" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    app:cardBackgroundColor="@color/dark_grey"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="15dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="Fuente de datos"
-                            android:textColor="@color/white"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-
-                            <CheckBox
-                                android:id="@+id/checkAutoridades"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:buttonTint="@color/white"
-                                android:checked="true"
-                                android:text="Autoridades"
-                                android:textColor="@color/white" />
-
-                            <CheckBox
-                                android:id="@+id/checkUsuarios"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:buttonTint="@color/white"
-                                android:checked="true"
-                                android:text="Usuarios"
-                                android:textColor="@color/white" />
-                        </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
@@ -471,7 +420,7 @@
                             android:orientation="horizontal">
 
                             <CheckBox
-                                android:id="@+id/checkGrave"
+                                android:id="@+id/cbGrave"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -485,7 +434,7 @@
                                 android:textColor="@color/white" />
 
                             <CheckBox
-                                android:id="@+id/checkMedio"
+                                android:id="@+id/cbMedio"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -499,7 +448,7 @@
                                 android:textColor="@color/white" />
 
                             <CheckBox
-                                android:id="@+id/checkLeve"
+                                android:id="@+id/cbLeve"
 
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"

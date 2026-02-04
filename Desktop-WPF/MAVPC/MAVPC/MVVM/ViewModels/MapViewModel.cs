@@ -1,14 +1,14 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MAVPC.Models;
 using MAVPC.Services;
+using MAVPC.Utils;
 using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Text.Json;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.Input;
-using MAVPC.Utils;
-using System.Text.Json; // Necesario para reconvertir el DataObject
-using System.Windows;   // Necesario para abrir ventanas (Application.Current)
+using System.Windows;
 
 namespace MAVPC.MVVM.ViewModels
 {
@@ -30,144 +30,123 @@ namespace MAVPC.MVVM.ViewModels
             _ = CargarDatosReales();
         }
 
-        // --- NUEVO COMANDO: GESTIONA EL CLICK EN EL MAPA ---
-        [RelayCommand]
-        public void MarkerClicked(MapMarkerModel item)
-        {
-            if (item == null || item.DataObject == null) return;
-
-            try
-            {
-                // Usamos el Dispatcher para asegurar que la ventana se abre en el hilo de la UI
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    // 1. SI ES CÁMARA
-                    if (item.Type.ToLower().Contains("camara"))
-                    {
-                        // El DataObject llega como un JsonElement genérico, hay que convertirlo a Camara
-                        var jsonString = item.DataObject.ToString();
-                        // Importante: CaseInsensitive por si las moscas
-                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                        var camara = JsonSerializer.Deserialize<Camara>(jsonString, options);
-
-                        if (camara != null)
-                        {
-                            var win = new CameraWindow(camara);
-                            win.Show();
-                        }
-                    }
-                    // 2. SI ES INCIDENCIA (Obra, Nieve, Accidente...)
-                    else
-                    {
-                        var jsonString = item.DataObject.ToString();
-                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                        var incidencia = JsonSerializer.Deserialize<Incidencia>(jsonString, options);
-
-                        if (incidencia != null)
-                        {
-                            var win = new IncidentWindow(incidencia);
-                            win.Show();
-                        }
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error abriendo ventana de detalle: {ex.Message}");
-            }
-        }
-
         public async Task CargarDatosReales()
         {
+            var listaTemp = new ObservableCollection<MapMarkerModel>();
+
+            // --- BLOQUE 1: INCIDENCIAS (API NUEVA - Double) ---
             try
             {
                 var incidencias = await _trafficService.GetIncidenciasAsync();
-                var camaras = await _trafficService.GetCamarasAsync();
-
-                var listaFinal = new ObservableCollection<MapMarkerModel>();
-
-                // 1. INCIDENCIAS
                 if (incidencias != null)
                 {
                     foreach (var item in incidencias)
                     {
                         if (item.Latitude == null || item.Longitude == null) continue;
-                        if (item.Latitude == 0 || item.Longitude == 0) continue;
+                        if (item.Latitude == 0 && item.Longitude == 0) continue;
 
-                        double rawLat = item.Latitude.Value;
-                        double rawLon = item.Longitude.Value;
-                        double finalLat, finalLon;
+                        double lat = item.Latitude.Value;
+                        double lon = item.Longitude.Value;
 
-                        if (Math.Abs(rawLat) <= 90 && Math.Abs(rawLon) <= 180)
+                        // Conversión UTM si es necesario (coordenadas grandes)
+                        if (Math.Abs(lat) > 90 || Math.Abs(lon) > 180)
                         {
-                            finalLat = rawLat;
-                            finalLon = rawLon;
-                        }
-                        else
-                        {
-                            double utmY = Math.Max(rawLat, rawLon);
-                            double utmX = Math.Min(rawLat, rawLon);
-                            var (cLat, cLon) = GpsUtils.UtmToLatLng(utmX, utmY, zone: 30);
-                            finalLat = cLat;
-                            finalLon = cLon;
+                            var (cLat, cLon) = GpsUtils.UtmToLatLng(Math.Min(lat, lon), Math.Max(lat, lon), 30);
+                            lat = cLat;
+                            lon = cLon;
                         }
 
-                        listaFinal.Add(new MapMarkerModel
+                        listaTemp.Add(new MapMarkerModel
                         {
-                            Lat = finalLat,
-                            Lon = finalLon,
+                            Lat = lat,
+                            Lon = lon,
                             Type = DetectarTipo(item.IncidenceType, item.Cause),
                             Title = item.IncidenceType ?? "Incidencia",
                             Description = $"{item.Cause} - {item.CityTown}",
-                            DataObject = item // Guardamos el objeto original
+                            DataObject = item
                         });
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error Incidencias: {ex.Message}");
+            }
 
-                // 2. CÁMARAS
+            // --- BLOQUE 2: CÁMARAS (API VIEJA - String) ---
+            try
+            {
+                var camaras = await _trafficService.GetCamarasAsync();
                 if (camaras != null)
                 {
                     foreach (var cam in camaras)
                     {
-                        bool latOk = double.TryParse(cam.Latitud?.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double rawLat);
-                        bool lonOk = double.TryParse(cam.Longitud?.Replace(",", "."), NumberStyles.Any, CultureInfo.InvariantCulture, out double rawLon);
+                        // Parseo manual de strings con coma o punto
+                        string sLat = cam.Latitud?.Replace(",", ".") ?? "0";
+                        string sLon = cam.Longitud?.Replace(",", ".") ?? "0";
 
-                        if (latOk && lonOk)
+                        if (double.TryParse(sLat, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) &&
+                            double.TryParse(sLon, NumberStyles.Any, CultureInfo.InvariantCulture, out double lon))
                         {
-                            double finalLat, finalLon;
+                            if (lat == 0 && lon == 0) continue;
 
-                            if (Math.Abs(rawLat) <= 90 && Math.Abs(rawLon) <= 180)
+                            if (Math.Abs(lat) > 90 || Math.Abs(lon) > 180)
                             {
-                                finalLat = rawLat;
-                                finalLon = rawLon;
-                            }
-                            else
-                            {
-                                double utmY = Math.Max(rawLat, rawLon);
-                                double utmX = Math.Min(rawLat, rawLon);
-                                var (cLat, cLon) = GpsUtils.UtmToLatLng(utmX, utmY, zone: 30);
-                                finalLat = cLat;
-                                finalLon = cLon;
+                                var (cLat, cLon) = GpsUtils.UtmToLatLng(Math.Min(lat, lon), Math.Max(lat, lon), 30);
+                                lat = cLat;
+                                lon = cLon;
                             }
 
-                            listaFinal.Add(new MapMarkerModel
+                            listaTemp.Add(new MapMarkerModel
                             {
-                                Lat = finalLat,
-                                Lon = finalLon,
+                                Lat = lat,
+                                Lon = lon,
                                 Type = "camara",
-                                Title = cam.Nombre ?? "Cámara DGT",
+                                Title = cam.Nombre ?? "Cámara",
                                 Description = cam.Carretera ?? "",
-                                DataObject = cam // Guardamos el objeto original
+                                DataObject = cam
                             });
                         }
                     }
                 }
-
-                Markers = listaFinal;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error cargando datos del mapa: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error Cámaras: {ex.Message}");
+            }
+
+            // --- ACTUALIZACIÓN FINAL EN UI ---
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Markers = listaTemp;
+            });
+        }
+
+        [RelayCommand]
+        public void MarkerClicked(MapMarkerModel item)
+        {
+            if (item?.DataObject == null) return;
+
+            try
+            {
+                // Reconstruir objeto desde el JsonElement o string que devuelve el DataObject genérico
+                var jsonString = item.DataObject.ToString();
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                if (item.Type == "camara")
+                {
+                    var cam = JsonSerializer.Deserialize<Camara>(jsonString, options);
+                    if (cam != null) new CameraWindow(cam).Show();
+                }
+                else
+                {
+                    var inc = JsonSerializer.Deserialize<Incidencia>(jsonString, options);
+                    if (inc != null) new IncidentWindow(inc).Show();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error abriendo ventana: {ex.Message}");
             }
         }
 
@@ -175,10 +154,8 @@ namespace MAVPC.MVVM.ViewModels
         {
             string t = (tipo ?? "").ToLower();
             string c = (causa ?? "").ToLower();
-
-            if (t.Contains("obra") || c.Contains("obra") || c.Contains("mantenimiento")) return "obra";
-            if (t.Contains("nieve") || t.Contains("hielo") || c.Contains("nieve")) return "nieve";
-
+            if (t.Contains("obra") || c.Contains("obra")) return "obra";
+            if (t.Contains("nieve") || c.Contains("nieve")) return "nieve";
             return "incidencia";
         }
     }

@@ -121,7 +121,7 @@ namespace MAVPC.MVVM.ViewModels
 
                     var newInc = new Incidencia
                     {
-                        IncidenceId = 0,
+                        IncidenceId = "0",
                         IncidenceType = TypeIncidence,
                         IncidenceLevel = IncidenceLevel,
                         Road = RoadIncidence,

@@ -6,7 +6,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace MAVPC.Services
 {
@@ -15,80 +14,116 @@ namespace MAVPC.Services
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
 
+        private const string BASE_URL = "https://mavpc.up.railway.app/api/";
+
         public TrafficService(HttpClient httpClient)
         {
             _httpClient = httpClient;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-                // Esto es vital para que [JsonPropertyName] funcione al enviar
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                // IMPORTANTE: Esto permite que "incidenceId": "12345" se lea como int 12345
+                // sin que tu modelo tenga que cambiar a string.
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
         }
 
-        public async Task<bool> AddCamaraAsync(Camara camara)
+        public async Task<List<Camara>> GetCamarasAsync()
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("http://10.10.16.93:8080/api/camaras/guardar", camara, _jsonOptions);
-                if (!response.IsSuccessStatusCode)
-                {
-                    string error = await response.Content.ReadAsStringAsync();
-                    System.Windows.MessageBox.Show($"Error Servidor (Cámara):\n{error}");
-                    return false;
-                }
-                return true;
+                return await _httpClient.GetFromJsonAsync<List<Camara>>($"{BASE_URL}camaras", _jsonOptions) ?? new List<Camara>();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Excepción: {ex.Message}");
-                return false;
+                System.Diagnostics.Debug.WriteLine($"Error GetCamaras: {ex.Message}");
+                return new List<Camara>();
             }
         }
 
-        public async Task<bool> AddIncidenciaAsync(Incidencia incidencia)
+        public async Task<List<Incidencia>> GetIncidenciasAsync()
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("http://10.10.16.93:8080/api/incidencias/guardar", incidencia, _jsonOptions);
+                string url = $"{BASE_URL}incidencias/listarActual";
+
+                // 1. Descargamos el texto crudo para ver si llega algo
+                var response = await _httpClient.GetAsync(url);
+                var jsonString = await response.Content.ReadAsStringAsync();
+
                 if (!response.IsSuccessStatusCode)
                 {
-                    string error = await response.Content.ReadAsStringAsync();
-                    System.Windows.MessageBox.Show($"Error Servidor (Incidencia):\n{error}");
-                    return false;
+                    System.Diagnostics.Debug.WriteLine($"Error HTTP: {response.StatusCode} - {jsonString}");
+                    return new List<Incidencia>();
                 }
-                return true;
+
+                // 2. Configuramos las opciones A MANO aquí mismo para asegurar que traga con el ID string -> int
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    NumberHandling = JsonNumberHandling.AllowReadingFromString, // CLAVE: Permite leer "123" como 123
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                };
+
+                // 3. Intentamos convertir
+                var lista = JsonSerializer.Deserialize<List<Incidencia>>(jsonString, options);
+
+                if (lista != null)
+                {
+                    // Filtro para quitar las que tienen latitud 0 (que vienen muchas en tu JSON)
+                    var filtradas = lista.FindAll(x => x.Latitude != null && x.Latitude != 0);
+                    System.Diagnostics.Debug.WriteLine($"Incidencias cargadas: {filtradas.Count} (Originales: {lista.Count})");
+                    return filtradas;
+                }
+
+                return new List<Incidencia>();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Excepción: {ex.Message}");
-                return false;
+                // --- AQUÍ VERÁS EL ERROR REAL ---
+                System.Diagnostics.Debug.WriteLine("--------------------------------------------------");
+                System.Diagnostics.Debug.WriteLine($"ERROR DESERIALIZANDO INCIDENCIAS: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"INNER ERROR: {ex.InnerException.Message}");
+                }
+                System.Diagnostics.Debug.WriteLine("--------------------------------------------------");
+
+                return new List<Incidencia>();
             }
         }
 
-        public async Task<List<Camara>> GetCamarasAsync() =>
-            await _httpClient.GetFromJsonAsync<List<Camara>>("http://10.10.16.93:8080/api/camaras", _jsonOptions) ?? new();
+        // --- MÉTODOS DE ESCRITURA (Sin cambios de lógica) ---
 
-        public async Task<List<Incidencia>> GetIncidenciasAsync() =>
-            await _httpClient.GetFromJsonAsync<List<Incidencia>>("http://10.10.16.93:8080/api/incidencias/listarActual", _jsonOptions) ?? new();
+        public async Task<bool> AddCamaraAsync(Camara nuevaCamara)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}camaras", nuevaCamara, _jsonOptions);
+                return response.IsSuccessStatusCode;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> AddIncidenciaAsync(Incidencia nuevaIncidencia)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}incidencias", nuevaIncidencia, _jsonOptions);
+                return response.IsSuccessStatusCode;
+            }
+            catch { return false; }
+        }
 
         public async Task<bool> DeleteCamaraAsync(string id)
         {
             try
             {
-                // 1. Construimos la URL con el parámetro 'id' (porque en Java es @RequestParam)
-                string url = $"http://10.10.16.93:8080/api/camaras/eliminar?id={id}";
-
-                // 2. ¡IMPORTANTE! Usamos GetAsync porque el servidor tiene @GetMapping
-                var response = await _httpClient.GetAsync(url);
-
+                var response = await _httpClient.DeleteAsync($"{BASE_URL}camaras?id={id}");
                 return response.IsSuccessStatusCode;
             }
-            catch (Exception ex)
-            {
-                // MessageBox.Show($"Error de conexión: {ex.Message}");
-                return false;
-            }
+            catch { return false; }
         }
     }
 }

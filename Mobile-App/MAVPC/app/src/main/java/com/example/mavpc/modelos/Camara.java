@@ -3,28 +3,20 @@ package com.example.mavpc.modelos;
 import com.google.gson.annotations.SerializedName;
 
 public class Camara {
-
     @SerializedName("cameraId")
-    private String id;
-
+    private int id;
     @SerializedName("cameraName")
     private String name;
-
     private String urlImage;
-
     private String latitude;
-
     private String longitude;
-
     private String road;
-
     @SerializedName("kilometer")
     private String km;
-
     @SerializedName("address")
     private String direction;
 
-    public Camara(String id, String name, String urlImage, String latitude, String longitude, String road, String km, String direction) {
+    public Camara(int id, String name, String urlImage, String latitude, String longitude, String road, String km, String direction) {
         this.id = id;
         this.name = name;
         this.urlImage = urlImage;
@@ -35,11 +27,11 @@ public class Camara {
         this.direction = direction;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

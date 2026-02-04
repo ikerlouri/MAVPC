@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 public class Incidencia {
     @SerializedName("incidenceId")
-    private String id;
+    private int id;
 
     @SerializedName("incidenceType")
     private String type;
@@ -28,7 +28,7 @@ public class Incidencia {
 
     private String longitude;
 
-    public Incidencia(String longitude, String latitude, String startDate, String direction, String province, String cityTown, String road, String level, String cause, String type, String id) {
+    public Incidencia(String longitude, String latitude, String startDate, String direction, String province, String cityTown, String road, String level, String cause, String type, int id) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.startDate = startDate;
@@ -42,11 +42,11 @@ public class Incidencia {
         this.id = id;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

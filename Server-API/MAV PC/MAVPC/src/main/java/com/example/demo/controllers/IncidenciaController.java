@@ -3,23 +3,22 @@ package com.example.demo.controllers;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.TraficoService;
 import com.example.demo.daos.IncidenciaCreadaDao;
-import com.example.demo.daos.IncidenciaDao; 
+import com.example.demo.daos.IncidenciaDao;
 import com.example.demo.modelos.Incidencia;
 import com.example.demo.modelos.IncidenciaCreada;
+import com.example.demo.servicios.TraficoService;
 
 @RestController
 @RequestMapping("/api/incidencias")
@@ -36,28 +35,34 @@ public class IncidenciaController {
     
     @GetMapping
     public Object verTrafico() {
-        return traficoService.obtenerTodasIncidencias();
+        return incidenciaDao.findAll();
     }
     
   //guardar incidencias creadas
-    @PostMapping("/guardar")
+    @PostMapping
     public void guardarIncidencia(@RequestBody Incidencia incidencia) {
         IncidenciaCreada nuevaIncidencia = modelMapper.map(incidencia, IncidenciaCreada.class);     
         incidenciaCreadaDao.save(nuevaIncidencia);
+    }
+    
+    @DeleteMapping
+    public void eliminarIncidencia(@RequestParam Integer id) {
+        incidenciaDao.deleteById(id);
     }
     
     //guardar las de este año
     @GetMapping("/sincronizar")
     public String sincronizarTodo() {
         try {
-            traficoService.SubirIncidencias2026();
+            traficoService.SubirIncidenciasDelDia();
             return "Sincronización completa finalizada con éxito.";
         } catch (Exception e) {
             return "Error durante la sincronización: " + e.getMessage();
         }
     }
+    
     //Listar incidencias pasandole año, mes y dia. URL ej.()/listarIncidencias?anio=2026&mes=01&dia=15
-    @GetMapping("/listar/byDate")
+    @GetMapping("/byDate")
     public List<Incidencia> listarIncidenciasPorFecha(
             @RequestParam String anio, 
             @RequestParam String mes, 
@@ -71,6 +76,8 @@ public class IncidenciaController {
         return incidenciasApi;
     }
     
+    
+    //lista las incidencias de hoy
     @GetMapping("/listarActual")
     public List<Incidencia> listarIncidenciasHoy() {
         LocalDate hoy = LocalDate.now();

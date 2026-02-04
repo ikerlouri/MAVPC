@@ -1,99 +1,284 @@
 ﻿// Variables globales
 var map;
-var markersLayer;
+var allMarkersData = []; // Guardamos los datos puros para buscar
 
-// Inicialización del mapa
+// Grupos de capas (Ahora son Clusters)
+var layerCamaras, layerObras, layerNieve, layerIncidencias;
+
+const INITIAL_VIEW = { lat: 43.0, lon: -2.5, zoom: 9 };
+
 document.addEventListener("DOMContentLoaded", function () {
 
-    // --- 1. DEFINICIÓN DE CAPAS BASE ---
+    // 1. CAPAS BASE
+    var capaOscura = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 });
+    var capaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
 
-    // A) Capa Oscura (La que ya tenías)
-    var capaOscura = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap, © CARTO',
-        maxZoom: 19
-    });
-
-    // B) Capa Satélite (Esri World Imagery - Muy buena calidad)
-    var capaSatelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles © Esri',
-        maxZoom: 19
-    });
-
-    // --- 2. INICIALIZAR EL MAPA ---
-    // En 'layers' ponemos [capaOscura] para que arranque con esa por defecto
+    // 2. INICIALIZAR MAPA
     map = L.map('map', {
         zoomControl: false,
+        attributionControl: false,
         layers: [capaOscura]
-    }).setView([43.0, -2.5], 9);
+    }).setView([INITIAL_VIEW.lat, INITIAL_VIEW.lon], INITIAL_VIEW.zoom);
 
-    // --- 3. AÑADIR CONTROL DE CAPAS (El botón para cambiar) ---
-    var baseMaps = {
-        "MODO OSCURO": capaOscura,
-        "SATÉLITE": capaSatelite
+    // 3. INICIALIZAR GRUPOS CON CLUSTERING
+    // Configuración: agrupar puntos cercanos
+    var clusterOptions = {
+        disableClusteringAtZoom: 15, // A mucho zoom, ver iconos sueltos
+        spiderfyOnMaxZoom: true,     // Efecto araña si están en el mismo sitio
+        showCoverageOnHover: false,  // Quitar sombra azul al pasar ratón
+        maxClusterRadius: 60         // Radio de agrupación
     };
 
-    // Añadimos el control en la esquina inferior derecha (o donde prefieras)
-    L.control.layers(baseMaps, null, { position: 'bottomright' }).addTo(map);
+    // Creamos los grupos especiales
+    layerCamaras = L.markerClusterGroup(clusterOptions).addTo(map);
+    layerObras = L.markerClusterGroup(clusterOptions).addTo(map);
+    layerNieve = L.markerClusterGroup(clusterOptions).addTo(map);
+    layerIncidencias = L.markerClusterGroup(clusterOptions).addTo(map);
 
-    // Capa para los marcadores (siempre encima de todo)
-    markersLayer = L.layerGroup().addTo(map);
+    // --- CONTROLES ---
+
+    // A. Selector Mapa/Satelite
+    L.control.layers({ "MODO OSCURO": capaOscura, "SATÉLITE": capaSatelite }, null, { position: 'bottomright' }).addTo(map);
+
+    // B. Panel Filtros
+    addFilterControl();
+
+    // C. Buscador Dinámico
+    addSearchControl();
+
+    // D. Barra de Navegación
+    addNavigationControl();
+
+    // E. Escala
+    L.control.scale({ imperial: false, maxWidth: 100, position: 'bottomleft' }).addTo(map);
+
+    // F. Coordenadas
+    addCoordsControl();
 });
 
-// Función para obtener el HTML del icono según el tipo
-function getIconHtml(type) {
-    type = (type || "").toLowerCase();
 
-    if (type.includes('camara'))
-        return { html: '<i class="fa-solid fa-video"></i>', css: 'pin-camara' };
+// --- FUNCIONES DE CREACIÓN DE CONTROLES ---
 
-    if (type.includes('obra'))
-        return { html: '<i class="fa-solid fa-person-digging"></i>', css: 'pin-obra' };
+function addSearchControl() {
+    var SearchControl = L.Control.extend({
+        options: { position: 'topleft' },
+        onAdd: function () {
+            var container = L.DomUtil.create('div', 'search-wrapper');
+            container.style.position = 'relative';
 
-    if (type.includes('nieve') || type.includes('hielo'))
-        return { html: '<i class="fa-solid fa-snowflake"></i>', css: 'pin-nieve' };
+            var searchBox = L.DomUtil.create('div', 'search-container', container);
+            searchBox.innerHTML = `
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" class="search-input" placeholder="Buscar cámara, obra..." id="txtBuscar" autocomplete="off">
+            `;
 
-    // Default: Incidencia
-    return { html: '<i class="fa-solid fa-triangle-exclamation"></i>', css: 'pin-incidencia' };
+            var resultsBox = L.DomUtil.create('div', 'search-results', container);
+            resultsBox.id = 'searchResults';
+
+            L.DomEvent.disableClickPropagation(container);
+            L.DomEvent.disableScrollPropagation(container);
+
+            return container;
+        }
+    });
+    map.addControl(new SearchControl());
+
+    setTimeout(() => {
+        var input = document.getElementById('txtBuscar');
+        var resultsDiv = document.getElementById('searchResults');
+
+        if (!input) return;
+
+        input.addEventListener('input', function () {
+            var texto = this.value.toLowerCase();
+            resultsDiv.innerHTML = '';
+
+            if (texto.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            var encontrados = allMarkersData.filter(m => m.Title.toLowerCase().includes(texto)).slice(0, 10);
+
+            if (encontrados.length > 0) {
+                resultsDiv.style.display = 'block';
+                encontrados.forEach(item => {
+                    var div = document.createElement('div');
+                    div.className = 'result-item';
+
+                    var icon = 'fa-circle';
+                    var color = '#fff';
+                    var t = item.Type.toLowerCase();
+                    if (t.includes('camara')) { icon = 'fa-video'; color = '#00F0FF'; }
+                    else if (t.includes('obra')) { icon = 'fa-person-digging'; color = '#FFA500'; }
+                    else if (t.includes('nieve')) { icon = 'fa-snowflake'; color = '#FFF'; }
+                    else { icon = 'fa-triangle-exclamation'; color = '#FF003C'; }
+
+                    div.innerHTML = `<i class="fa-solid ${icon}" style="color:${color}"></i> ${item.Title}`;
+
+                    div.onclick = function () {
+                        input.value = item.Title;
+                        resultsDiv.style.display = 'none';
+                        map.flyTo([item.Lat, item.Lon], 16, { duration: 1.5 });
+                    };
+                    resultsDiv.appendChild(div);
+                });
+            } else {
+                resultsDiv.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target !== input && e.target !== resultsDiv) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+
+    }, 500);
 }
 
-// Función PRINCIPAL llamada desde C#
+function addNavigationControl() {
+    var NavControl = L.Control.extend({
+        options: { position: 'bottomleft' },
+        onAdd: function (map) {
+            var container = L.DomUtil.create('div', 'nav-bar');
+
+            var btnIn = L.DomUtil.create('div', 'nav-btn', container);
+            btnIn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+            btnIn.onclick = function () { map.zoomIn(); };
+
+            var btnOut = L.DomUtil.create('div', 'nav-btn', container);
+            btnOut.innerHTML = '<i class="fa-solid fa-minus"></i>';
+            btnOut.onclick = function () { map.zoomOut(); };
+
+            var btnReset = L.DomUtil.create('div', 'nav-btn', container);
+            btnReset.innerHTML = '<i class="fa-solid fa-crosshairs"></i>';
+            btnReset.title = "Centrar Mapa";
+            btnReset.onclick = function () {
+                map.setView([INITIAL_VIEW.lat, INITIAL_VIEW.lon], INITIAL_VIEW.zoom);
+            };
+
+            L.DomEvent.disableClickPropagation(container);
+            return container;
+        }
+    });
+    map.addControl(new NavControl());
+}
+
+function addCoordsControl() {
+    var CoordsControl = L.Control.extend({
+        options: { position: 'bottomright' },
+        onAdd: function () {
+            var div = L.DomUtil.create('div', 'telemetry-bar');
+            div.id = 'coords-display';
+            div.innerHTML = 'LAT: -- LON: --';
+            return div;
+        }
+    });
+    map.addControl(new CoordsControl());
+
+    map.on('mousemove', function (e) {
+        var c = document.getElementById('coords-display');
+        if (c) c.innerHTML = `LAT: ${e.latlng.lat.toFixed(4)}  LON: ${e.latlng.lng.toFixed(4)}`;
+    });
+}
+
+function addFilterControl() {
+    var FilterControl = L.Control.extend({
+        options: { position: 'topright' },
+        onAdd: function () {
+            var div = L.DomUtil.create('div', 'filter-panel');
+            div.innerHTML = `
+                <div class="filter-title">VISUALIZACIÓN</div>
+                ${crearFiltroHTML('btn-cam', 'Cámaras', 'fa-video', '#00F0FF')}
+                ${crearFiltroHTML('btn-obr', 'Obras', 'fa-person-digging', '#FFA500')}
+                ${crearFiltroHTML('btn-met', 'Meteo', 'fa-snowflake', '#FFF')}
+                ${crearFiltroHTML('btn-inc', 'Incidencias', 'fa-triangle-exclamation', '#FF003C')}
+            `;
+            L.DomEvent.disableClickPropagation(div);
+            return div;
+        }
+    });
+    map.addControl(new FilterControl());
+}
+
+// --- LOGICA DE DATOS ---
+
 function CargarMarcadores(jsonItems) {
     if (!map) return;
 
-    markersLayer.clearLayers();
-    var items = JSON.parse(jsonItems);
+    allMarkersData = JSON.parse(jsonItems);
 
-    items.forEach(function (item) {
+    layerCamaras.clearLayers();
+    layerObras.clearLayers();
+    layerNieve.clearLayers();
+    layerIncidencias.clearLayers();
+
+    allMarkersData.forEach(function (item) {
         var style = getIconHtml(item.Type);
 
+        // Icono personalizado
         var myIcon = L.divIcon({
-            className: '', // Dejamos esto vacío para que no meta estilos de leaflet por defecto
+            className: '',
             html: `<div class="custom-pin ${style.css}">${style.html}</div>`,
             iconSize: [30, 30],
             iconAnchor: [15, 15],
             popupAnchor: [0, -20]
         });
 
+        // Marcador
         var marker = L.marker([item.Lat, item.Lon], { icon: myIcon });
 
-        // --- CAMBIO: USAR TOOLTIP (Hover) EN LUGAR DE POPUP (Click) ---
-        marker.bindTooltip(item.Title, {
-            permanent: false,      // Solo visible al pasar el ratón
-            direction: 'top',      // Arriba del icono
-            className: 'custom-tooltip', // Clase definida en el CSS nuevo
-            offset: [0, -20],      // Un poco separado hacia arriba
-            opacity: 1
-        });
+        // Tooltip
+        marker.bindTooltip(item.Title, { permanent: false, direction: 'top', className: 'custom-tooltip', offset: [0, -20] });
 
-        // --- EVENTO CLICK ---
-        // Al hacer click, SOLO avisamos a C#
+        // Evento Click -> Enviar a C#
         marker.on('click', function () {
             this.closeTooltip();
-            if (window.chrome && window.chrome.webview) {
-                window.chrome.webview.postMessage(JSON.stringify(item));
-            }
+            setTimeout(function () {
+                if (window.chrome && window.chrome.webview) window.chrome.webview.postMessage(JSON.stringify(item));
+            }, 100);
         });
 
-        markersLayer.addLayer(marker);
+        // Añadir al Cluster correspondiente
+        if (style.group === 'camara') layerCamaras.addLayer(marker);
+        else if (style.group === 'obra') layerObras.addLayer(marker);
+        else if (style.group === 'nieve') layerNieve.addLayer(marker);
+        else layerIncidencias.addLayer(marker);
     });
 }
+
+function crearFiltroHTML(id, texto, iconClass, color) {
+    return `<div class="filter-item active" id="${id}" onclick="toggleLayer('${id}')">
+        <div class="filter-check"><i class="fa-solid fa-check"></i></div>
+        <i class="fa-solid ${iconClass}" style="margin-right:8px; color:${color}; width:15px; text-align:center;"></i>
+        <span>${texto}</span>
+    </div>`;
+}
+
+function toggleLayer(id) {
+    var el = document.getElementById(id);
+    var layer;
+    if (id === 'btn-cam') layer = layerCamaras;
+    else if (id === 'btn-obr') layer = layerObras;
+    else if (id === 'btn-met') layer = layerNieve;
+    else layer = layerIncidencias;
+
+    if (el.classList.contains('active')) {
+        el.classList.remove('active');
+        map.removeLayer(layer);
+    } else {
+        el.classList.add('active');
+        map.addLayer(layer);
+    }
+}
+
+function getIconHtml(type) {
+    type = (type || "").toLowerCase();
+    if (type.includes('camara')) return { html: '<i class="fa-solid fa-video"></i>', css: 'pin-camara', group: 'camara' };
+    if (type.includes('obra')) return { html: '<i class="fa-solid fa-person-digging"></i>', css: 'pin-obra', group: 'obra' };
+    if (type.includes('nieve') || type.includes('hielo')) return { html: '<i class="fa-solid fa-snowflake"></i>', css: 'pin-nieve', group: 'nieve' };
+    return { html: '<i class="fa-solid fa-triangle-exclamation"></i>', css: 'pin-incidencia', group: 'otro' };
+}
+
+function asignarEventosFiltros() { }
