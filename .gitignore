@@ -11,12 +11,26 @@
 packages/
 *.lock.json
 
-# --- JAVA ---
+# --- JAVA & ECLIPSE ---
 .idea/
 target/
 .settings/
+.metadata/            <-- ¡Añadido! (Crucial para Eclipse)
+.classpath
+.project
+*.log
+*.lock
 
 # --- ANDROID ---
 .gradle/
 build/
 local.properties
+*.iml
+.cxx/
+captures/
+
+# --- WEBVIEW2 / BROWSERS (WPF) ---
+# Esto evitará que se suban los miles de archivos de caché de Edge/WebView
+EBWebView/
+GPUCache/
+ShaderCache/
