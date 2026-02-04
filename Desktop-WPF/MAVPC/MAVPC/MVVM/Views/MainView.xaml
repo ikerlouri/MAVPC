@@ -26,6 +26,10 @@
         <DataTemplate DataType="{x:Type vm:StatsViewModel}">
             <views:StatsView/>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:UsersViewModel}">
+            <views:UsersView/>
+        </DataTemplate>
     </Window.Resources>
 
     <Border BorderBrush="#333" BorderThickness="1">
@@ -62,6 +66,7 @@
                         </StackPanel>
 
                         <StackPanel Margin="10,20">
+
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}"
                                          Height="50" 
                                          Command="{Binding ShowDashboardCommand}"
@@ -84,12 +89,21 @@
                                     <TextBlock Text="MAPA" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
+
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowStatsCommand}" Foreground="White" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="ChartBar" VerticalAlignment="Center" Margin="0,0,10,0"/>
                                     <TextBlock Text="ESTADÍSTICAS" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </RadioButton>
+
+                            <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowUsersCommand}" Foreground="White" Padding="20,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AccountGroup" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <TextBlock Text="USUARIOS" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </RadioButton>
+
                         </StackPanel>
 
                         <Button Command="{Binding LogoutCommand}" Content="CERRAR SESIÓN" Margin="20" Background="{StaticResource NeonPink}" BorderBrush="{x:Null}"/>

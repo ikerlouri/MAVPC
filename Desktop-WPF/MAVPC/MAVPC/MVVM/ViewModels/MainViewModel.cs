@@ -18,6 +18,7 @@ namespace MAVPC.MVVM.ViewModels
         {
             _provider = provider;
             WeakReferenceMessenger.Default.Register(this);
+            // Iniciamos en Login
             CurrentView = _provider.GetRequiredService<LoginViewModel>();
             IsLoggedIn = false;
         }
@@ -25,6 +26,7 @@ namespace MAVPC.MVVM.ViewModels
         public void Receive(LoginSuccessMessage message)
         {
             IsLoggedIn = true;
+            // Al hacer login, vamos al Dashboard
             CurrentView = _provider.GetRequiredService<DashboardViewModel>();
         }
 
@@ -42,6 +44,19 @@ namespace MAVPC.MVVM.ViewModels
             CurrentView = _provider.GetRequiredService<MapViewModel>();
         }
 
+        [RelayCommand]
+        private void ShowStats()
+        {
+            CurrentView = _provider.GetRequiredService<StatsViewModel>();
+        }
+
+        // NUEVO: Comando para mostrar Usuarios
+        [RelayCommand]
+        private void ShowUsers()
+        {
+            CurrentView = _provider.GetRequiredService<UsersViewModel>();
+        }
+
         // ------------------------------
 
         [RelayCommand]
@@ -52,11 +67,5 @@ namespace MAVPC.MVVM.ViewModels
         }
 
         [RelayCommand] private void CloseApp() => Application.Current.Shutdown(0);
-        [RelayCommand]
-        private void ShowStats()
-        {
-            CurrentView = _provider.GetRequiredService<StatsViewModel>();
-        }
-
     }
 }

@@ -28,7 +28,14 @@ namespace MAVPC
             services.AddTransient<MapViewModel>();
             services.AddTransient<StatsViewModel>();
 
+            // --- IMPORTANTE: AÑADIR ESTA LÍNEA ---
+            services.AddTransient<UsersViewModel>();
+            // -------------------------------------
+
             // Vistas
+            // Nota: Solo registramos MainView porque es la única que instanciamos 
+            // manualmente al inicio. Las otras (Dashboard, Users, etc.) se resuelven 
+            // solas por los DataTemplates de XAML.
             services.AddSingleton<MainView>(provider => new MainView
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
