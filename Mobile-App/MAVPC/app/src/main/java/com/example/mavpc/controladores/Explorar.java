@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Calendar;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
@@ -64,6 +65,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap gMap;
+    private Marker marcadorTemporal;
     private BottomNavigationView navbar;
     private Button btnCloseFilter, btnAplicarFiltros, btnCloseMarkerWindow;
     private View darkBackground;
@@ -155,6 +157,38 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    private void mostrarDialogoCrearIncidencia(LatLng latLng) {
+        new AlertDialog.Builder(Explorar.this)
+                .setTitle("Nueva Incidencia")
+                .setMessage("Crear incidencia en este punto")
+                .setPositiveButton("Crear", (dialog, which) -> {
+                    // se pulsa si -> formulario de creación
+                    Intent intent = new Intent(Explorar.this, Reportar.class);
+
+                    // Pasamos las coordenadas
+                    intent.putExtra("LATITUD", latLng.latitude);
+                    intent.putExtra("LONGITUD", latLng.longitude);
+
+                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                    startActivity(intent);
+                    overridePendingTransition(0, 0);
+
+                    // borrar el marcador temporal al irnos
+                    if (marcadorTemporal != null) {
+                        marcadorTemporal.remove();
+                        marcadorTemporal = null;
+                    }
+                })
+                .setNegativeButton("Cancelar", (dialog, which) -> {
+                    // se pulsa no -> borrar marcador temporal
+                    if (marcadorTemporal != null) {
+                        marcadorTemporal.remove();
+                        marcadorTemporal = null;
+                    }
+                })
+                .show();
+    }
+
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         gMap = googleMap;
@@ -179,6 +213,23 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         marcarIncidenciasMapa();
         marcarCamarasMapa();
+
+        // mantener pulsado para añadir marcador
+        gMap.setOnMapLongClickListener(latLng -> {
+            // 1. Si ya había un marcador de selección previo, lo borramos
+            if (marcadorTemporal != null) {
+                marcadorTemporal.remove();
+            }
+
+            // 2. Añadimos un marcador visual donde el usuario pulsó
+            marcadorTemporal = gMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .title("Nueva ubicación")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))); // Color distinto
+
+            // 3. Mostramos el diálogo de confirmación
+            mostrarDialogoCrearIncidencia(latLng);
+        });
     }
 
     private void obtenerUbicacionActual() {
@@ -210,7 +261,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private void marcarIncidenciasMapa() {
         // conf retrofit
-        String BASE_URL = "http://10.10.16.93:8080/api/";
+        String BASE_URL = "https://mavpc.up.railway.app/api/";
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -345,7 +396,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private void marcarCamarasMapa() {
         // url base
-        String BASE_URL = "http://10.10.16.93:8080/api/";
+        String BASE_URL = "https://mavpc.up.railway.app/api/";
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)

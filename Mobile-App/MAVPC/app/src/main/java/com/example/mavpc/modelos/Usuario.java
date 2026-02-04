@@ -3,19 +3,16 @@ package com.example.mavpc.modelos;
 import com.google.gson.annotations.SerializedName;
 
 public class Usuario {
-    private String id;
-
+    private int id;
     @SerializedName("usuario")
     private String username;
-
     private String email;
     @SerializedName("contrasena")
     private String password;
-
     @SerializedName("urlImage")
     private String pfpUrl;
 
-    public Usuario(String id, String username, String email, String password, String pfpUrl) {
+    public Usuario(int id, String username, String email, String password, String pfpUrl) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -25,11 +22,9 @@ public class Usuario {
 
     public Usuario() {}
 
-    public String getId() {
-        return id;
-    }
+    public int getId() { return id; }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
