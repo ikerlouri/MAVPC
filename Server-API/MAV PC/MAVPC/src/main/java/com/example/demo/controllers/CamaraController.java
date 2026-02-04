@@ -24,16 +24,19 @@ public class CamaraController {
     @Autowired
     private CamaraDao camaraDao;
     
+    //lista todas las camaras de la bbdd
     @GetMapping
     public List<Camara> listarCamaras() {
         return camaraDao.findAll();
     }
     
+    //elimina una camara pasandole una id
     @DeleteMapping
     public void eliminarCamaras(@RequestParam int id) {
         camaraDao.deleteById(id);
     }
     
+    //guarda una camara pasandole un objeto Camara
     @PostMapping
     public String guardarCamara(@RequestBody Camara camara) {
     	try {  		
@@ -44,6 +47,7 @@ public class CamaraController {
         }
     }
     
+    //Guarda las camaras que estan operativas de la API a nuestra base de datos
     @GetMapping("/sincronizar")
     public void sincronizar() {
     	traficoService.SubirCamaras();

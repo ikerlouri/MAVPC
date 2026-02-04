@@ -20,7 +20,7 @@ public class EmailSchedulerService {
 	
     private final String BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-    @Async // Mantenemos la asincronía para que sea rápido
+    @Async // Ponemos que este metodo sea asincrono para que se ejecute en segundo plano
     public void enviarCorreoBienvenida(String emailDestino, String nombreUsuario) {
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -30,13 +30,15 @@ public class EmailSchedulerService {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("api-key", brevoApiKey);
 
-            // 2. Construir el cuerpo del JSON (Payload) manualmente con Mapas
+            // 2. Construir el cuerpo del JSON manualmente con Mapas
             Map<String, Object> body = new HashMap<>();
             
             // Remitente
             Map<String, String> sender = new HashMap<>();
+            //nombre del correr
             sender.put("name", "Soporte MAVPC");
-            sender.put("email", "mavpc1459@gmail.com"); // Puedes poner tu correo de registro en Brevo
+            //mail del emisario
+            sender.put("email", "mavpc1459@gmail.com"); 
             body.put("sender", sender);
 
             // Destinatario (es una lista)
@@ -47,9 +49,10 @@ public class EmailSchedulerService {
             toList.add(toUser);
             body.put("to", toList);
 
-            // Asunto y Contenido
+            // Asunto del mail
             body.put("subject", "Bienvenido a MAVPC");
             
+            //cuerpo del mail en formato html para que Brevo lo pueda leer
             String htmlContent = "<html>" +
                 "<body style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>" +
                 "<div style='max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);'>" +
@@ -68,7 +71,7 @@ public class EmailSchedulerService {
             // 3. Empaquetar la petición
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-            // 4. ¡ENVIAR! (Esto sale por el puerto 443, que Railway SÍ permite)
+            // 4. Envia el mail a su destinatiario
             restTemplate.postForEntity(BREVO_API_URL, request, String.class);
             
             System.out.println("ÉXITO: Correo enviado vía API a " + emailDestino);

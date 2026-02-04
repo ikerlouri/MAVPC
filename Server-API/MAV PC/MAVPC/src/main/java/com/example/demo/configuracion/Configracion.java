@@ -27,6 +27,7 @@ import javax.net.ssl.SSLContext;
 @Configuration
 public class Configracion {
 
+    // Configura ModelMapper para transformar objetos entre tipos (ej. de Incidencia a IncidenciaCreada)
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
@@ -37,6 +38,7 @@ public class Configracion {
         return modelMapper;
     }
 
+    // Configura la seguridad para permitir todas las peticiones y desactivar la protección CSRF
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -45,6 +47,7 @@ public class Configracion {
         return http.build();
     }
 
+    // Define la política CORS para permitir peticiones desde cualquier origen y cualquier método HTTP
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
@@ -57,23 +60,25 @@ public class Configracion {
         };
     }
 
+    // Crea un cliente para llamadas a APIs externas ignorando problemas de certificados SSL (Trust All)
     @Bean
     public RestTemplate restTemplate() {
         try {
+            // Permite confiar en cualquier certificado sin validación (útil para entornos de prueba)
             SSLContext sslContext = SSLContextBuilder.create()
                     .loadTrustMaterial(TrustAllStrategy.INSTANCE)
                     .build();
 
-            // AJUSTE AQUÍ: Añadimos .setHostnameVerifier(NoopHostnameVerifier.INSTANCE)
             SSLConnectionSocketFactory sslSocketFactory = SSLConnectionSocketFactoryBuilder.create()
                     .setSslContext(sslContext)
-                    .setHostnameVerifier(NoopHostnameVerifier.INSTANCE) // <--- ESTO ES CLAVE
+                    .setHostnameVerifier(NoopHostnameVerifier.INSTANCE) 
                     .build();
 
             HttpClientConnectionManager cm = PoolingHttpClientConnectionManagerBuilder.create()
                     .setSSLSocketFactory(sslSocketFactory)
                     .build();
 
+            // Construye el cliente HTTP con el gestor de conexiones configurado
             CloseableHttpClient httpClient = HttpClients.custom()
                     .setConnectionManager(cm)
                     .evictExpiredConnections()
@@ -82,6 +87,7 @@ public class Configracion {
             HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
             return new RestTemplate(factory);
         } catch (Exception e) {
+            // En caso de error, devuelve un RestTemplate por defecto
             return new RestTemplate();
         }
     }

@@ -31,33 +31,38 @@ public class UsuarioController {
 	@Autowired
 	private CamaraFavoritaUsuarioDao camaraFavoritaUsuarioDao;
 	
+	// Obtiene la lista completa de todos los usuarios registrados
 	@GetMapping
 	public List<Usuario> listarUsuarios() {
 		return usuarioDao.findAll();
 	}
 	
+	// Elimina un usuario de la base de datos según su ID
 	@DeleteMapping
 	public void BorrarUsuario(@RequestParam int idUsuario) {
 		usuarioDao.deleteById(idUsuario);
 	}
 	
-	
+	// Registra un nuevo usuario y envía automáticamente un correo de bienvenida
 	@PostMapping
 	public void GuardarUsuario(@RequestBody Usuario usuario) {
 		usuarioDao.save(usuario);
 		eService.enviarCorreoBienvenida(usuario.getEmail(), usuario.getUsuario());
 	}
 	
+	// Actualiza la información de un usuario existente
 	@PutMapping
 	public void ActualizarUsuario(@RequestBody Usuario usuario) {
 		usuarioDao.save(usuario);
 	}
 	
+	// Recupera todas las cámaras marcadas como favoritas por un usuario específico
 	@GetMapping("/favoritos")
 	public List<CamaraFavoritaUsuario> listarFavoritos(@RequestParam int idUsuario) {	
-		return camaraFavoritaUsuarioDao.findByIdUsuario(idUsuario) ; 
+		return camaraFavoritaUsuarioDao.findByIdUsuario(idUsuario); 
 	}
 	
+	// Vincula una cámara como favorita a un usuario concreto
 	@PostMapping("/favoritos")
 	public void guardarFavoritos(
 			@RequestParam int idCamara,
@@ -69,21 +74,25 @@ public class UsuarioController {
 	camaraFavoritaUsuarioDao.save(camaraFavoritaUsuario);	
 	}
 	
+	// Elimina una cámara de la lista de favoritos mediante el ID del registro
 	@DeleteMapping("/favoritos")
 	public void borrarFavoritos(@RequestParam int id) {
 		camaraFavoritaUsuarioDao.deleteById(id);	
 	}
  	
+	// Valida las credenciales (login) comprobando si existen usuario y contraseña
 	@GetMapping("/comprobarUsuario")
 	public boolean comprobarUsuario(@RequestParam String usuario, @RequestParam String contrasena) {
 	return usuarioDao.existsByUsuarioAndContrasena(usuario, contrasena);
 	}
 	
+	// Verifica si un nombre de usuario o email ya están en uso (para registros)
 	@GetMapping("/comprobarUsuarioEmail")
 	public boolean comprobarUsuarioEmail(@RequestParam String usuario, @RequestParam String email) {
 	return usuarioDao.existsByUsuarioOrEmail(usuario, email);
 	}
 	
+	// Busca y retorna los datos completos de un usuario por su nombre de usuario
 	@GetMapping("/buscarUsuarioPorNombre")
 	public Usuario buscarUsuarioPorNombre(@RequestParam String usuario) {
 		return usuarioDao.findByUsuario(usuario);
