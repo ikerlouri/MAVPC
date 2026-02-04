@@ -9,6 +9,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -32,11 +33,14 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -142,7 +146,7 @@ public class Perfil extends BaseActivity {
         Button btnSalir = view.findViewById(R.id.btnSalir);
         btnSalir.setOnClickListener(v -> {
             DbHelper dbHelper = new DbHelper(Perfil.this);
-            dbHelper.logoff(); // O logoff()
+            dbHelper.logoff();
 
             Intent intent = new Intent(Perfil.this, Login.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -282,7 +286,7 @@ public class Perfil extends BaseActivity {
                 pfpBase64
         );
 
-        // Llamada a la API (Retrofit)
+        // Actualizar en la api
         String BASE_URL = "https://mavpc.up.railway.app/api/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -290,8 +294,48 @@ public class Perfil extends BaseActivity {
                 .build();
         ApiService service = retrofit.create(ApiService.class);
 
-        service.actualizarUsuario(usuarioActualizado);
-        dbHelper.insertUsuarioSesion(usuarioActualizado);
+        Call<Void> call = service.actualizarUsuario(usuarioActualizado);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Actualizar en sqlite
+                    dbHelper.insertUsuarioSesion(usuarioActualizado);
+
+                    Toast.makeText(Perfil.this, "Perfil actualizado correctamente", Toast.LENGTH_SHORT).show();
+                    // Reemplaza el bloque else dentro de onResponse con este código:
+                } else {
+                    // 1. Obtener el código de estado (ej: 400, 404, 500)
+                    int statusCode = response.code();
+
+                    // 2. Intentar leer el cuerpo del error (lo que el servidor dice que salió mal)
+                    String errorMsg = "Error desconocido";
+                    try {
+                        if (response.errorBody() != null) {
+                            errorMsg = response.errorBody().string();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.e("API_ERROR", "Código: " + statusCode + " | Mensaje: " + errorMsg);
+
+                    // Sugerencia visual para el usuario
+                    if (statusCode == 400) {
+                        Toast.makeText(Perfil.this, "Datos inválidos. Revisa el formato.", Toast.LENGTH_LONG).show();
+                    } else if (statusCode == 405) {
+                        Toast.makeText(Perfil.this, "Método PUT no permitido en esta ruta.", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(Perfil.this, "Error del servidor: " + statusCode, Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(Perfil.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private String hashearPassword(String txtPassword) {

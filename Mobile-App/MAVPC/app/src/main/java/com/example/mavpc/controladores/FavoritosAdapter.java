@@ -1,7 +1,9 @@
 package com.example.mavpc.controladores;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,44 +32,53 @@ public class FavoritosAdapter extends ArrayAdapter<Camara> {
         this.listaCamaras = lista;
     }
 
+    // el metodo en si es un for each
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        // Inflar la vista si no existe
+        // Inflar vista
         if (convertView == null) {
             convertView = LayoutInflater.from(context).inflate(R.layout.item_camara_fav, parent, false);
         }
 
-        // Obtener la cámara actual
+        // Obtener el objeto de esta posición
         Camara camara = listaCamaras.get(position);
+        Log.d("FAVORITOSADAPTER", camara.toString());
 
-        // Referencias UI
         TextView tvNombre = convertView.findViewById(R.id.tvNombreItem);
         ImageView ivImagen = convertView.findViewById(R.id.ivCamaraItem);
         Button btnIr = convertView.findViewById(R.id.btnIrMapa);
 
-        // Setear datos
+        // Escribir nombre
         tvNombre.setText(camara.getName());
 
-        // Cargar imagen con Glide
+        // Cargar imagen
         if (camara.getUrlImage() != null && !camara.getUrlImage().isEmpty()) {
             Glide.with(context)
                     .load(camara.getUrlImage())
-                    .placeholder(R.drawable.ic_launcher_foreground) // Tu imagen por defecto
+                    .placeholder(R.drawable.ic_camera)
                     .into(ivImagen);
         }
 
-        // --- LÓGICA DEL BOTÓN IR ---
         btnIr.setOnClickListener(v -> {
             Intent intent = new Intent(context, Explorar.class);
-            // Pasamos las coordenadas a la actividad Explorar
-            intent.putExtra("LAT_DESTINO", camara.getLatitude());
-            intent.putExtra("LON_DESTINO", camara.getLongitude());
-            intent.putExtra("ID_CAMARA_FOCUS", camara.getId()); // Opcional, por si quieres abrir el popup directo
 
-            // Para que no cree una nueva instancia si ya existe, o para ir directo
+            try {
+                double lat = Double.parseDouble(camara.getLatitude());
+                double lon = Double.parseDouble(camara.getLongitude());
+
+                intent.putExtra("LAT_DESTINO", lat);
+                intent.putExtra("LON_DESTINO", lon);
+            } catch (NumberFormatException | NullPointerException e) {
+                e.printStackTrace();
+            }
+
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             context.startActivity(intent);
+            // para desactivar la animacion al cambiar de activity
+            if (context instanceof Activity) {
+                ((Activity) context).overridePendingTransition(0, 0);
+            }
         });
 
         return convertView;

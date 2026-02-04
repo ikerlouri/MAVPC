@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.example.mavpc.modelos.Camara;
 import com.example.mavpc.modelos.Usuario;
@@ -73,7 +74,14 @@ public class DbHelper extends SQLiteOpenHelper {
         values.put("password", usuario.getPassword());
         values.put("pfpUrl", usuario.getPfpUrl());
 
-        db.insert(TABLA_USUARIO, null, values);
+        long resultado = db.insert(TABLA_USUARIO, null, values);
+
+        if (resultado == -1) {
+            Log.e("DB_ERROR", "No se pudo guardar el usuario. ID: " + usuario.getId());
+        } else {
+            Log.d("DB_SUCCESS", "Usuario guardado correctamente en fila: " + resultado);
+        }
+
         db.close();
     }
 
@@ -118,8 +126,14 @@ public class DbHelper extends SQLiteOpenHelper {
         values.put("km", c.getKm());
         values.put("direction", c.getDirection());
 
-        // insertWithOnConflict reemplaza si ya existe (para no duplicar)
-        db.insertWithOnConflict(TABLA_CAMARAS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        // insertWithOnConflict devuelve el ID de la fila o -1 si falla y reemplaza si ya existe (para no duplicar)
+        long resultado = db.insertWithOnConflict(TABLA_CAMARAS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+
+        if (resultado == -1) {
+            Log.e("DB_ERROR", "Error crítico: No se pudo insertar la cámara " + c.getName());
+        } else {
+            Log.d("DB_SUCCESS", "Guardada cámara con ID: " + c.getId() + " en fila: " + resultado);
+        }
         db.close();
     }
 
@@ -206,6 +220,7 @@ public class DbHelper extends SQLiteOpenHelper {
         boolean existe = (cursor.getCount() > 0);
 
         cursor.close();
+        db.close();
 
         return existe;
     }

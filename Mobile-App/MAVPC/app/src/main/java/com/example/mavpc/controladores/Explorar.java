@@ -22,6 +22,7 @@ import java.util.List;
 
 // para coger la fecha de hoy
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -36,6 +37,7 @@ import com.example.mavpc.R;
 import com.example.mavpc.database.DbHelper;
 import com.example.mavpc.modelos.Camara;
 import com.example.mavpc.modelos.Incidencia;
+import com.example.mavpc.modelos.Usuario;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -55,6 +57,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 // Imports para Retrofit y JSON
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -179,26 +182,84 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
+    // Esto actualiza el Intent de la actividad para cuando se abre el mapa desde una camara favorita abrirlo en sus coordenadas
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
     private void alternarFavCam(Camara c) {
-        DbHelper dbHelper = new DbHelper(Explorar.this);
-        boolean esFavorita = dbHelper.isFavourite(c);
+        try {
+            DbHelper dbHelper = new DbHelper(Explorar.this);
+            Usuario currentUser = dbHelper.getUsuarioSesion();
 
-        if (esFavorita) {
-            // Borrar
-            dbHelper.deleteFavCam(c);
-            Toast.makeText(this, "Eliminada de favoritos", Toast.LENGTH_SHORT).show();
+            // 1. SEGURIDAD: Aunque los logs digan que se guardó, si por lo que sea es null, evitamos el cierre
+            if (currentUser == null) {
+                Toast.makeText(this, "Error: Sesión no encontrada. Reinicia la app.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            // Color GRIS
-            int color = ContextCompat.getColor(this, R.color.dark_grey);
-            btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
-        } else {
-            // Añadir
-            dbHelper.insertCam(c);
-            Toast.makeText(this, "Añadida a favoritos", Toast.LENGTH_SHORT).show();
+            boolean esFavorita = dbHelper.isFavourite(c);
 
-            // Color VERDE
-            int color = ContextCompat.getColor(this, R.color.cake_green);
-            btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
+            // Conf Retrofit
+            String BASE_URL = "https://mavpc.up.railway.app/api/";
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            ApiService service = retrofit.create(ApiService.class);
+
+            if (esFavorita) {
+                // --- BORRAR ---
+
+                // 1. SQLite
+                dbHelper.deleteFavCam(c);
+
+                // 2. API (Con enqueue para evitar bloqueos)
+                service.eliminarCamFavorita(c.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if(!response.isSuccessful()) Log.e("API", "Error al borrar en nube: " + response.code());
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.e("API", "Fallo de red al borrar: " + t.getMessage());
+                    }
+                });
+
+                // 3. UI
+                btnFavorito.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.dark_grey)));
+                Toast.makeText(this, "Eliminada de favoritos", Toast.LENGTH_SHORT).show();
+
+            } else {
+                // --- AÑADIR ---
+
+                // 1. SQLite
+                dbHelper.insertCam(c);
+
+                // 2. API
+                service.guardarCamFavorita(c.getId(), currentUser.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if(!response.isSuccessful()) Log.e("API", "Error al guardar en nube: " + response.code());
+                    }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Log.e("API", "Fallo de red al guardar: " + t.getMessage());
+                    }
+                });
+
+                // 3. UI
+                btnFavorito.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.cake_green)));
+                Toast.makeText(this, "Añadida a favoritos", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            // ESTO EVITARÁ QUE SE CIERRE LA APP SI HAY OTRO ERROR
+            Log.e("CRASH_EVITADO", "Error en alternarFavCam: " + e.getMessage());
+            e.printStackTrace();
+            Toast.makeText(this, "Ocurrió un error interno", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -249,10 +310,11 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             Log.e("Explorar", "No se encuentra el archivo map_style_dark.json", e);
         }
 
-        // interfaz
+        // desactivar opciones de interfaz de googlemaps
         gMap.getUiSettings().setZoomControlsEnabled(false);
-        gMap.getUiSettings().setCompassEnabled(true);
+        gMap.getUiSettings().setCompassEnabled(false);
         gMap.getUiSettings().setMyLocationButtonEnabled(false);
+        gMap.getUiSettings().setMapToolbarEnabled(false);
 
         obtenerUbicacionActual();
 
@@ -308,8 +370,16 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         // conf retrofit
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
+        // Creacion de cliente personalizado para dar mas tiempo de carga
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS) // Tiempo para establecer conexión
+                .readTimeout(60, TimeUnit.SECONDS)    // Tiempo esperando a recibir datos
+                .writeTimeout(60, TimeUnit.SECONDS)   // Tiempo enviando datos
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
+                .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -461,10 +531,8 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         // Lógica según el tipo de objeto
         if (item instanceof Camara) {
-            // Altura 60%
-            params.matchConstraintPercentHeight = 0.6f;
-
             Camara cam = (Camara) item; // Casteo
+            Log.d("DEBUG_ID", "Nombre: " + cam.getName() + " | ID: " + cam.getId());
 
             ivCamara.setVisibility(View.VISIBLE);
             btnFavorito.setVisibility(View.VISIBLE);
@@ -509,17 +577,14 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
             // Cargar imagen con Glide
             String urlImage = cam.getUrlImage();
-            if (urlImage != null && urlImage.isEmpty()) {
+            if (urlImage != null && !urlImage.isEmpty()) {
                 Glide.with(this)
                         .load(urlImage)
-                        .placeholder(R.drawable.ic_launcher_foreground) // Tu placeholder
-                        .error(R.drawable.ic_launcher_foreground)      // Imagen si falla
+                        .placeholder(R.drawable.ic_camera) // Tu placeholder
+                        .error(R.drawable.ic_camera)      // Imagen si falla
                         .into(ivCamara);
             }
         } else if (item instanceof Incidencia) {
-            // Altura 40% (más pequeña porque no hay foto)
-            params.matchConstraintPercentHeight = 0.4f;
-
             Incidencia inc = (Incidencia) item; // Casteo
 
             ivCamara.setVisibility(View.GONE);
@@ -535,31 +600,31 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
             String infoInc = "";
             String gravedad = inc.getLevel();
-            if (gravedad != null){
+            if (gravedad != null && !gravedad.isEmpty()){
                 infoInc += "Gravedad: " + gravedad + "\n" + "\n";
             }
             String causa = inc.getCause();
-            if (causa != null){
+            if (causa != null && !causa.isEmpty()){
                 infoInc += "Causa: " + causa + "\n" + "\n";
             }
             String ciudad = inc.getCityTown();
-            if (ciudad != null){
+            if (ciudad != null && !ciudad.isEmpty()){
                 infoInc += "Ciudad: " + ciudad + "\n" + "\n";
             }
             String carretera = inc.getRoad();
-            if (carretera != null){
+            if (carretera != null && !carretera.isEmpty()){
                 infoInc += "Carretera: " + carretera + "\n" + "\n";
             }
             String direccion = inc.getDirection();
-            if (direccion != null){
+            if (direccion != null && !direccion.isEmpty()){
                 infoInc += "Dirección: " + direccion + "\n" + "\n";
             }
             String latitud = inc.getLatitude();
-            if (latitud != null){
+            if (latitud != null && !latitud.isEmpty()){
                 infoInc += "Latitud: " + latitud + "\n" + "\n";
             }
             String longitud = inc.getLongitude();
-            if (longitud != null){
+            if (longitud != null && !longitud.isEmpty()){
                 infoInc += "Longitud: " + longitud;
             }
 
@@ -567,9 +632,13 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             tvInfoDetalles.setText(infoInc);
         }
 
-        // 4. Aplicar cambios finales
+        // Aplicar cambios UI
+        params.height = ConstraintLayout.LayoutParams.WRAP_CONTENT;
+        params.matchConstraintPercentHeight = -1f;
+
         markerWindow.setLayoutParams(params);
         markerWindow.setVisibility(View.VISIBLE);
+
         darkBackground.setVisibility(View.VISIBLE);
     }
 

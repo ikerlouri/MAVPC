@@ -3,7 +3,7 @@ package com.example.mavpc.modelos;
 import com.google.gson.annotations.SerializedName;
 
 public class Camara {
-    @SerializedName("cameraId")
+    @SerializedName("id")
     private int id;
     @SerializedName("cameraName")
     private String name;

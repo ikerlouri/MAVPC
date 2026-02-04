@@ -100,7 +100,7 @@ public class Login extends BaseActivity {
                                         @Override
                                         public void onFailure(Call<List<Camara>> call, Throwable t) {
                                             // Si falla internet al cargar cámaras, entramos igual
-                                            Log.e("LOGIN", "Fallo al bajar favoritas: " + t.getMessage());
+                                            Log.e("LOGIN", "Fallo al cargar cámaras favoritas: " + t.getMessage());
                                             irAExplorar();
                                         }
                                     });

@@ -42,6 +42,8 @@ public class Incidencia {
         this.id = id;
     }
 
+    public Incidencia() {}
+
     public int getId() {
         return id;
     }

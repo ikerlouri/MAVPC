@@ -18,7 +18,7 @@ import retrofit2.http.Query;
 public interface ApiService {
     // solo se pone la parte final de la url de la API
 
-    //incidencia
+    //incidencias
     @GET("incidencias/listarActual")
     Call<List<Incidencia>> obtenerIncidenciasHoy();
     @GET("incidencias/byDate")
@@ -30,18 +30,20 @@ public interface ApiService {
     @POST("incidencias")
     Call<Void> crearIncidencia(@Body Incidencia incidencia);
 
-    //camara
+    //camaras
     @GET("camaras")
     Call<List<Camara>> obtenerCamaras();
     @GET("usuarios/favoritos")
     Call<List<Camara>> cargarCamsFavoritasUsuario(@Query("idUsuario") int idUsuario);
     @POST("usuarios/favoritos")
-    Call<Void> guardarCamFavorita(@Body int idCamara, int idUsuario);
+    Call<Void> guardarCamFavorita(
+            @Query("idCamara") int idCamara,
+            @Query("idUsuario") int idUsuario);
     @DELETE("usuarios/favoritos")
     Call<Void> eliminarCamFavorita(@Body int idCamaraUsuario);
 
 
-    //usuario
+    //usuarios
     @GET("usuarios/comprobarUsuario")
     Call<Boolean> comprobarUsuarioLogin(
             @Query("usuario") String usuario,
