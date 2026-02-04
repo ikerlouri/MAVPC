@@ -3,6 +3,7 @@ package com.example.mavpc.controladores;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import androidx.core.content.ContextCompat;
 // google maps
 import com.bumptech.glide.Glide;
 import com.example.mavpc.R;
+import com.example.mavpc.database.DbHelper;
 import com.example.mavpc.modelos.Camara;
 import com.example.mavpc.modelos.Incidencia;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -67,7 +69,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
     private GoogleMap gMap;
     private Marker marcadorTemporal;
     private BottomNavigationView navbar;
-    private Button btnCloseFilter, btnAplicarFiltros, btnCloseMarkerWindow;
+    private Button btnCloseFilter, btnAplicarFiltros, btnCloseMarkerWindow, btnFavorito;
     private View darkBackground;
     private CardView cardSearch, btnLayers, btnFiltros, markerWindow, filterWindow;
 
@@ -144,6 +146,8 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             darkBackground.setVisibility(View.GONE);
         });
 
+        btnFavorito = findViewById(R.id.btnFavorito);
+
         // inicializar mapa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -157,6 +161,47 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    // por si viene con unas coordenadas que enseñar
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null && extras.containsKey("LAT_DESTINO")) {
+            double lat = extras.getDouble("LAT_DESTINO");
+            double lon = extras.getDouble("LON_DESTINO");
+
+            LatLng ubicacionActual = new LatLng(lat, lon);
+            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionActual, 16.5f));
+
+            // Limpiar el intent para que no lo haga cada vez que rotes la pantalla
+            getIntent().removeExtra("LAT_DESTINO");
+        }
+    }
+
+    private void alternarFavCam(Camara c) {
+        DbHelper dbHelper = new DbHelper(Explorar.this);
+        boolean esFavorita = dbHelper.isFavourite(c);
+
+        if (esFavorita) {
+            // Borrar
+            dbHelper.deleteFavCam(c);
+            Toast.makeText(this, "Eliminada de favoritos", Toast.LENGTH_SHORT).show();
+
+            // Color GRIS
+            int color = ContextCompat.getColor(this, R.color.dark_grey);
+            btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
+        } else {
+            // Añadir
+            dbHelper.insertCam(c);
+            Toast.makeText(this, "Añadida a favoritos", Toast.LENGTH_SHORT).show();
+
+            // Color VERDE
+            int color = ContextCompat.getColor(this, R.color.cake_green);
+            btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
+        }
+    }
+    
     private void mostrarDialogoCrearIncidencia(LatLng latLng) {
         new AlertDialog.Builder(Explorar.this)
                 .setTitle("Nueva Incidencia")
@@ -224,7 +269,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             // 2. Añadimos un marcador visual donde el usuario pulsó
             marcadorTemporal = gMap.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .title("Nueva ubicación")
+                    .title("Nueva incidencia")
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))); // Color distinto
 
             // 3. Mostramos el diálogo de confirmación
@@ -331,69 +376,6 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
-    private void configurarClickMarcadores() {
-        gMap.setOnMarkerClickListener(marker -> {
-            Object tag = marker.getTag();
-
-            if (tag != null) {
-                // comprueba si es marcador de incidencia
-                if (tag instanceof Incidencia) {
-                    Incidencia incidencia = (Incidencia) tag;
-                    prepararDetallesIncidencia(incidencia);
-                }
-                // comrpueba si es marcador de camara
-                else if (tag instanceof Camara) {
-                    Camara camara = (Camara) tag;
-                    prepararDetallesCamara(camara);
-                }
-            }
-
-            return false; // False = comportamiento por defecto (centrar y abrir globito)
-        });
-    }
-
-    private void prepararDetallesIncidencia(Incidencia i) {
-        // titulo
-        String titulo;
-        if(i.getType() == null || i.getType().toLowerCase().trim().contains("otro")){
-            titulo = "Otro";
-        } else{
-            titulo = i.getType();
-        }
-
-        String info = "";
-        String gravedad = i.getLevel();
-        if (gravedad != null){
-            info += "Gravedad: " + gravedad + "\n" + "\n";
-        }
-        String causa = i.getCause();
-        if (causa != null){
-            info += "Causa: " + causa + "\n" + "\n";
-        }
-        String ciudad = i.getCityTown();
-        if (ciudad != null){
-            info += "Ciudad: " + ciudad + "\n" + "\n";
-        }
-        String carretera = i.getRoad();
-        if (carretera != null){
-            info += "Carretera: " + carretera + "\n" + "\n";
-        }
-        String direccion = i.getDirection();
-        if (direccion != null){
-            info += "Dirección: " + direccion + "\n" + "\n";
-        }
-        String latitud = i.getLatitude();
-        if (latitud != null){
-            info += "Latitud: " + latitud + "\n" + "\n";
-        }
-        String longitud = i.getLongitude();
-        if (longitud != null){
-            info += "Longitud: " + longitud;
-        }
-
-        mostrarDetallesGenerico(titulo, info, null);
-    }
-
     private void marcarCamarasMapa() {
         // url base
         String BASE_URL = "https://mavpc.up.railway.app/api/";
@@ -448,79 +430,145 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
-    private void prepararDetallesCamara(Camara c) {
-        // Título
-        String titulo = c.getName();
+    private void configurarClickMarcadores() {
+        gMap.setOnMarkerClickListener(marker -> {
+            Object tag = marker.getTag();
 
-        String info = "";
+            if (tag != null) {
+                // comprueba si es marcador de incidencia
+                if (tag instanceof Incidencia) {
+                    Incidencia incidencia = (Incidencia) tag;
+                    mostrarDetallesIncidenciaOCam(incidencia);
+                }
+                // comrpueba si es marcador de camara
+                else if (tag instanceof Camara) {
+                    Camara camara = (Camara) tag;
+                    mostrarDetallesIncidenciaOCam(camara);
+                }
+            }
 
-        String carretera = c.getRoad();
-        if (carretera != null){
-            info += "Carretera: " + carretera + "\n" + "\n";
-        }
-
-        String direccion = c.getDirection();
-        if (direccion != null){
-            info += "Dirección: " + direccion + "\n" + "\n";
-        }
-
-        String km = c.getKm();
-        if (km != null){
-            info += "Kilómetro: " + km + "\n" + "\n";
-        }
-
-        String latitude = c.getLatitude();
-        if (latitude != null){
-            info += "Latitud: " + latitude + "\n" + "\n";
-        }
-
-        String longitud = c.getLongitude();
-        if (longitud != null){
-            info += "Longitud: " + longitud;
-        }
-
-        String imagenCamara = c.getUrlImage();
-
-        mostrarDetallesGenerico(titulo, info, imagenCamara);
+            return false; // False = comportamiento por defecto (centrar y abrir globito)
+        });
     }
 
-    private void mostrarDetallesGenerico(String titulo, String descripcion, String urlImagen) {
+    private void mostrarDetallesIncidenciaOCam(Object item) {
         TextView tvTituloDetalles = findViewById(R.id.tvTituloDetalles);
         ImageView ivCamara = findViewById(R.id.ivCamara);
         TextView tvInfoDetalles = findViewById(R.id.tvInfoDetalles);
 
-        tvTituloDetalles.setText(titulo);
-        tvInfoDetalles.setText(descripcion);
-
-        // obtener los parámetros del layout para modificar el porcentaje
-        // casteamos a ConstraintLayout.LayoutParams porque el padre es un ConstraintLayout
+        // Obtenemos params para cambiar el tamaño
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) markerWindow.getLayoutParams();
 
-        if (urlImagen != null && !urlImagen.isEmpty()) {
-            // si es una camara
-            ivCamara.setVisibility(View.VISIBLE);
-
-            // cargar imagen
-            Glide.with(this)
-                    .load(urlImagen)
-                    .placeholder(R.drawable.ic_launcher_foreground)
-                    .into(ivCamara);
-
-            // Cambiar altura al 70%
+        // Lógica según el tipo de objeto
+        if (item instanceof Camara) {
+            // Altura 60%
             params.matchConstraintPercentHeight = 0.6f;
 
-        } else {
-            // si es una incidencia
-            ivCamara.setVisibility(View.GONE);
+            Camara cam = (Camara) item; // Casteo
 
-            // cambiar altura al 50%
+            ivCamara.setVisibility(View.VISIBLE);
+            btnFavorito.setVisibility(View.VISIBLE);
+
+            DbHelper dbHelper = new DbHelper(Explorar.this);
+            boolean esFavorita = dbHelper.isFavourite(cam);
+
+            if (esFavorita) {
+                // Color VERDE
+                int color = ContextCompat.getColor(this, R.color.cake_green);
+                btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
+            }else {
+                int color = ContextCompat.getColor(this, R.color.dark_grey);
+                btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
+            }
+            btnFavorito.setOnClickListener(v -> alternarFavCam(cam));
+
+            tvTituloDetalles.setText(cam.getName());
+
+            String camInfo = "";
+            String carretera = cam.getRoad();
+            if (carretera != null){
+                camInfo += "Carretera: " + carretera + "\n" + "\n";
+            }
+            String direccion = cam.getDirection();
+            if (direccion != null){
+                camInfo += "Dirección: " + direccion + "\n" + "\n";
+            }
+            String km = cam.getKm();
+            if (km != null){
+                camInfo += "Kilómetro: " + km + "\n" + "\n";
+            }
+            String latitude = cam.getLatitude();
+            if (latitude != null){
+                camInfo += "Latitud: " + latitude + "\n" + "\n";
+            }
+            String longitud = cam.getLongitude();
+            if (longitud != null){
+                camInfo += "Longitud: " + longitud;
+            }
+            tvInfoDetalles.setText(camInfo);
+
+            // Cargar imagen con Glide
+            String urlImage = cam.getUrlImage();
+            if (urlImage != null && urlImage.isEmpty()) {
+                Glide.with(this)
+                        .load(urlImage)
+                        .placeholder(R.drawable.ic_launcher_foreground) // Tu placeholder
+                        .error(R.drawable.ic_launcher_foreground)      // Imagen si falla
+                        .into(ivCamara);
+            }
+        } else if (item instanceof Incidencia) {
+            // Altura 40% (más pequeña porque no hay foto)
             params.matchConstraintPercentHeight = 0.4f;
+
+            Incidencia inc = (Incidencia) item; // Casteo
+
+            ivCamara.setVisibility(View.GONE);
+            btnFavorito.setVisibility(View.GONE);
+
+            String titulo = inc.getType();
+            if(titulo == null || titulo.toLowerCase().trim().contains("otro")){
+                titulo = "Otro";
+            } else{
+                titulo = inc.getType();
+            }
+            tvTituloDetalles.setText(titulo);
+
+            String infoInc = "";
+            String gravedad = inc.getLevel();
+            if (gravedad != null){
+                infoInc += "Gravedad: " + gravedad + "\n" + "\n";
+            }
+            String causa = inc.getCause();
+            if (causa != null){
+                infoInc += "Causa: " + causa + "\n" + "\n";
+            }
+            String ciudad = inc.getCityTown();
+            if (ciudad != null){
+                infoInc += "Ciudad: " + ciudad + "\n" + "\n";
+            }
+            String carretera = inc.getRoad();
+            if (carretera != null){
+                infoInc += "Carretera: " + carretera + "\n" + "\n";
+            }
+            String direccion = inc.getDirection();
+            if (direccion != null){
+                infoInc += "Dirección: " + direccion + "\n" + "\n";
+            }
+            String latitud = inc.getLatitude();
+            if (latitud != null){
+                infoInc += "Latitud: " + latitud + "\n" + "\n";
+            }
+            String longitud = inc.getLongitude();
+            if (longitud != null){
+                infoInc += "Longitud: " + longitud;
+            }
+
+            tvTituloDetalles.setText(inc.getType());
+            tvInfoDetalles.setText(infoInc);
         }
 
-        // aplicar los cambios de tamaño al cardview
+        // 4. Aplicar cambios finales
         markerWindow.setLayoutParams(params);
-
-        // mostrar la ventana y el fondo oscuro
         markerWindow.setVisibility(View.VISIBLE);
         darkBackground.setVisibility(View.VISIBLE);
     }

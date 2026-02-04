@@ -162,9 +162,9 @@ public class DbHelper extends SQLiteOpenHelper {
         }
     }
 
-    public void deleteFavCam(int idCamara) {
+    public void deleteFavCam(Camara c) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLA_CAMARAS, "id = ?", new String[]{String.valueOf(idCamara)});
+        db.delete(TABLA_CAMARAS, "id = ?", new String[]{String.valueOf(c.getId())});
         db.close();
     }
 
@@ -191,5 +191,22 @@ public class DbHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return lista;
+    }
+
+    public boolean isFavourite(Camara c) {
+        // Obtener base de datos en modo lectura
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // '?' para evitar inyección SQL y errores de formato
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM " + TABLA_CAMARAS + " WHERE id = ?",
+                new String[]{ String.valueOf(c.getId()) }
+        );
+
+        boolean existe = (cursor.getCount() > 0);
+
+        cursor.close();
+
+        return existe;
     }
 }
