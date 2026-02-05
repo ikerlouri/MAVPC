@@ -3,7 +3,6 @@ package com.example.mavpc.controladores;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,7 +13,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.mavpc.R;
-import com.example.mavpc.modelos.Incidencia;
+import com.example.mavpc.data.api.ApiService;
+import com.example.mavpc.model.Incidencia;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -25,7 +25,6 @@ import java.util.Calendar;
 import java.util.List;
 
 // para coger la hora actual
-import java.time.LocalTime;
 
 import retrofit2.Call;
 import retrofit2.Callback;

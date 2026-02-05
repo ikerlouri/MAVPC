@@ -1,10 +1,10 @@
-package com.example.mavpc.controladores;
+package com.example.mavpc.data.api;
 
 // modelos
-import com.example.mavpc.modelos.CamFavoritaUsuario;
-import com.example.mavpc.modelos.Camara;
-import com.example.mavpc.modelos.Incidencia;
-import com.example.mavpc.modelos.Usuario;
+import com.example.mavpc.model.CamFavoritaUsuario;
+import com.example.mavpc.model.Camara;
+import com.example.mavpc.model.Incidencia;
+import com.example.mavpc.model.Usuario;
 
 import java.util.List;
 

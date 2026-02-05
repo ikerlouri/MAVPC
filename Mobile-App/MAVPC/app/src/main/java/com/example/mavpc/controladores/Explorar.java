@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,11 +35,13 @@ import androidx.core.content.ContextCompat;
 // google maps
 import com.bumptech.glide.Glide;
 import com.example.mavpc.R;
-import com.example.mavpc.database.DbHelper;
-import com.example.mavpc.modelos.CamFavoritaUsuario;
-import com.example.mavpc.modelos.Camara;
-import com.example.mavpc.modelos.Incidencia;
-import com.example.mavpc.modelos.Usuario;
+import com.example.mavpc.data.api.ApiService;
+import com.example.mavpc.data.local.DbHelper;
+import com.example.mavpc.model.CamFavoritaUsuario;
+import com.example.mavpc.model.Camara;
+import com.example.mavpc.model.FiltrosData;
+import com.example.mavpc.model.Incidencia;
+import com.example.mavpc.model.Usuario;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -76,6 +79,8 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
     private Button btnCloseFilter, btnAplicarFiltros, btnCloseMarkerWindow, btnFavorito;
     private View darkBackground;
     private CardView cardSearch, btnLayers, btnFiltros, markerWindow, filterWindow;
+    private Spinner spinDia, spinMes, spinAno;
+    private CheckBox cbAlava, cbVizcaya, cbGuipuzcoa, cbIncidencia, cbObra, cbCamara, cbGrave, cbMedio, cbLeve;
 
     // cliente de ubicacion
     private FusedLocationProviderClient fusedLocationClient;
@@ -132,6 +137,22 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             darkBackground.setVisibility(View.VISIBLE);
         });
 
+        spinDia = findViewById(R.id.spinDia);
+        spinMes = findViewById(R.id.spinMes);
+        spinAno = findViewById(R.id.spinAno);
+
+        cbAlava = findViewById(R.id.cbAlava);
+        cbVizcaya = findViewById(R.id.cbVizcaya);
+        cbGuipuzcoa = findViewById(R.id.cbGuipuzcoa);
+
+        cbIncidencia = findViewById(R.id.cbIncidencia);
+        cbObra = findViewById(R.id.cbObra);
+        cbCamara = findViewById(R.id.cbCamara);
+
+        cbGrave = findViewById(R.id.cbGrave);
+        cbMedio = findViewById(R.id.cbMedio);
+        cbLeve = findViewById(R.id.cbLeve);
+
         btnCloseFilter = findViewById(R.id.btnCloseFilter);
         btnCloseFilter.setOnClickListener(v -> {
             filterWindow.setVisibility(View.GONE);
@@ -139,10 +160,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
 
         btnAplicarFiltros = findViewById(R.id.btnAplicarFiltros);
-        btnAplicarFiltros.setOnClickListener(v -> {
-            filterWindow.setVisibility(View.GONE);
-            darkBackground.setVisibility(View.GONE);
-        });
+        btnAplicarFiltros.setOnClickListener(v -> aplicarFiltros());
 
         btnCloseMarkerWindow = findViewById(R.id.btnCerrarDetalles);
         btnCloseMarkerWindow.setOnClickListener(v -> {
@@ -165,6 +183,130 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    private void aplicarFiltros() {
+        filterWindow.setVisibility(View.GONE);
+        darkBackground.setVisibility(View.GONE);
+
+        Toast.makeText(Explorar.this, "Aplicando filtros...", Toast.LENGTH_SHORT).show();
+
+        FiltrosData datos = recogerInputsFiltros();
+
+        String BASE_URL = "https://mavpc.up.railway.app/api/";
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        ApiService service = retrofit.create(ApiService.class);
+
+        Call<List<Incidencia>> call = service.obtenerIncidenciasFecha(datos.getAnio(), datos.getMes(), datos.getDia());
+        call.enqueue(new Callback<List<Incidencia>>() {
+            @Override
+            public void onResponse(Call<List<Incidencia>> call, Response<List<Incidencia>> response) {
+                if (response.isSuccessful()) {
+                    List<Incidencia> listaOriginal = response.body(); // Lista completa que llega de la API
+                    List<Incidencia> listaFiltrada = new ArrayList<>(); // Lista vacía donde meteremos las que pasen el filtro
+
+                    // 1. Limpiar mapa
+                    gMap.clear();
+
+                    // 2. Si se quieren ver las cámaras, enseñarlas
+                    if(cbCamara.isChecked()){
+                        marcarCamarasMapa();
+                    }
+
+                    if (listaOriginal != null && !listaOriginal.isEmpty()) {
+                        Log.d("API_FILTRO", "Recibidas de API: " + listaOriginal.size());
+
+                        for (Incidencia i : listaOriginal) {
+                            boolean pasaElFiltro = true;
+
+                            // --- PROTECCIÓN CONTRA NULL ---
+                            // Si algún dato viene null de la API, evitamos el crash usando cadenas vacías
+                            String tipo = (i.getType() != null) ? i.getType().toLowerCase().trim() : "";
+                            String provincia = (i.getProvince() != null) ? i.getProvince().toLowerCase().trim() : "";
+                            String gravedad = (i.getLevel() != null) ? i.getLevel().toLowerCase().trim() : "";
+
+                            // --- FILTRO DE TIPO ---
+                            boolean esObra = tipo.contains("obra") || tipo.contains("mantenimiento");
+
+                            // Si es obra y el checkbox de obras está apagado -> FUERA
+                            if (esObra && !cbObra.isChecked()) pasaElFiltro = false;
+
+                            // Si NO es obra (es accidente) y el checkbox de accidentes está apagado -> FUERA
+                            if (!esObra && !cbIncidencia.isChecked()) pasaElFiltro = false;
+
+
+                            // --- FILTRO DE PROVINCIA ---
+                            boolean esAlava = provincia.contains("álava") || provincia.contains("alava") || provincia.contains("araba");
+                            boolean esVizcaya = provincia.contains("vizcaya") || provincia.contains("bizkaia");
+                            boolean esGuipuzcoa = provincia.contains("guipúzcoa") || provincia.contains("gipuzkoa");
+
+                            if (esAlava && !cbAlava.isChecked()) pasaElFiltro = false;
+                            if (esVizcaya && !cbVizcaya.isChecked()) pasaElFiltro = false;
+                            if (esGuipuzcoa && !cbGuipuzcoa.isChecked()) pasaElFiltro = false;
+
+
+                            // --- FILTRO DE GRAVEDAD ---
+                            if (gravedad.contains("grave") && !cbGrave.isChecked()) pasaElFiltro = false;
+                            if (gravedad.contains("medio") && !cbMedio.isChecked()) pasaElFiltro = false;
+                            if (gravedad.contains("leve") && !cbLeve.isChecked()) pasaElFiltro = false;
+
+
+                            // --- RESULTADO FINAL ---
+                            // Si ha sobrevivido a todos los 'if', la añadimos a la lista final
+                            if (pasaElFiltro) {
+                                listaFiltrada.add(i);
+                            }
+                        }
+
+                        Log.d("API_FILTRO", "Incidencias tras filtrar: " + listaFiltrada.size());
+                        marcarIncidenciasMapa(listaFiltrada); // Pasamos la lista filtrada, no la original
+
+                    } else {
+                        Toast.makeText(Explorar.this, "No hay incidencias en esta fecha", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e("API_ERROR", "Error del servidor: " + response.code());
+                    Toast.makeText(Explorar.this, "Error al filtrar", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Incidencia>> call, Throwable t) {
+                Log.e("API_FAIL", "Fallo de conexión: " + t.getMessage());
+                Toast.makeText(Explorar.this, "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private FiltrosData recogerInputsFiltros() {
+        FiltrosData datos = new FiltrosData();
+
+        // Recoger Fecha
+        if (spinAno.getSelectedItem() != null) datos.setAnio(spinAno.getSelectedItem().toString());
+        if (spinMes.getSelectedItem() != null) datos.setMes(spinMes.getSelectedItem().toString());
+        if (spinDia.getSelectedItem() != null) datos.setDia(spinDia.getSelectedItem().toString());
+
+        // Recoger Provincias
+        if (cbAlava.isChecked()) datos.getProvinciasSeleccionadas().add("Álava");
+        if (cbVizcaya.isChecked()) datos.getProvinciasSeleccionadas().add("Vizcaya");
+        if (cbGuipuzcoa.isChecked()) datos.getProvinciasSeleccionadas().add("Guipúzcoa");
+
+        // Recoger Tipos de Marcadores
+        if (cbIncidencia.isChecked()) datos.getTiposSeleccionados().add("Accidentes");
+        if (cbObra.isChecked()) datos.getTiposSeleccionados().add("Obras");
+        if (cbCamara.isChecked()) datos.getTiposSeleccionados().add("Cámaras");
+
+        // Recoger Gravedad
+        if (cbGrave.isChecked()) datos.getGravedadSeleccionada().add("Grave");
+        if (cbMedio.isChecked()) datos.getGravedadSeleccionada().add("Medio");
+        if (cbLeve.isChecked()) datos.getGravedadSeleccionada().add("Leve");
+
+        return datos;
+    }
+
     // por si viene con unas coordenadas que enseñar
     @Override
     protected void onResume(){
@@ -176,7 +318,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             if (extras.containsKey("ACTUALIZAR_MAPA")){
                 if (gMap != null) {
                     gMap.clear();
-                    marcarIncidenciasMapa();
+                    marcarIncidenciasActuales();
                     marcarCamarasMapa();
                 }
             }
@@ -337,7 +479,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         obtenerUbicacionActual();
 
-        marcarIncidenciasMapa();
+        marcarIncidenciasActuales();
         marcarCamarasMapa();
 
         // mantener pulsado para añadir marcador
@@ -385,15 +527,14 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
-    private void marcarIncidenciasMapa() {
-        // conf retrofit
+    private void marcarIncidenciasActuales() {
+        // 1. Configuración de Retrofit
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
-        // Creacion de cliente personalizado para dar mas tiempo de carga
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(60, TimeUnit.SECONDS) // Tiempo para establecer conexión
-                .readTimeout(60, TimeUnit.SECONDS)    // Tiempo esperando a recibir datos
-                .writeTimeout(60, TimeUnit.SECONDS)   // Tiempo enviando datos
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -404,54 +545,19 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         ApiService service = retrofit.create(ApiService.class);
 
-        // llamada a la api
+        // 2. Llamada a la API
         Call<List<Incidencia>> call = service.obtenerIncidenciasHoy();
 
         call.enqueue(new Callback<List<Incidencia>>() {
             @Override
             public void onResponse(Call<List<Incidencia>> call, Response<List<Incidencia>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<Incidencia> lista = response.body();
+                    List<Incidencia> listaRecibida = response.body();
+                    Log.d("API", "Datos recibidos: " + listaRecibida.size());
 
-                    for (Incidencia i : lista) {
-                        try {
-                            if (i.getLatitude() != null && i.getLongitude() != null) {
-                                double lat = Double.parseDouble(i.getLatitude());
-                                double lng = Double.parseDouble(i.getLongitude());
+                    // AQUÍ ES DONDE CONECTAMOS CON EL OTRO MÉTODO
+                    marcarIncidenciasMapa(listaRecibida);
 
-                                LatLng posicion = new LatLng(lat, lng);
-
-                                // rojo por defecto y naranja si es una obra o mantenimiento
-                                float markerColor = BitmapDescriptorFactory.HUE_RED;
-
-                                if (i.getType() != null) {
-                                    String tipoLower = i.getType().toLowerCase();
-                                    if (tipoLower.contains("obra") || tipoLower.contains("mantenimiento")) {
-                                        // #eb8934 es un naranja. HUE_ORANGE es 30.0f.
-                                        markerColor = BitmapDescriptorFactory.HUE_ORANGE;
-                                    }
-                                }
-
-                                // colocar marcador
-                                Marker marker = gMap.addMarker(new MarkerOptions()
-                                        .position(posicion)
-                                        .title(i.getType())
-                                        .snippet(i.getCityTown())
-                                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
-
-                                // guardamos la incidencia dentro del marcador para enseñar su informacion
-                                if (marker != null) {
-                                    marker.setTag(i);
-                                }
-                            }
-                        } catch (NumberFormatException e) {
-                            Log.e("API", "Error al convertir coordenadas: " + e.getMessage());
-                        }
-                    }
-
-                    configurarClickMarcadores();
-
-                    Log.d("API", "Cargadas " + lista.size() + " incidencias.");
                 } else {
                     Log.e("API", "Error en respuesta: " + response.code());
                 }
@@ -463,6 +569,48 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                 Toast.makeText(Explorar.this, "Error cargando datos", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void marcarIncidenciasMapa(List<Incidencia> lista) {
+        if (lista == null || lista.isEmpty()) return;
+
+        for (Incidencia i : lista) {
+            try {
+                if (i.getLatitude() != null && i.getLongitude() != null) {
+                    double lat = Double.parseDouble(i.getLatitude());
+                    double lng = Double.parseDouble(i.getLongitude());
+
+                    LatLng posicion = new LatLng(lat, lng);
+
+                    // Lógica de colores
+                    float markerColor = BitmapDescriptorFactory.HUE_RED; // Por defecto rojo
+
+                    if (i.getType() != null) {
+                        String tipoLower = i.getType().toLowerCase();
+                        if (tipoLower.contains("obra") || tipoLower.contains("mantenimiento")) {
+                            markerColor = BitmapDescriptorFactory.HUE_ORANGE;
+                        }
+                    }
+
+                    // Añadir marcador
+                    Marker marker = gMap.addMarker(new MarkerOptions()
+                            .position(posicion)
+                            .title(i.getType())
+                            .snippet(i.getCityTown())
+                            .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+
+                    // Guardar objeto en el tag
+                    if (marker != null) {
+                        marker.setTag(i);
+                    }
+                }
+            } catch (NumberFormatException e) {
+                Log.e("MAPA", "Error coordenadas: " + e.getMessage());
+            }
+        }
+
+        // Configurar el listener de clicks
+        configurarClickMarcadores();
     }
 
     private void marcarCamarasMapa() {
@@ -716,15 +864,15 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         // dia (1-31)
         List<String> dias = new ArrayList<>();
-        for(int i=1; i<=31; i++) dias.add(String.valueOf(i));
+        for(int i=1; i<=31; i++) dias.add(String.format("%02d", i));
 
         // mes (1-12)
         List<String> meses = new ArrayList<>();
-        for(int i=1; i<=12; i++) meses.add(String.valueOf(i));
+        for(int i=1; i<=12; i++) meses.add(String.format("%02d", i));
 
         // año (2008-2026)
         List<String> anos = new ArrayList<>();
-        for(int i=2008; i<=2026; i++) anos.add(String.valueOf(i));
+        for(int i=2025; i<=2026; i++) anos.add(String.valueOf(i));
 
         // adaptadores
         ArrayAdapter<String> adapterDia = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dias);

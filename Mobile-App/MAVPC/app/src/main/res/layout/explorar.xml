@@ -264,6 +264,71 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
+                            android:text="Marcadores"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <CheckBox
+                            android:id="@+id/cbIncidencia"
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+
+                            android:buttonTint="#FF4444"
+
+                            android:checked="true"
+
+                            android:text="Incidencias"
+                            android:textColor="@color/white" />
+
+                        <CheckBox
+                            android:id="@+id/cbObra"
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+
+                            android:buttonTint="#FFBB33"
+
+                            android:checked="true"
+
+                            android:text="Obras"
+                            android:textColor="@color/white" />
+
+                        <CheckBox
+                            android:id="@+id/cbCamara"
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+
+                            android:buttonTint="#42bfdb"
+
+                            android:checked="true"
+
+                            android:text="Cámaras"
+                            android:textColor="@color/white" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Provincia -->
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="15dp"
+                    app:cardBackgroundColor="@color/dark_grey"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
                             android:text="Provincia"
                             android:textColor="@color/white"
                             android:textSize="16sp"
@@ -321,75 +386,11 @@
                                 android:text="Guipúzcoa"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
-
                         </LinearLayout>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp"
-                    app:cardBackgroundColor="@color/dark_grey"
-                    app:cardCornerRadius="12dp"
-                    app:cardElevation="4dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="15dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dp"
-                            android:text="Marcadores"
-                            android:textColor="@color/white"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <CheckBox
-                            android:id="@+id/cbAlerta"
-
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-
-                            android:buttonTint="#FF4444"
-
-                            android:checked="true"
-
-                            android:text="Accidentes"
-                            android:textColor="@color/white" />
-
-                        <CheckBox
-                            android:id="@+id/cbObra"
-
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-
-                            android:buttonTint="#FFBB33"
-
-                            android:checked="true"
-
-                            android:text="Obras"
-                            android:textColor="@color/white" />
-
-                        <CheckBox
-                            android:id="@+id/cbCamara"
-
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-
-                            android:buttonTint="#42bfdb"
-
-                            android:checked="true"
-
-                            android:text="Cámaras"
-                            android:textColor="@color/white" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
+                <!-- Gravedad -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

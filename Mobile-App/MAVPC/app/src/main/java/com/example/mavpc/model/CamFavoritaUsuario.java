@@ -1,4 +1,4 @@
-package com.example.mavpc.modelos;
+package com.example.mavpc.model;
 
 public class CamFavoritaUsuario {
     private int id;

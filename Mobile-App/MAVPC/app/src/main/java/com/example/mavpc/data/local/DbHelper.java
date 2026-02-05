@@ -1,4 +1,4 @@
-package com.example.mavpc.database;
+package com.example.mavpc.data.local;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.example.mavpc.modelos.Camara;
-import com.example.mavpc.modelos.Usuario;
+import com.example.mavpc.model.Camara;
+import com.example.mavpc.model.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +80,31 @@ public class DbHelper extends SQLiteOpenHelper {
             Log.e("DB_ERROR", "No se pudo guardar el usuario. ID: " + usuario.getId());
         } else {
             Log.d("DB_SUCCESS", "Usuario guardado correctamente en fila: " + resultado);
+        }
+
+        db.close();
+    }
+
+    public void updateUsuario(Usuario usuario) {
+        if (usuario == null) return;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        // NO tocamos el ID, porque es el mismo usuario
+        values.put("username", usuario.getUsername());
+        values.put("email", usuario.getEmail());
+        values.put("password", usuario.getPassword());
+        values.put("pfpUrl", usuario.getPfpUrl());
+
+        // Ejecutamos UPDATE en lugar de DELETE + INSERT
+        // "id = ?" significa: busca la fila donde la columna id sea igual al id del usuario
+        int filasAfectadas = db.update(TABLA_USUARIO, values, "id = ?", new String[]{String.valueOf(usuario.getId())});
+
+        if (filasAfectadas > 0) {
+            Log.d("DB_UPDATE", "Perfil actualizado correctamente.");
+        } else {
+            Log.e("DB_UPDATE", "No se encontró el usuario para actualizar.");
         }
 
         db.close();

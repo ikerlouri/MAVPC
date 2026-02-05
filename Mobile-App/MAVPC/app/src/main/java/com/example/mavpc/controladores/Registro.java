@@ -12,8 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mavpc.R;
-import com.example.mavpc.database.DbHelper;
-import com.example.mavpc.modelos.Usuario;
+import com.example.mavpc.data.api.ApiService;
+import com.example.mavpc.data.local.DbHelper;
+import com.example.mavpc.model.Usuario;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

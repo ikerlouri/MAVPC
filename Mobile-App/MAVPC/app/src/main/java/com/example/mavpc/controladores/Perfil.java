@@ -26,8 +26,9 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.mavpc.R;
-import com.example.mavpc.database.DbHelper;
-import com.example.mavpc.modelos.Usuario;
+import com.example.mavpc.data.api.ApiService;
+import com.example.mavpc.data.local.DbHelper;
+import com.example.mavpc.model.Usuario;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.yalantis.ucrop.UCrop;
 
@@ -374,17 +375,12 @@ public class Perfil extends BaseActivity {
             return;
         }
 
-        // --- CONTRASEÑA ---
-        // Volvemos a la lógica simple solicitada: Hasheamos SIEMPRE lo que hay en el EditText.
         String passwordFinal = hashearPassword(inputPassword);
 
-        // --- IMAGEN SEGURA (Fix Error 500) ---
         String imagenFinalEnviar;
         if (pfpBase64 != null) {
-            // El usuario eligió foto nueva (datos) o borró (vacío)
             imagenFinalEnviar = pfpBase64;
         } else {
-            // El usuario NO tocó nada. Recuperamos lo que se ve en pantalla para no enviar null
             imagenFinalEnviar = obtenerImagenActualDePantalla();
         }
 
@@ -412,7 +408,8 @@ public class Perfil extends BaseActivity {
 
                 if (response.isSuccessful()) {
                     // Actualizar en sqlite
-                    dbHelper.insertUsuarioSesion(usuarioActualizado);
+                    usuarioActualizado.setPassword(inputPassword); // en sqlite se guarda la contraseña sin hashear
+                    dbHelper.updateUsuario(usuarioActualizado);
                     Toast.makeText(Perfil.this, "Perfil actualizado correctamente", Toast.LENGTH_SHORT).show();
                 } else {
                     int statusCode = response.code();
@@ -460,7 +457,6 @@ public class Perfil extends BaseActivity {
         }
     }
 
-    // --- NUEVO METODO PARA EVITAR NULL/ERROR 500 ---
     private String obtenerImagenActualDePantalla() {
         try {
             if (ivPfp.getDrawable() == null) return null;

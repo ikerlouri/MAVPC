@@ -1,4 +1,4 @@
-package com.example.mavpc.modelos;
+package com.example.mavpc.model;
 
 import com.google.gson.annotations.SerializedName;
 

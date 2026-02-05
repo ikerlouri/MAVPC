@@ -1,4 +1,4 @@
-package com.example.mavpc.controladores;
+package com.example.mavpc.adapters;
 
 import android.app.Activity;
 import android.content.Context;
@@ -17,7 +17,8 @@ import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.example.mavpc.R;
-import com.example.mavpc.modelos.Camara; // Importa tu modelo
+import com.example.mavpc.controladores.Explorar;
+import com.example.mavpc.model.Camara; // Importa tu modelo
 
 import java.util.List;
 

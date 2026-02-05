@@ -2,14 +2,14 @@ package com.example.mavpc.controladores;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.mavpc.R;
-import com.example.mavpc.database.DbHelper;
-import com.example.mavpc.modelos.Camara;
+import com.example.mavpc.adapters.FavoritosAdapter;
+import com.example.mavpc.data.local.DbHelper;
+import com.example.mavpc.model.Camara;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
