@@ -22,10 +22,10 @@ public class CamaraFavoritaUsuario {
 	private Integer id;
 	
 	@Column(name = "id_camara")
-	private int idCamara;
+	private Integer idCamara;
 	
 	@Column(name = "id_usuario")
-	private int idUsuario;
+	private Integer idUsuario;
 
 	public CamaraFavoritaUsuario() {
 	}
@@ -38,19 +38,19 @@ public class CamaraFavoritaUsuario {
 		this.id = id;
 	}
 
-	public int getIdCamara() {
+	public Integer getIdCamara() {
 		return idCamara;
 	}
 
-	public void setIdCamara(int idCamara) {
+	public void setIdCamara(Integer idCamara) {
 		this.idCamara = idCamara;
 	}
 
-	public int getIdUsuario() {
+	public Integer getIdUsuario() {
 		return idUsuario;
 	}
 
-	public void setIdUsuario(int idUsuario) {
+	public void setIdUsuario(Integer idUsuario) {
 		this.idUsuario = idUsuario;
 	}
 
