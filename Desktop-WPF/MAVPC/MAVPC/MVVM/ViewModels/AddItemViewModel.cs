@@ -9,7 +9,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Media;
 
 namespace MAVPC.MVVM.ViewModels
@@ -18,6 +17,21 @@ namespace MAVPC.MVVM.ViewModels
     {
         private readonly ITrafficService _trafficService;
         private readonly Action _closeWindow;
+
+        // --- CONSTANTES ---
+        private const string DEFAULT_CAM_URL = "http://10.10.16.93:8080/images/default.jpg";
+        private static readonly Color ColorCamera = (Color)ColorConverter.ConvertFromString("#00FFFF"); // Cyan
+        private static readonly Color ColorIncidence = (Color)ColorConverter.ConvertFromString("#FF007F"); // Pink
+
+        // --- PROVINCIAS Y MUNICIPIOS (Diccionario para búsqueda rápida) ---
+        private static readonly Dictionary<string, string[]> MapaMunicipios = new()
+        {
+            { "Bizkaia", new[] { "bilbao", "barakaldo", "getxo", "portugalete", "santurtzi", "basauri", "leioa", "galdakao", "durango", "sestao", "erandio", "amorebieta", "gernika", "bermeo", "mungia", "sopela", "arrigorriaga", "trapagaran", "etxebarri", "abanto", "ondarroa", "ortuella", "balmaseda", "muskiz", "lekeitio", "berriz", "güeñes", "derio", "gorliz", "orozko", "zalla", "elorrio", "lemoa", "plentzia" } },
+            { "Gipuzkoa", new[] { "donostia", "san sebastián", "irun", "errenteria", "eibar", "zarautz", "arrasate", "mondragón", "hernani", "tolosa", "lasarte", "pasaia", "bergara", "azpeitia", "beasain", "andoain", "oñati", "zumarraga", "hondarribia", "elgoibar", "oiartzun", "azkoitia", "lazkao", "mutriku", "urniet", "deba", "zumaia", "lezo", "villabona", "astigarraga", "aretxabaleta", "oria", "getaria", "orio" } },
+            { "Araba", new[] { "vitoria", "gasteiz", "laudio", "llodio", "amurrio", "salvatierra", "agurain", "oion", "oyón", "iruña de oca", "ayala", "aiara", "zuia", "legutio", "aramaio", "laguardia", "labastida" } },
+            { "Navarra", new[] { "pamplona", "iruña", "tudela", "barañáin", "burlada", "egüés", "estella", "lizarra", "tafalla", "alsasua", "altsasu", "baztan", "corella", "noáin", "cintruénigo", "bera", "lesaka", "leitza", "etxarri" } },
+            { "Lapurdi", new[] { "hendaya", "hendaia", "bayonne", "baiona", "biarritz" } }
+        };
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
@@ -30,15 +44,16 @@ namespace MAVPC.MVVM.ViewModels
 
         public bool IsCameraMode => IsCameraSelected;
 
+        // Usamos pinceles congelados si es posible, o creados al vuelo pero eficientes
         public Brush CurrentColor => IsCameraSelected
-            ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00FFFF"))
-            : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF007F"));
+            ? new SolidColorBrush(ColorCamera)
+            : new SolidColorBrush(ColorIncidence);
 
         // --- FECHA Y HORA ---
         [ObservableProperty] private DateTime _selectedDate = DateTime.Now;
         [ObservableProperty] private DateTime _selectedTime = DateTime.Now;
 
-        // --- LISTAS DE AUTOCOMPLETADO (CIUDADES) ---
+        // --- LISTAS AUTOCOMPLETADO ---
         public ObservableCollection<string> SugerenciasCiudades { get; } = new()
         {
             "Bilbao", "Donostia/San Sebastián", "Vitoria-Gasteiz", "Pamplona/Iruña",
@@ -52,21 +67,14 @@ namespace MAVPC.MVVM.ViewModels
             "Gipuzkoa", "Bizkaia", "Araba", "Navarra", "Lapurdi", "Cantabria", "Burgos"
         };
 
-        // --- MEJORA: LISTA DE VÍAS COMPARTIDA (RECICLAJE DE LÓGICA) ---
-        // Se usa tanto para Cámaras como para Incidencias
         public ObservableCollection<string> SugerenciasVias { get; } = new()
         {
-            // Principales
             "AP-8", "AP-1", "AP-68", "N-1", "A-15", "A-1", "N-634", "N-240",
-            // Bizkaia
-            "BI-637", "BI-30", "BI-631", "BI-636", "N-637", 
-            // Gipuzkoa
+            "BI-637", "BI-30", "BI-631", "BI-636", "N-637",
             "GI-20", "GI-636", "GI-11", "GI-40", "GI-41", "GI-2632", "GI-627",
-            // Araba
             "N-622", "A-3002", "N-102", "A-625"
         };
 
-        // --- LISTAS DE TIPOS ---
         public ObservableCollection<string> IncidenceTypes { get; }
         public ObservableCollection<string> IncidenceCauses { get; }
 
@@ -86,27 +94,28 @@ namespace MAVPC.MVVM.ViewModels
         [ObservableProperty] private string _directionIncidence = "Ambos";
         [ObservableProperty] private string _descriptionIncidence = string.Empty;
 
-        [ObservableProperty] private string _cityIncidence = "Irun";
-        partial void OnCityIncidenceChanged(string value)
-        {
-            if (string.IsNullOrEmpty(value)) return;
-            var val = value.ToLower().Trim();
-
-            if (new[] { "bilbao", "barakaldo", "getxo", "portugalete", "santurtzi", "basauri", "leioa", "galdakao", "durango", "sestao", "erandio", "amorebieta", "gernika", "bermeo", "mungia", "sopela", "arrigorriaga", "trapagaran", "etxebarri", "abanto", "ondarroa", "ortuella", "balmaseda", "muskiz", "lekeitio", "berriz", "güeñes", "derio", "gorliz", "orozko", "zalla", "elorrio", "lemoa", "plentzia" }.Any(c => val.Contains(c)))
-                ProvinceIncidence = "Bizkaia";
-            else if (new[] { "donostia", "san sebastián", "irun", "errenteria", "eibar", "zarautz", "arrasate", "mondragón", "hernani", "tolosa", "lasarte", "pasaia", "bergara", "azpeitia", "beasain", "andoain", "oñati", "zumarraga", "hondarribia", "elgoibar", "oiartzun", "azkoitia", "lazkao", "mutriku", "urniet", "deba", "zumaia", "lezo", "villabona", "astigarraga", "aretxabaleta", "oria", "getaria", "orio" }.Any(c => val.Contains(c)))
-                ProvinceIncidence = "Gipuzkoa";
-            else if (new[] { "vitoria", "gasteiz", "laudio", "llodio", "amurrio", "salvatierra", "agurain", "oion", "oyón", "iruña de oca", "ayala", "aiara", "zuia", "legutio", "aramaio", "laguardia", "labastida" }.Any(c => val.Contains(c)))
-                ProvinceIncidence = "Araba";
-            else if (new[] { "pamplona", "iruña", "tudela", "barañáin", "burlada", "egüés", "estella", "lizarra", "tafalla", "alsasua", "altsasu", "baztan", "corella", "noáin", "cintruénigo", "bera", "lesaka", "leitza", "etxarri" }.Any(c => val.Contains(c)))
-                ProvinceIncidence = "Navarra";
-            else if (val.Contains("hendaya") || val.Contains("hendaia") || val.Contains("bayonne") || val.Contains("baiona"))
-                ProvinceIncidence = "Lapurdi";
-        }
-
         [ObservableProperty] private string _provinceIncidence = "Gipuzkoa";
         [ObservableProperty] private string _latitudInc = "43.3400";
         [ObservableProperty] private string _longitudInc = "-1.7900";
+
+        [ObservableProperty] private string _cityIncidence = "Irun";
+
+        // Lógica de detección automática de provincia optimizada
+        partial void OnCityIncidenceChanged(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+            var valLower = value.ToLower().Trim();
+
+            foreach (var kvp in MapaMunicipios)
+            {
+                // Buscamos si el texto introducido contiene alguna de las ciudades de la lista
+                if (kvp.Value.Any(c => valLower.Contains(c)))
+                {
+                    ProvinceIncidence = kvp.Key;
+                    return; // Provincia encontrada, salimos
+                }
+            }
+        }
 
         public AddItemViewModel(ITrafficService trafficService, Action closeWindow)
         {
@@ -130,31 +139,37 @@ namespace MAVPC.MVVM.ViewModels
         {
             try
             {
-                if (Clipboard.ContainsText())
+                if (!Clipboard.ContainsText()) return;
+
+                string text = Clipboard.GetText();
+                // Limpieza agresiva de caracteres comunes en copias de Google Maps / GeoJSON
+                text = text.Replace("Lat:", "").Replace("Lon:", "").Replace("Latitude:", "").Replace("Longitude:", "")
+                           .Replace("(", "").Replace(")", "").Replace("[", "").Replace("]", "").Trim();
+
+                // Separadores comunes: coma, espacio, tabulador
+                var parts = text.Split(new[] { ',', ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length >= 2)
                 {
-                    string text = Clipboard.GetText();
-                    text = text.Replace("Lat:", "").Replace("Lon:", "").Replace("(", "").Replace(")", "").Trim();
-                    var parts = text.Contains(',') ? text.Split(',') : text.Split(' ');
+                    string lat = parts[0].Trim();
+                    string lon = parts[1].Trim();
 
-                    if (parts.Length >= 2)
+                    if (IsCameraSelected)
                     {
-                        string lat = parts[0].Trim();
-                        string lon = parts[1].Trim();
-
-                        if (IsCameraSelected)
-                        {
-                            LatitudCamara = lat;
-                            LongitudCamara = lon;
-                        }
-                        else
-                        {
-                            LatitudInc = lat;
-                            LongitudInc = lon;
-                        }
+                        LatitudCamara = lat;
+                        LongitudCamara = lon;
+                    }
+                    else
+                    {
+                        LatitudInc = lat;
+                        LongitudInc = lon;
                     }
                 }
             }
-            catch { }
+            catch (Exception)
+            {
+                // Silencioso o log si tuvieras logger
+            }
         }
 
         [RelayCommand] private void Close() => _closeWindow?.Invoke();
@@ -165,15 +180,17 @@ namespace MAVPC.MVVM.ViewModels
         private double ParseCoordinate(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return 0.0;
-            if (double.TryParse(NormalizeCoordinate(input), NumberStyles.Any, CultureInfo.InvariantCulture, out double result))
-                return result;
-            return 0.0;
+            // CultureInfo.InvariantCulture asegura que el punto '.' sea el separador decimal
+            return double.TryParse(NormalizeCoordinate(input), NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
+                ? result
+                : 0.0;
         }
 
         [RelayCommand(CanExecute = nameof(CanSubmit))]
         private async Task Submit()
         {
             if (IsBusy) return;
+
             try
             {
                 IsBusy = true;
@@ -181,16 +198,21 @@ namespace MAVPC.MVVM.ViewModels
 
                 if (IsCameraSelected)
                 {
-                    if (string.IsNullOrWhiteSpace(NombreCamara)) { MessageBox.Show("Nombre obligatorio"); return; }
+                    if (string.IsNullOrWhiteSpace(NombreCamara))
+                    {
+                        MessageBox.Show("El nombre de la cámara es obligatorio.");
+                        return;
+                    }
 
                     var newCam = new Camara
                     {
-                        Id = "CAM-" + new Random().Next(2000, 9999).ToString(),
+                        Id = new Random().Next(2000, 9999),
                         Nombre = NombreCamara,
-                        UrlImagen = string.IsNullOrWhiteSpace(UrlCamara) ? "http://10.10.16.93:8080/images/default.jpg" : UrlCamara,
+                        UrlImagen = string.IsNullOrWhiteSpace(UrlCamara) ? DEFAULT_CAM_URL : UrlCamara,
                         Carretera = CarreteraCamara,
                         Kilometro = KmCamara,
                         Direccion = DireccionCamara,
+                        // Normalizamos a string con punto para la API
                         Latitud = NormalizeCoordinate(LatitudCamara),
                         Longitud = NormalizeCoordinate(LongitudCamara)
                     };
@@ -198,7 +220,11 @@ namespace MAVPC.MVVM.ViewModels
                 }
                 else
                 {
-                    if (string.IsNullOrWhiteSpace(TypeIncidence)) { MessageBox.Show("Tipo obligatorio"); return; }
+                    if (string.IsNullOrWhiteSpace(TypeIncidence))
+                    {
+                        MessageBox.Show("El tipo de incidencia es obligatorio.");
+                        return;
+                    }
 
                     DateTime fechaFinal = new DateTime(
                         SelectedDate.Year, SelectedDate.Month, SelectedDate.Day,
@@ -206,7 +232,7 @@ namespace MAVPC.MVVM.ViewModels
 
                     var newInc = new Incidencia
                     {
-                        IncidenceId = "0",
+                        IncidenceId = "0", // Backend genera el ID real
                         IncidenceType = TypeIncidence,
                         IncidenceLevel = IncidenceLevel,
                         Road = RoadIncidence,
@@ -221,19 +247,26 @@ namespace MAVPC.MVVM.ViewModels
                     success = await _trafficService.AddIncidenciaAsync(newInc);
                 }
 
-                if (success) { await Task.Delay(500); Close(); }
-                else { MessageBox.Show("Error al guardar en el servidor."); }
+                if (success)
+                {
+                    await Task.Delay(300); // Feedback visual
+                    Close();
+                }
+                else
+                {
+                    MessageBox.Show("Error al guardar en el servidor. Verifique la conexión.");
+                }
             }
-            catch (Exception ex) { MessageBox.Show($"Error: {ex.Message}"); }
-            finally { IsBusy = false; }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error interno: {ex.Message}");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private bool CanSubmit() => !IsBusy;
-    }
-
-    public class InverseBoolConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value is bool b ? !b : value;
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => value is bool b ? !b : value;
     }
 }

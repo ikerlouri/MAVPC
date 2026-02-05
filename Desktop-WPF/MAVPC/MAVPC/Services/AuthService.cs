@@ -9,23 +9,28 @@ using System.Threading.Tasks;
 
 namespace MAVPC.Services
 {
+    /// <summary>
+    /// Servicio encargado de la comunicación con la API de Usuarios alojada en Railway.
+    /// </summary>
     public class AuthService : IAuthService
     {
         private readonly HttpClient _httpClient;
+
+        // URL de producción (API en la nube)
         private const string BaseUrl = "https://mavpc.up.railway.app/api/";
 
         public AuthService()
         {
             _httpClient = new HttpClient();
-            // Timeout por si la API va lenta al gestionar usuarios
+            // Timeout preventivo de 10s para evitar congelamientos si la API duerme (cold start)
             _httpClient.Timeout = TimeSpan.FromSeconds(10);
         }
 
         // --- 1. LOGIN LOCAL (Escritorio) ---
         public bool Login(string username, string password)
         {
-            // Aquí solo entra el administrador del sistema
-            // Puedes cambiar esto por lo que quieras o dejarlo así
+            // Verificación simple para el administrador de la consola de escritorio
+            // TODO: En el futuro esto podría validar contra la base de datos si fuera necesario
             return username == "admin" && password == "admin";
         }
 
@@ -83,6 +88,7 @@ namespace MAVPC.Services
             try
             {
                 // DELETE a /usuarios?idUsuario=X
+                // Nota: Mantenemos el query parameter exacto como lo requiere tu API
                 string url = $"{BaseUrl}usuarios?idUsuario={id}";
                 var response = await _httpClient.DeleteAsync(url);
                 return response.IsSuccessStatusCode;
@@ -91,4 +97,3 @@ namespace MAVPC.Services
         }
     }
 }
-

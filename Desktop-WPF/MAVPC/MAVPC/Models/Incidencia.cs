@@ -3,13 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace MAVPC.Models
 {
+    /// <summary>
+    /// Modelo que representa una incidencia de tráfico proveniente de la API Open Data.
+    /// Incluye lógica de presentación básica (Color/Icono).
+    /// </summary>
     public class Incidencia
     {
-        // --- PROPIEDADES RAW (Coinciden 100% con tu JSON) ---
+        // --- PROPIEDADES RAW (Mapeo directo del JSON) ---
 
         [JsonPropertyName("incidenceId")]
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string IncidenceId { get; set; } // CRÍTICO: En el JSON viene con comillas "", es string.
+        public string IncidenceId { get; set; } = string.Empty;
 
         [JsonPropertyName("incidenceType")]
         public string? IncidenceType { get; set; }
@@ -32,6 +35,8 @@ namespace MAVPC.Models
         [JsonPropertyName("direction")]
         public string? Direction { get; set; }
 
+        // Nota: Asumimos que la API devuelve WGS84 (Decimal) para incidencias.
+        // Si devolviera UTM, necesitaríamos strings y procesar con GpsUtils.
         [JsonPropertyName("latitude")]
         public double? Latitude { get; set; }
 
@@ -42,43 +47,58 @@ namespace MAVPC.Models
         public DateTime? StartDate { get; set; }
 
 
-        // --- HELPERS VISUALES (Esto se mantiene igual, es lógica tuya) ---
+        // --- LÓGICA DE PRESENTACIÓN (COMPUTADA) ---
 
-        public string StatusColor
+        [JsonIgnore] // No enviamos esto a la API, es solo para la UI de WPF
+        public string StatusColor => DetermineColor();
+
+        [JsonIgnore]
+        public string IconKind => DetermineIcon();
+
+        private string DetermineColor()
         {
-            get
-            {
-                // Protección contra nulos
-                var level = IncidenceLevel?.ToLower() ?? "";
+            if (string.IsNullOrEmpty(IncidenceLevel)) return "#00D4FF"; // Cyan por defecto
 
-                if (level.Contains("rojo") || level.Contains("red")) return "#FF003C"; // Rojo Neón
-                if (level.Contains("negro") || level.Contains("black")) return "#000000";
-                if (level.Contains("amarillo") || level.Contains("yellow")) return "#FFD700";
-                if (level.Contains("verde") || level.Contains("green")) return "#00FF00";
+            // Uso de StringComparison para rendimiento (evita crear nuevos strings con ToLower)
+            if (Contains(IncidenceLevel, "rojo") || Contains(IncidenceLevel, "red")) return "#FF003C"; // Rojo Neón
+            if (Contains(IncidenceLevel, "negro") || Contains(IncidenceLevel, "black")) return "#000000"; // Carretera cortada
+            if (Contains(IncidenceLevel, "amarillo") || Contains(IncidenceLevel, "yellow")) return "#FFD700";
+            if (Contains(IncidenceLevel, "verde") || Contains(IncidenceLevel, "green")) return "#00FF00";
 
-                // Por defecto (blanco o desconocido) -> Cyan
-                return "#00D4FF";
-            }
+            return "#00D4FF";
         }
 
-        public string IconKind
+        private string DetermineIcon()
         {
-            get
-            {
-                var t = IncidenceType?.ToLower() ?? "";
-                var c = Cause?.ToLower() ?? "";
+            // Unificamos tipo y causa para la búsqueda
+            string type = IncidenceType ?? "";
+            string cause = Cause ?? "";
 
-                if (t.Contains("obra") || c.Contains("obra") || c.Contains("mantenimiento")) return "Cone";
-                if (t.Contains("accidente") || c.Contains("vuelco") || c.Contains("choque") || c.Contains("alcance")) return "CarCrash";
-                if (c.Contains("avería") || c.Contains("averia")) return "CarWrench";
-                if (c.Contains("gasoil") || c.Contains("aceite")) return "Oil";
-                if (t.Contains("meteo") || c.Contains("nieve") || c.Contains("lluvia") || c.Contains("hielo")) return "WeatherPouring";
-                if (t.Contains("evento")) return "CalendarStar";
+            if (Contains(type, "obra") || Contains(cause, "obra") || Contains(cause, "mantenimiento"))
+                return "Cone"; // Icono de cono
 
-                // Seguridad vial o genérico
-                return "AlertCircle";
-            }
+            if (Contains(type, "accidente") || Contains(cause, "vuelco") || Contains(cause, "choque") || Contains(cause, "alcance"))
+                return "CarCrash";
+
+            if (Contains(cause, "avería") || Contains(cause, "averia"))
+                return "CarWrench";
+
+            if (Contains(cause, "gasoil") || Contains(cause, "aceite"))
+                return "Oil";
+
+            if (Contains(type, "meteo") || Contains(cause, "nieve") || Contains(cause, "lluvia") || Contains(cause, "hielo"))
+                return "WeatherPouring";
+
+            if (Contains(type, "evento"))
+                return "CalendarStar";
+
+            return "AlertCircle"; // Genérico
+        }
+
+        // Helper para búsqueda case-insensitive rápida
+        private bool Contains(string source, string toCheck)
+        {
+            return source.IndexOf(toCheck, StringComparison.OrdinalIgnoreCase) >= 0;
         }
     }
 }
-

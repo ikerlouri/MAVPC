@@ -1,6 +1,5 @@
 ﻿using System.Windows.Controls;
 
-
 namespace MAVPC.MVVM.Views
 {
     /// <summary>
@@ -14,4 +13,3 @@ namespace MAVPC.MVVM.Views
         }
     }
 }
-

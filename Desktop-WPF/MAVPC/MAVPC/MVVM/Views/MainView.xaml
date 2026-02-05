@@ -4,7 +4,8 @@
         xmlns:vm="clr-namespace:MAVPC.MVVM.ViewModels"
         xmlns:views="clr-namespace:MAVPC.MVVM.Views"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        Title="MAVPC" Height="800" Width="1200"
+        Title="MAVPC - Control Center" 
+        Height="800" Width="1200"
         WindowStartupLocation="CenterScreen" 
         WindowStyle="None"
         WindowState="Maximized"
@@ -12,8 +13,6 @@
         AllowsTransparency="True">
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
         <DataTemplate DataType="{x:Type vm:LoginViewModel}">
             <views:LoginView/>
         </DataTemplate>
@@ -29,20 +28,47 @@
         <DataTemplate DataType="{x:Type vm:UsersViewModel}">
             <views:UsersView/>
         </DataTemplate>
+
+        <Style x:Key="WindowButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Foreground" Value="Gray"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{x:Null}"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="Background" Value="#33FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="WindowCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource WindowButtonStyle}">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E81123"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
 
     <Border BorderBrush="#333" BorderThickness="1">
         <Grid>
-            <Grid Opacity="0.05" IsHitTestVisible="False">
+            <Grid Opacity="0.03" IsHitTestVisible="False">
                 <Grid.Background>
-                    <DrawingBrush Viewport="0,0,50,50" ViewportUnits="Absolute" TileMode="Tile">
+                    <DrawingBrush Viewport="0,0,40,40" ViewportUnits="Absolute" TileMode="Tile">
                         <DrawingBrush.Drawing>
                             <GeometryDrawing>
                                 <GeometryDrawing.Pen>
-                                    <Pen Brush="White" Thickness="0.1"/>
+                                    <Pen Brush="White" Thickness="0.5"/>
                                 </GeometryDrawing.Pen>
                                 <GeometryDrawing.Geometry>
-                                    <RectangleGeometry Rect="0,0,50,50"/>
+                                    <GeometryGroup>
+                                        <LineGeometry StartPoint="0,0" EndPoint="40,40"/>
+                                    </GeometryGroup>
                                 </GeometryDrawing.Geometry>
                             </GeometryDrawing>
                         </DrawingBrush.Drawing>
@@ -58,43 +84,49 @@
 
                 <Border Grid.Column="0" Width="260" Background="{StaticResource PanelBg}" 
                         Visibility="{Binding IsLoggedIn, Converter={StaticResource BoolToVis}}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="20" ShadowDepth="5" Opacity="0.5"/>
+                    </Border.Effect>
+
                     <StackPanel>
                         <StackPanel Margin="30">
                             <materialDesign:PackIcon Kind="TrafficLight" Width="40" Height="40" Foreground="{StaticResource NeonCyan}" HorizontalAlignment="Center"/>
                             <TextBlock Text="MAVPC" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="White" Margin="0,10,0,0"/>
+                            <TextBlock Text="CONTROL CENTER" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
                         </StackPanel>
 
                         <StackPanel Margin="10,20">
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowDashboardCommand}" IsChecked="True" Foreground="White" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ViewDashboard" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <TextBlock Text="DASHBOARD" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="ViewDashboard" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                    <TextBlock Text="DASHBOARD" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowMapCommand}" Foreground="White" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="MapMarker" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <TextBlock Text="MAPA" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="MapMarker" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                    <TextBlock Text="MAPA VIAL" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowStatsCommand}" Foreground="White" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ChartBar" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <TextBlock Text="ESTADÍSTICAS" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="ChartBar" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                    <TextBlock Text="ESTADÍSTICAS" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </RadioButton>
 
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowUsersCommand}" Foreground="White" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="AccountGroup" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <TextBlock Text="USUARIOS" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="AccountGroup" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                                    <TextBlock Text="USUARIOS" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </RadioButton>
                         </StackPanel>
 
-                        <Button Command="{Binding LogoutCommand}" Content="CERRAR SESIÓN" Margin="20" Background="{StaticResource NeonPink}" BorderBrush="{x:Null}"/>
+                        <Button Command="{Binding LogoutCommand}" Content="CERRAR SESIÓN" Margin="20,40,20,0" 
+                                Background="{StaticResource NeonRed}" BorderBrush="{x:Null}" FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
 
@@ -105,40 +137,24 @@
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" Background="Transparent" MouseDown="TitleBar_MouseDown">
-
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
 
-                            <Button Click="MinimizeButton_Click" Width="45" Height="30" 
-                                    Background="Transparent" BorderBrush="{x:Null}" Padding="0" Margin="0"
-                                    Style="{StaticResource MaterialDesignFlatButton}" Foreground="White">
-                                <materialDesign:PackIcon Kind="WindowMinimize" Width="20" Height="20"/>
+                            <Button Command="{Binding MinimizeAppCommand}" Style="{StaticResource WindowButtonStyle}">
+                                <materialDesign:PackIcon Kind="WindowMinimize" Width="16" Height="16"/>
                             </Button>
 
-                            <Button Click="MaximizeButton_Click" Width="45" Height="30" 
-                                    Background="Transparent" BorderBrush="{x:Null}" Padding="0" Margin="0"
-                                    Style="{StaticResource MaterialDesignFlatButton}" Foreground="White">
-                                <materialDesign:PackIcon Kind="WindowMaximize" Width="20" Height="20"/>
+                            <Button Command="{Binding MaximizeRestoreAppCommand}" Style="{StaticResource WindowButtonStyle}">
+                                <materialDesign:PackIcon Kind="WindowMaximize" Width="16" Height="16"/>
                             </Button>
 
-                            <Button Click="CloseButton_Click" Width="45" Height="30" 
-                                    Background="Transparent" BorderBrush="{x:Null}" Padding="0" Margin="0">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignFlatButton}">
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#FF4444"/>
-                                                <Setter Property="Foreground" Value="White"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                                <materialDesign:PackIcon Kind="WindowClose" Width="20" Height="20"/>
+                            <Button Command="{Binding CloseAppCommand}" Style="{StaticResource WindowCloseButtonStyle}">
+                                <materialDesign:PackIcon Kind="WindowClose" Width="16" Height="16"/>
                             </Button>
+
                         </StackPanel>
                     </Grid>
 
-                    <ContentControl Grid.Row="1" Content="{Binding CurrentView}"/>
+                    <ContentControl Grid.Row="1" Content="{Binding CurrentView}" Margin="0"/>
                 </Grid>
             </Grid>
         </Grid>

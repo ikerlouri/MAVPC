@@ -9,6 +9,10 @@ using Microsoft.Web.WebView2.Core;
 
 namespace MAVPC.MVVM.Views
 {
+    /// <summary>
+    /// Lógica de interacción para MapView.xaml.
+    /// Gestiona la inicialización del navegador WebView2 y el puente de comunicación JavaScript <-> C#.
+    /// </summary>
     public partial class MapView : UserControl
     {
         private MapViewModel? _viewModel;
@@ -18,13 +22,19 @@ namespace MAVPC.MVVM.Views
         {
             InitializeComponent();
             InitializeAsync();
+
+            // Escuchamos cambios en el DataContext para enlazar eventos
             this.DataContextChanged += MapView_DataContextChanged;
         }
 
+        /// <summary>
+        /// Inicializa el entorno WebView2 y navega al archivo local HTML.
+        /// </summary>
         private async void InitializeAsync()
         {
             try
             {
+                // Asegura que el runtime de WebView2 está listo
                 await MapBrowser.EnsureCoreWebView2Async();
 
                 string currentDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -32,14 +42,18 @@ namespace MAVPC.MVVM.Views
 
                 if (File.Exists(mapPath))
                 {
+                    // Suscripción a mensajes que vienen desde JavaScript
                     MapBrowser.WebMessageReceived += MapBrowser_WebMessageReceived;
-                    // Truco: Convertimos a URI para evitar problemas de rutas raras en Windows
+
+                    // Navegación segura usando URI absoluta
                     MapBrowser.CoreWebView2.Navigate(new Uri(mapPath).AbsoluteUri);
+
+                    // Evento para saber cuándo el HTML ha terminado de cargar
                     MapBrowser.NavigationCompleted += MapBrowser_NavigationCompleted;
                 }
                 else
                 {
-                    MessageBox.Show($"Falta el archivo: {mapPath}");
+                    MessageBox.Show($"Error crítico: No se encuentra el archivo del mapa en: {mapPath}");
                 }
             }
             catch (Exception ex)
@@ -48,11 +62,10 @@ namespace MAVPC.MVVM.Views
             }
         }
 
-        // Se ejecuta cuando el HTML ha terminado de cargar
         private void MapBrowser_NavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             _isMapLoaded = true;
-            RefrescarMapa(); // Si ya había datos, los pintamos ahora
+            RefrescarMapa(); // Si el ViewModel ya tenía datos, los enviamos ahora que el mapa está listo
         }
 
         private void MapView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -60,7 +73,7 @@ namespace MAVPC.MVVM.Views
             if (DataContext is MapViewModel vm)
             {
                 _viewModel = vm;
-                // Nos suscribimos a cambios en la lista de marcadores
+                // Nos suscribimos a cambios en la lista de marcadores del ViewModel
                 _viewModel.PropertyChanged += (s, args) =>
                 {
                     if (args.PropertyName == "Markers")
@@ -68,28 +81,26 @@ namespace MAVPC.MVVM.Views
                         RefrescarMapa();
                     }
                 };
-                // Intento inicial por si ya hay datos
                 RefrescarMapa();
             }
         }
 
+        /// <summary>
+        /// Serializa los marcadores a JSON y llama a la función JS 'CargarMarcadores'.
+        /// </summary>
         private async void RefrescarMapa()
         {
-            // Verificamos que todo esté listo para no dar errores tontos
             if (!_isMapLoaded || _viewModel == null || _viewModel.Markers == null || MapBrowser.CoreWebView2 == null) return;
 
             try
             {
-                // 1. Serializamos a JSON
                 var options = new JsonSerializerOptions { PropertyNamingPolicy = null };
                 var json = JsonSerializer.Serialize(_viewModel.Markers, options);
 
-                // --- CORRECCIÓN CRÍTICA ---
-                // Escapamos las comillas simples (') porque si no rompen la cadena de JS
-                // Ejemplo: "Sant'Ana" rompía la llamada CargarMarcadores('...')
+                // IMPORTANTE: Escapar comillas simples para evitar errores de sintaxis en la inyección JS
                 var jsonSafe = json.Replace("'", "\\'");
 
-                // 2. Ejecutamos la función JS
+                // Inyección de script: Llamamos a la función global definida en mapa.html
                 await MapBrowser.CoreWebView2.ExecuteScriptAsync($"CargarMarcadores('{jsonSafe}')");
             }
             catch (Exception ex)
@@ -98,18 +109,22 @@ namespace MAVPC.MVVM.Views
             }
         }
 
-        // Recibe el click desde el JS
+        /// <summary>
+        /// Recibe mensajes enviados desde el JS mediante 'window.chrome.webview.postMessage'.
+        /// </summary>
         private void MapBrowser_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
             {
                 string jsonString = e.TryGetWebMessageAsString();
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                // Deserializamos el marcador que ha sido clicado
                 var markerClicked = JsonSerializer.Deserialize<MapMarkerModel>(jsonString, options);
 
                 if (_viewModel != null && markerClicked != null)
                 {
-                    // Ejecutamos el comando en el hilo de UI
+                    // Delegamos la acción al ViewModel (ej: abrir ventana modal)
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         _viewModel.MarkerClickedCommand.Execute(markerClicked);
@@ -118,9 +133,8 @@ namespace MAVPC.MVVM.Views
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error al procesar click: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error al procesar click desde JS: {ex.Message}");
             }
         }
     }
 }
-

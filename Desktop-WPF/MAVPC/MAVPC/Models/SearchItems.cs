@@ -1,19 +1,24 @@
-﻿namespace MAVPC.Models
+﻿namespace MAVPC.Models;
+
+/// <summary>
+/// Modelo auxiliar para los resultados del buscador (AutoSuggestBox).
+/// Actúa como un DTO intermedio entre la búsqueda y la navegación.
+/// </summary>
+public class SearchItem
 {
-    // Clase auxiliar para la lista desplegable del buscador
-    public class SearchItem
-    {
-        public string Titulo { get; set; } = "";
-        public string Subtitulo { get; set; } = "";
-        public string Icono { get; set; } = "Magnify"; // Nombre del icono Material
-        public string Color { get; set; } = "White";
+    public string Titulo { get; set; } = string.Empty;
+    public string Subtitulo { get; set; } = string.Empty;
 
-        // Coordenadas para viajar al hacer clic
-        public double Lat { get; set; }
-        public double Lon { get; set; }
+    // Icono Material Design por defecto
+    public string Icono { get; set; } = "Magnify";
 
-        // Guardamos el objeto original por si acaso
-        public object? DataObject { get; set; }
-    }
+    // Color en formato Hex o nombre (WPF lo convierte automáticamente)
+    public string Color { get; set; } = "White";
+
+    // Coordenadas destino
+    public double Lat { get; set; }
+    public double Lon { get; set; }
+
+    // Referencia al objeto de origen (Camara, Incidencia, etc.) para lógica avanzada
+    public object? DataObject { get; set; }
 }
-

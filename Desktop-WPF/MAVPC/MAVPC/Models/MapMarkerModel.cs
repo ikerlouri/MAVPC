@@ -1,20 +1,32 @@
-﻿namespace MAVPC.Models
+﻿using System.Text.Json.Serialization;
+
+namespace MAVPC.Models
 {
+    /// <summary>
+    /// DTO ligero para enviar datos al mapa (Leaflet/WebView2).
+    /// </summary>
     public class MapMarkerModel
     {
-        // Usamos nombres cortos porque así lo espera el JavaScript que te pasé
+        // Añadido ID para poder identificar el click en el mapa
+        [JsonPropertyName("Id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("Lat")]
         public double Lat { get; set; }
+
+        [JsonPropertyName("Lon")]
         public double Lon { get; set; }
 
-        // Tipos aceptados por el JS: "camara", "incidencia", "obra"
+        // Tipos aceptados por el JS: "camara", "incidencia", "obra", "nieve"
+        [JsonPropertyName("Type")]
         public string Type { get; set; } = "incidencia";
 
+        [JsonPropertyName("Title")]
         public string Title { get; set; } = string.Empty;
+
+        [JsonPropertyName("Description")]
         public string Description { get; set; } = string.Empty;
 
-        // Propiedad opcional para guardar tu objeto original (Cámara o Incidencia real)
-        // por si luego quieres hacer cosas avanzadas al recibir clics.
         public object? DataObject { get; set; }
     }
 }
-

@@ -9,16 +9,23 @@ using System.Threading.Tasks;
 
 namespace MAVPC.Services
 {
+    /// <summary>
+    /// Servicio que comunica con la API de Tráfico.
+    /// Gestiona la obtención, creación y borrado de cámaras e incidencias.
+    /// </summary>
     public class TrafficService : ITrafficService
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
 
+        // URL de producción (API en Railway)
         private const string BASE_URL = "https://mavpc.up.railway.app/api/";
 
         public TrafficService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+
+            // Configuración robusta para leer JSONs (ignora mayúsculas/minúsculas y nulos)
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -27,13 +34,14 @@ namespace MAVPC.Services
             };
         }
 
-        // --- MÉTODOS EXISTENTES ---
+        #region Métodos de Lectura (GET)
 
         public async Task<List<Camara>> GetCamarasAsync()
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<Camara>>($"{BASE_URL}camaras", _jsonOptions) ?? new List<Camara>();
+                var resultado = await _httpClient.GetFromJsonAsync<List<Camara>>($"{BASE_URL}camaras", _jsonOptions);
+                return resultado ?? new List<Camara>();
             }
             catch (Exception ex)
             {
@@ -44,37 +52,38 @@ namespace MAVPC.Services
 
         public async Task<List<Incidencia>> GetIncidenciasAsync()
         {
-            // Este llama a /listarActual (Solo lo que está pasando AHORA)
+            // Llama a /listarActual (Solo lo que está pasando AHORA para el Mapa)
             return await FetchIncidencias($"{BASE_URL}incidencias/listarActual");
         }
 
-        // --- NUEVO MÉTODO: HISTORIAL COMPLETO ---
         public async Task<List<Incidencia>> GetAllIncidenciasAsync()
         {
-            // Este llama a /incidencias (Histórico completo para reportes)
+            // Llama a /incidencias (Histórico completo para Dashboard/Reportes)
             return await FetchIncidencias($"{BASE_URL}incidencias");
         }
 
-        // He refactorizado la lógica de fetch para no repetir código, 
-        // ya que ambos endpoints devuelven la misma estructura JSON.
+        /// <summary>
+        /// Método auxiliar privado para no repetir la lógica de petición y limpieza de datos.
+        /// </summary>
         private async Task<List<Incidencia>> FetchIncidencias(string url)
         {
             try
             {
                 var response = await _httpClient.GetAsync(url);
-                var jsonString = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error HTTP: {response.StatusCode}");
+                    System.Diagnostics.Debug.WriteLine($"Error HTTP FetchIncidencias: {response.StatusCode}");
                     return new List<Incidencia>();
                 }
 
+                var jsonString = await response.Content.ReadAsStringAsync();
                 var lista = JsonSerializer.Deserialize<List<Incidencia>>(jsonString, _jsonOptions);
 
                 if (lista != null)
                 {
-                    // Filtramos latitud 0 o nula para evitar basura en el mapa/reporte
+                    // Filtro de seguridad: Eliminamos incidencias sin coordenadas válidas
+                    // para que no rompan el mapa ni los cálculos.
                     return lista.FindAll(x => x.Latitude != null && x.Latitude != 0);
                 }
 
@@ -82,12 +91,14 @@ namespace MAVPC.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ERROR FETCH: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"ERROR CRÍTICO EN FETCH: {ex.Message}");
                 return new List<Incidencia>();
             }
         }
 
-        // --- MÉTODOS DE ESCRITURA ---
+        #endregion
+
+        #region Métodos de Escritura (POST/DELETE)
 
         public async Task<bool> AddCamaraAsync(Camara nuevaCamara)
         {
@@ -103,16 +114,18 @@ namespace MAVPC.Services
         {
             try
             {
-                // EL TRUCO QUE FUNCIONÓ:
+                // --- CONSTRUCCIÓN MANUAL DEL OBJETO (DTO) ---
+                // Creamos un objeto anónimo para tener control total sobre el formato de los datos.
+                // Especialmente crítico para la fecha (startDate), que la API requiere en formato exacto.
                 var paqueteParaEnviar = new
                 {
-                    // Forzamos fecha ISO 8601 limpia
+                    // Forzamos formato ISO 8601 limpio (yyyy-MM-ddTHH:mm:ss)
                     startDate = $"{item.StartDate:yyyy-MM-ddTHH:mm:ss}",
 
-                    // Resto de datos
+                    // Mapeo directo del resto de propiedades
                     incidenceType = item.IncidenceType,
                     incidenceLevel = item.IncidenceLevel,
-                    autonomousRegion = "Euskadi",
+                    autonomousRegion = "Euskadi", // Valor por defecto fijo
                     road = item.Road,
                     cityTown = item.CityTown,
                     province = item.Province,
@@ -120,32 +133,39 @@ namespace MAVPC.Services
                     direction = item.Direction,
                     latitude = item.Latitude,
                     longitude = item.Longitude
-                    // SIN incidenceId
+                    // Nota: No enviamos incidenceId, la BD lo genera
                 };
 
                 var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}incidencias", paqueteParaEnviar);
 
-                // Solo devolvemos true si es 200-299.
-                // Si falla, el ViewModel se encargará de avisar al usuario si quiere.
+                if (!response.IsSuccessStatusCode)
+                {
+                    // Debug opcional para ver qué dice el servidor si falla
+                    var errorMsg = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"Error Servidor al guardar: {errorMsg}");
+                }
+
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)
             {
-                // Loguear el error en consola por si acaso
-                System.Diagnostics.Debug.WriteLine($"Error al guardar: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Excepción al guardar incidencia: {ex.Message}");
                 return false;
             }
         }
 
-        public async Task<bool> DeleteCamaraAsync(string id)
+        // En TrafficService.cs
+        public async Task<bool> DeleteCamaraAsync(int id) // Cambia string por int
         {
             try
             {
+                // La API espera ?id=1957
                 var response = await _httpClient.DeleteAsync($"{BASE_URL}camaras?id={id}");
                 return response.IsSuccessStatusCode;
             }
             catch { return false; }
         }
+
+        #endregion
     }
 }
-

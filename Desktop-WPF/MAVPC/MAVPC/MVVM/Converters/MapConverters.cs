@@ -6,7 +6,9 @@ using MaterialDesignThemes.Wpf;
 
 namespace MAVPC.MVVM.Converters
 {
-    // 1. INVERSE BOOL (Este se queda igual porque no está en el otro archivo)
+    /// <summary>
+    /// Invierte un valor booleano. Útil para propiedades de Visibilidad o IsEnabled.
+    /// </summary>
     public class InverseBoolConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -14,41 +16,58 @@ namespace MAVPC.MVVM.Converters
             if (value is bool booleanValue) return !booleanValue;
             return false;
         }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is bool booleanValue) return !booleanValue;
+            return false;
+        }
     }
 
-    // 2. ICON CONVERTER DEL MAPA (Renombrado a MapIncident...)
+    /// <summary>
+    /// Lógica de Iconos específica para la vista del Mapa (SidePanel).
+    /// </summary>
     public class MapIncidentTypeToIconConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string type = (value as string ?? "").ToLower();
+            if (value is not string type || string.IsNullOrEmpty(type))
+                return PackIconKind.AlertCircle;
 
-            if (type.Contains("camara")) return PackIconKind.Cctv;
-            if (type.Contains("obra") || type.Contains("mantenimiento")) return PackIconKind.Construction;
-            if (type.Contains("accidente") || type.Contains("grave")) return PackIconKind.Car;
-            if (type.Contains("lluvia") || type.Contains("nieve") || type.Contains("hielo")) return PackIconKind.WeatherRainy;
-            if (type.Contains("retención") || type.Contains("tráfico")) return PackIconKind.TrafficLight;
+            if (Contains(type, "camara")) return PackIconKind.Cctv;
+            if (Contains(type, "obra") || Contains(type, "mantenimiento")) return PackIconKind.Construction;
+            if (Contains(type, "accidente") || Contains(type, "grave")) return PackIconKind.Car;
+            if (Contains(type, "lluvia") || Contains(type, "nieve") || Contains(type, "hielo")) return PackIconKind.WeatherRainy;
+            if (Contains(type, "retención") || Contains(type, "tráfico")) return PackIconKind.TrafficLight;
 
             return PackIconKind.AlertCircle;
         }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+
+        private bool Contains(string source, string keyword)
+            => source.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 
-    // 3. COLOR CONVERTER DEL MAPA (Renombrado a MapIncident...)
+    /// <summary>
+    /// Lógica de Colores simplificada para marcadores o bordes en el mapa.
+    /// </summary>
     public class MapIncidentTypeToColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string type = (value as string ?? "").ToLower();
+            if (value is not string type || string.IsNullOrEmpty(type))
+                return Brushes.Red; // Default alert
 
-            if (type.Contains("camara")) return Brushes.DodgerBlue;
-            if (type.Contains("obra") || type.Contains("mantenimiento")) return Brushes.Orange;
-            if (type.Contains("retención") || type.Contains("tráfico")) return Brushes.Yellow;
+            if (Contains(type, "camara")) return Brushes.DodgerBlue;
+            if (Contains(type, "obra") || Contains(type, "mantenimiento")) return Brushes.Orange;
+            if (Contains(type, "retención") || Contains(type, "tráfico")) return Brushes.Yellow;
 
             return Brushes.Red;
         }
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+
+        private bool Contains(string source, string keyword)
+            => source.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 }
-

@@ -4,16 +4,15 @@ namespace MAVPC.Models
 {
     public class Camara
     {
-        // Mapeamos "cameraId" del JSON a nuestra propiedad Id
-        [JsonPropertyName("cameraId")]
-        public string Id { get; set; } = string.Empty;
+        // CORRECCIÓN CRÍTICA: 
+        // 1. Cambiamos "cameraId" por "id" para que coincida con tu JSON.
+        // 2. Cambiamos string a int para evitar problemas de formato.
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
 
-        // Mapeamos "cameraName" -> Nombre
         [JsonPropertyName("cameraName")]
         public string Nombre { get; set; } = string.Empty;
 
-        // Mapeamos "urlImage" -> UrlImagen
-        // El '?' es importante porque en tu JSON a veces viene null
         [JsonPropertyName("urlImage")]
         public string? UrlImagen { get; set; }
 
@@ -26,8 +25,7 @@ namespace MAVPC.Models
         [JsonPropertyName("address")]
         public string Direccion { get; set; } = string.Empty;
 
-        // Nota: Tus coordenadas vienen en formato UTM (números gigantes), 
-        // no en latitud/longitud normal. Las guardamos como string por ahora.
+        // Latitud/Longitud las dejamos como string por seguridad en el parseo
         [JsonPropertyName("latitude")]
         public string Latitud { get; set; } = string.Empty;
 

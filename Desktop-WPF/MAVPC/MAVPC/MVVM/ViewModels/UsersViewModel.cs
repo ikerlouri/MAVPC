@@ -2,63 +2,84 @@
 using CommunityToolkit.Mvvm.Input;
 using MAVPC.Services;
 using MAVPC.Models;
+using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Diagnostics;
-using System.ComponentModel; // NECESARIO PARA EL FILTRO
-using System.Windows.Data;   // NECESARIO PARA EL FILTRO
+using System.Windows.Data;
 
 namespace MAVPC.MVVM.ViewModels
 {
+    /// <summary>
+    /// ViewModel para la gestión de usuarios.
+    /// Incluye filtrado en tiempo real, hashing de contraseñas y operaciones CRUD completas.
+    /// </summary>
     public partial class UsersViewModel : ObservableObject
     {
         private readonly IAuthService _authService;
 
-        // Variable para controlar la vista filtrada (NO es una propiedad observable)
+        // Vista de colección para aplicar filtros sin modificar la lista original
         private ICollectionView _usersCollectionView;
 
         [ObservableProperty] private ObservableCollection<Usuario> _usuarios;
         [ObservableProperty] private Usuario? _selectedUsuario;
 
-        // DIÁLOGO
+        #region Propiedades del Diálogo (Modal)
+
         [ObservableProperty] private bool _isDialogOpen;
         [ObservableProperty] private string _dialogTitle;
 
-        // FORMULARIO
-        [ObservableProperty] private string _formUsername;
-        [ObservableProperty] private string _formEmail;
-        [ObservableProperty] private string _formUrlImage; // Añadido por si acaso lo usas luego
-
+        // Variables de estado para saber si estamos creando o editando
         private bool _isEditMode;
 
-        // --- PROPIEDAD DEL BUSCADOR ---
+        #endregion
+
+        #region Propiedades del Formulario
+
+        [ObservableProperty] private string _formUsername;
+        [ObservableProperty] private string _formEmail;
+        [ObservableProperty] private string _formUrlImage;
+
+        #endregion
+
+        #region Buscador y Filtro
+
         private string _searchText;
+        /// <summary>
+        /// Texto de búsqueda. Al cambiar, actualiza automáticamente el filtro de la lista.
+        /// </summary>
         public string SearchText
         {
             get => _searchText;
             set
             {
-                // Al cambiar el texto, notificamos y refrescamos el filtro
                 if (SetProperty(ref _searchText, value))
                 {
+                    // Refrescamos la vista para aplicar el filtro de nuevo
                     _usersCollectionView?.Refresh();
                 }
             }
         }
+
+        #endregion
 
         public UsersViewModel(IAuthService authService)
         {
             _authService = authService;
             Usuarios = new ObservableCollection<Usuario>();
 
-            // Lanzamos la carga inicial
+            // Carga inicial de datos
             LoadUsers();
         }
 
-        // Método para cargar desde la API
+        /// <summary>
+        /// Carga los usuarios desde la API y configura el ICollectionView para el filtrado.
+        /// </summary>
         private async void LoadUsers()
         {
             try
@@ -72,20 +93,18 @@ namespace MAVPC.MVVM.ViewModels
                 }
 
                 // --- CONFIGURACIÓN DEL FILTRO ---
-                // Obtenemos la vista por defecto de la colección
+                // Enlazamos la CollectionView a la ObservableCollection
                 _usersCollectionView = CollectionViewSource.GetDefaultView(Usuarios);
 
-                // Definimos la lógica: ¿Qué filas se muestran?
+                // Definimos el predicado de filtrado
                 _usersCollectionView.Filter = (obj) =>
                 {
-                    // 1. Si el buscador está vacío, mostramos todo
                     if (string.IsNullOrEmpty(SearchText)) return true;
 
-                    // 2. Si el objeto es un usuario, comprobamos el texto
                     if (obj is Usuario user)
                     {
                         string search = SearchText.ToLower();
-                        // Buscamos coincidencia en Nombre o Email
+                        // Filtramos por Nombre de Usuario O Email
                         return (user.NombreUsuario != null && user.NombreUsuario.ToLower().Contains(search)) ||
                                (user.Email != null && user.Email.ToLower().Contains(search));
                     }
@@ -94,11 +113,13 @@ namespace MAVPC.MVVM.ViewModels
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Error al cargar: {ex.Message}");
+                Debug.WriteLine($"Error al cargar usuarios: {ex.Message}");
             }
         }
 
-        // --- MÉTODO DE HASHEO ---
+        /// <summary>
+        /// Genera un hash SHA256 de la contraseña para no enviarla en texto plano.
+        /// </summary>
         private string HashPassword(string rawPassword)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -113,12 +134,14 @@ namespace MAVPC.MVVM.ViewModels
             }
         }
 
+        #region Comandos del Diálogo
+
         [RelayCommand]
         private void OpenCreateDialog()
         {
             FormUsername = "";
             FormEmail = "";
-            FormUrlImage = ""; // Limpiamos
+            FormUrlImage = "";
             _isEditMode = false;
             DialogTitle = "NUEVO USUARIO";
             IsDialogOpen = true;
@@ -132,12 +155,22 @@ namespace MAVPC.MVVM.ViewModels
             SelectedUsuario = usuarioToEdit;
             FormUsername = usuarioToEdit.NombreUsuario;
             FormEmail = usuarioToEdit.Email;
-            FormUrlImage = usuarioToEdit.UrlImage; // Cargamos
+            FormUrlImage = usuarioToEdit.UrlImage;
 
             _isEditMode = true;
             DialogTitle = $"EDITAR: {usuarioToEdit.NombreUsuario.ToUpper()}";
             IsDialogOpen = true;
         }
+
+        [RelayCommand]
+        private void CloseDialog()
+        {
+            IsDialogOpen = false;
+        }
+
+        #endregion
+
+        #region Comandos CRUD
 
         [RelayCommand]
         private async Task DeleteUser(Usuario? usuarioToDelete)
@@ -161,6 +194,10 @@ namespace MAVPC.MVVM.ViewModels
             }
         }
 
+        /// <summary>
+        /// Guarda (Crea o Edita) el usuario, gestionando el hash de la contraseña si es necesario.
+        /// </summary>
+        /// <param name="parameter">El PasswordBox de la vista para obtener la contraseña de forma segura.</param>
         [RelayCommand]
         private async Task Save(object parameter)
         {
@@ -175,11 +212,12 @@ namespace MAVPC.MVVM.ViewModels
 
             try
             {
+                // === CASO EDICIÓN ===
                 if (_isEditMode && SelectedUsuario != null)
                 {
-                    // === EDICIÓN ===
                     string? passwordToSend = null;
 
+                    // Solo hasheamos si el usuario escribió una nueva contraseña
                     if (!string.IsNullOrWhiteSpace(rawPassword))
                     {
                         passwordToSend = HashPassword(rawPassword);
@@ -190,7 +228,8 @@ namespace MAVPC.MVVM.ViewModels
                         Id = SelectedUsuario.Id,
                         NombreUsuario = FormUsername,
                         Email = FormEmail,
-                        UrlImage = FormUrlImage ?? SelectedUsuario.UrlImage, // Usamos la nueva o mantenemos
+                        UrlImage = FormUrlImage ?? SelectedUsuario.UrlImage,
+                        // Si no hay password nueva, mantenemos la vieja
                         Contrasena = passwordToSend ?? SelectedUsuario.Contrasena
                     };
 
@@ -198,6 +237,7 @@ namespace MAVPC.MVVM.ViewModels
 
                     if (exito)
                     {
+                        // Actualizamos la lista localmente para reflejar cambios sin recargar todo
                         var index = Usuarios.IndexOf(SelectedUsuario);
                         if (index >= 0) Usuarios[index] = usuarioActualizado;
 
@@ -210,9 +250,9 @@ namespace MAVPC.MVVM.ViewModels
                         MessageBox.Show("Error al actualizar en el servidor.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
+                // === CASO CREACIÓN ===
                 else
                 {
-                    // === CREACIÓN ===
                     if (string.IsNullOrWhiteSpace(rawPassword))
                     {
                         MessageBox.Show("La contraseña es obligatoria para nuevos usuarios.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -223,7 +263,7 @@ namespace MAVPC.MVVM.ViewModels
 
                     var newUsuario = new Usuario
                     {
-                        Id = 0,
+                        Id = 0, // La API asignará el ID real
                         NombreUsuario = FormUsername,
                         Email = FormEmail,
                         Contrasena = hashedPassword,
@@ -237,7 +277,7 @@ namespace MAVPC.MVVM.ViewModels
                         MessageBox.Show("Usuario creado correctamente.");
                         CloseDialog();
                         if (passwordBox != null) passwordBox.Password = "";
-                        LoadUsers(); // Recargamos para obtener ID real
+                        LoadUsers(); // Recargamos para obtener el ID real generado por la BD
                     }
                     else
                     {
@@ -251,10 +291,6 @@ namespace MAVPC.MVVM.ViewModels
             }
         }
 
-        [RelayCommand]
-        private void CloseDialog()
-        {
-            IsDialogOpen = false;
-        }
+        #endregion
     }
 }

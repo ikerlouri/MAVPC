@@ -9,46 +9,80 @@ using System.Windows.Media;
 
 namespace MAVPC.MVVM.ViewModels
 {
+    /// <summary>
+    /// ViewModel encargado de la analítica de datos.
+    /// Calcula KPIs en tiempo real y genera series de datos para gráficas (LiveCharts).
+    /// </summary>
     public partial class StatsViewModel : ObservableObject
     {
         private readonly ITrafficService _trafficService;
 
-        // --- KPIS ---
+        #region Propiedades KPI (Indicadores Clave)
+
+        /// <summary>Total de incidencias registradas.</summary>
         [ObservableProperty] private string _kpiTotal = "0";
+
+        /// <summary>Total de incidencias de nivel Rojo/Crítico.</summary>
         [ObservableProperty] private string _kpiCriticas = "0";
+
+        /// <summary>La causa más frecuente de incidencias.</summary>
         [ObservableProperty] private string _kpiTopCausa = "-";
+
+        /// <summary>La provincia o zona con más incidencias.</summary>
         [ObservableProperty] private string _kpiTopZona = "-";
 
-        // --- PROPIEDADES GRÁFICOS ---
+        #endregion
+
+        #region Propiedades Gráficos (LiveCharts)
+
+        /// <summary>Datos para el gráfico circular de Tipos.</summary>
         [ObservableProperty] private SeriesCollection _incidenciasSeries;
+
+        /// <summary>Datos para el gráfico de barras comparativo (Cámaras vs Incidencias).</summary>
         [ObservableProperty] private SeriesCollection _camarasSeries;
+
+        /// <summary>Datos para el gráfico de barras de Carreteras conflictivas.</summary>
         [ObservableProperty] private SeriesCollection _carreterasSeries;
 
+        // Ejes y Formateadores
         [ObservableProperty] private string[] _labels;
         [ObservableProperty] private string[] _carreterasLabels;
         [ObservableProperty] private Func<double, string> _formatter;
 
-        // --- NUEVO: CONSTRUCTOR VACÍO DE SEGURIDAD ---
-        // Esto evita que el XAML explote si intenta crear el VM sin pasarle el servicio
+        #endregion
+
+        #region Constructores
+
+        /// <summary>
+        /// Constructor vacío de seguridad.
+        /// Necesario para que el diseñador XAML de Visual Studio no lance excepciones al intentar renderizar la vista.
+        /// </summary>
         public StatsViewModel()
         {
-            // Inicializamos listas para que no de error de "Null Reference" al pintar
+            // Inicialización preventiva de colecciones para evitar NullReferenceException
             IncidenciasSeries = new SeriesCollection();
             CamarasSeries = new SeriesCollection();
             CarreterasSeries = new SeriesCollection();
             Formatter = value => value.ToString("N0");
         }
 
-        // --- CONSTRUCTOR PRINCIPAL ---
-        public StatsViewModel(ITrafficService trafficService) : this() // Llama al vacío primero para inicializar listas
+        /// <summary>
+        /// Constructor principal con inyección de dependencias.
+        /// </summary>
+        public StatsViewModel(ITrafficService trafficService) : this() // Llama al vacío primero
         {
             _trafficService = trafficService;
             LoadStats();
         }
 
+        #endregion
+
+        /// <summary>
+        /// Carga los datos de los servicios, calcula los KPIs y rellena las series de los gráficos.
+        /// </summary>
         private async void LoadStats()
         {
-            // NUEVO: Comprobación de seguridad
+            // Comprobación de seguridad por si el servicio falla en la inyección
             if (_trafficService == null) return;
 
             try
@@ -58,10 +92,13 @@ namespace MAVPC.MVVM.ViewModels
 
                 if (incidencias == null || camaras == null) return;
 
-                // 1. CÁLCULO DE KPIS
-                KpiTotal = incidencias.Count.ToString();
+                // --- 1. CÁLCULO DE KPIS ---
+                KpiTotal = incidencias.Count().ToString();
+
+                // Filtramos por nivel Rojo (Crítico)
                 KpiCriticas = incidencias.Count(x => x.IncidenceLevel == "Rojo").ToString();
 
+                // Calculamos la causa más común ignorando valores vacíos o "Var"
                 var topCausaGroup = incidencias
                     .Where(x => !string.IsNullOrEmpty(x.Cause) && x.Cause != "Var")
                     .GroupBy(x => x.Cause)
@@ -69,6 +106,7 @@ namespace MAVPC.MVVM.ViewModels
                     .FirstOrDefault();
                 KpiTopCausa = topCausaGroup?.Key ?? "N/A";
 
+                // Calculamos la zona (Provincia) con más actividad
                 var topZonaGroup = incidencias
                     .Where(x => !string.IsNullOrEmpty(x.Province))
                     .GroupBy(x => x.Province)
@@ -76,7 +114,8 @@ namespace MAVPC.MVVM.ViewModels
                     .FirstOrDefault();
                 KpiTopZona = topZonaGroup?.Key ?? "N/A";
 
-                // 2. DONUT TIPOS
+
+                // --- 2. GRÁFICO DONUT (Distribución por Tipos) ---
                 var pieSeries = new SeriesCollection();
                 var rawTipos = incidencias
                     .GroupBy(x => x.IncidenceType ?? "OTROS")
@@ -94,7 +133,7 @@ namespace MAVPC.MVVM.ViewModels
                         Title = item.Tipo,
                         Values = new ChartValues<int> { item.Cantidad },
                         DataLabels = true,
-                        LabelPoint = point => "",
+                        LabelPoint = point => "", // Ocultamos etiqueta interna para limpieza
                         Fill = (SolidColorBrush)new BrushConverter().ConvertFromString(colorHex),
                         StrokeThickness = 2,
                         Stroke = Brushes.Black
@@ -103,7 +142,8 @@ namespace MAVPC.MVVM.ViewModels
                 }
                 IncidenciasSeries = pieSeries;
 
-                // 3. BARRAS CARRETERAS
+
+                // --- 3. GRÁFICO BARRAS HORIZONTALES (Top Carreteras) ---
                 var topRoads = incidencias
                     .Where(x => !string.IsNullOrEmpty(x.Road))
                     .GroupBy(x => x.Road)
@@ -125,13 +165,14 @@ namespace MAVPC.MVVM.ViewModels
                 };
                 CarreterasLabels = topRoads.Select(x => x.Carretera).ToArray();
 
-                // 4. COLUMNAS ACTIVOS
+
+                // --- 4. GRÁFICO COLUMNAS (Activos: Cámaras vs Incidencias) ---
                 CamarasSeries = new SeriesCollection
                 {
                     new ColumnSeries
                     {
                         Title = "Activos",
-                        Values = new ChartValues<int> { camaras.Count, incidencias.Count },
+                        Values = new ChartValues<int> { camaras.Count(), incidencias.Count() },
                         Fill = (SolidColorBrush)new BrushConverter().ConvertFromString("#FF007F"),
                         DataLabels = true,
                         MaxColumnWidth = 50
@@ -141,7 +182,7 @@ namespace MAVPC.MVVM.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error stats: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error calculando estadísticas: {ex.Message}");
             }
         }
     }

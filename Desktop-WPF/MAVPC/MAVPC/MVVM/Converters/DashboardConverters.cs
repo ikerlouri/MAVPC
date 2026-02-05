@@ -6,61 +6,75 @@ using System.Windows.Media;
 
 namespace MAVPC.MVVM.Converters
 {
-    // 1. CONVERTER DE COLOR (Corregido para detectar Montaña)
+    /// <summary>
+    /// Convierte tipos de incidencia (string) a Colores (Brush) para el Dashboard.
+    /// Optimizado para evitar asignaciones de memoria en listas largas.
+    /// </summary>
     public class IncidentTypeToColorConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        // Cacheamos el color personalizado para no crearlo en cada fila (Performance crítica en listas)
+        private static readonly SolidColorBrush CyanBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00D4FF"));
+
+        static IncidentTypeToColorConverter()
         {
-            // Pasamos a minúsculas para comparar fácil
-            string type = value?.ToString()?.ToLower() ?? "";
-
-            // CASO 1: ACCIDENTES (Rojo)
-            if (type.Contains("accidente") || type.Contains("rojo") || type.Contains("grave") || type.Contains("cerrado"))
-                return Brushes.Red;
-
-            // CASO 2: OBRAS (Naranja)
-            if (type.Contains("obra") || type.Contains("mantenimiento"))
-                return Brushes.Orange;
-
-            // CASO 3: TRÁFICO (Amarillo)
-            if (type.Contains("retención") || type.Contains("tráfico") || type.Contains("lento"))
-                return Brushes.Yellow;
-
-            // CASO 4: NIEVE / PUERTOS (Blanco / Nieve) -> ¡ESTO ES LO QUE FALTABA!
-            if (type.Contains("puerto") || type.Contains("montaña") || type.Contains("nieve") || type.Contains("hielo") || type.Contains("climatología"))
-                return Brushes.White;
-
-            // CASO 5: CÁMARAS (Si las usas aquí)
-            if (type.Contains("cámara") || type.Contains("camara"))
-                return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00D4FF")); // Cyan Tecnológico
-
-            // DEFAULT: Si no sabemos qué es, ponemos el Cyan (o podrías poner Gris para que no destaque tanto)
-            return new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00D4FF"));
+            // Congelar el brush permite que WPF lo comparta entre hilos y objetos sin overhead
+            if (CyanBrush.CanFreeze) CyanBrush.Freeze();
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is not string type || string.IsNullOrEmpty(type))
+                return CyanBrush; // Default
+
+            // Uso de StringComparison para evitar .ToLower() (Más rápido)
+            if (IsMatch(type, "accidente", "rojo", "grave", "cerrado")) return Brushes.Red;
+            if (IsMatch(type, "obra", "mantenimiento")) return Brushes.Orange;
+            if (IsMatch(type, "retención", "tráfico", "lento")) return Brushes.Yellow;
+
+            // Lógica específica para Meteo/Montaña
+            if (IsMatch(type, "puerto", "montaña", "nieve", "hielo", "climatología")) return Brushes.White;
+
+            return CyanBrush;
+        }
+
+        // Helper para comparar múltiples keywords eficientemente
+        private bool IsMatch(string source, params string[] keywords)
+        {
+            foreach (var key in keywords)
+            {
+                if (source.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0) return true;
+            }
+            return false;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 
-    // 2. CONVERTER DE ICONO (Corregido para detectar Montaña)
+    /// <summary>
+    /// Convierte tipos de incidencia a Iconos de Material Design.
+    /// </summary>
     public class IncidentTypeToIconConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string type = value?.ToString()?.ToLower() ?? "";
+            if (value is not string type || string.IsNullOrEmpty(type))
+                return PackIconKind.AlertCircleOutline;
 
-            if (type.Contains("accidente")) return PackIconKind.Car;
-            if (type.Contains("obra") || type.Contains("mantenimiento")) return PackIconKind.Cone; // Cone (cono) es muy visual
+            if (Contains(type, "accidente")) return PackIconKind.Car; 
+            if (Contains(type, "obra") || Contains(type, "mantenimiento")) return PackIconKind.Cone;
 
-            // Aquí añadimos "puerto" y "montaña" para que salga el icono de clima
-            if (type.Contains("lluvia") || type.Contains("nieve") || type.Contains("hielo") || type.Contains("puerto") || type.Contains("montaña"))
-                return PackIconKind.Snowflake; // O PackIconKind.Mountain si prefieres
+            // Meteo / Montaña
+            if (Contains(type, "lluvia") || Contains(type, "nieve") || Contains(type, "hielo") || Contains(type, "puerto") || Contains(type, "montaña"))
+                return PackIconKind.Snowflake;
 
-            if (type.Contains("retención")) return PackIconKind.TrafficLight;
+            if (Contains(type, "retención")) return PackIconKind.TrafficLight;
 
             return PackIconKind.AlertCircleOutline;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+        private bool Contains(string source, string keyword)
+            => source.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => Binding.DoNothing;
     }
 }
-

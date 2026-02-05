@@ -4,21 +4,45 @@ using System.Threading.Tasks;
 
 namespace MAVPC.Services
 {
+    /// <summary>
+    /// Interfaz para la gestión de datos de tráfico (Cámaras e Incidencias).
+    /// </summary>
     public interface ITrafficService
     {
-        // Métodos de Lectura (GET)
+        // --- LECTURA (GET) ---
+
+        /// <summary>
+        /// Obtiene la lista de cámaras disponibles.
+        /// </summary>
         Task<List<Camara>> GetCamarasAsync();
 
-        // El actual (solo activas)
+        /// <summary>
+        /// Obtiene SOLO las incidencias que están activas actualmente (endpoint /listarActual).
+        /// Usado principalmente por el Mapa.
+        /// </summary>
         Task<List<Incidencia>> GetIncidenciasAsync();
 
-        // --- NUEVO: El que trae todo el historial (api/incidencias) ---
+        /// <summary>
+        /// Obtiene TODO el historial de incidencias (endpoint /incidencias).
+        /// Usado para generar reportes y estadísticas en el Dashboard.
+        /// </summary>
         Task<List<Incidencia>> GetAllIncidenciasAsync();
 
-        // Métodos de Escritura (POST/DELETE)
+        // --- ESCRITURA (POST/DELETE) ---
+
+        /// <summary>
+        /// Registra una nueva cámara en el sistema.
+        /// </summary>
         Task<bool> AddCamaraAsync(Camara nuevaCamara);
+
+        /// <summary>
+        /// Registra una nueva incidencia.
+        /// </summary>
         Task<bool> AddIncidenciaAsync(Incidencia nuevaIncidencia);
-        Task<bool> DeleteCamaraAsync(string id);
+
+        /// <summary>
+        /// Elimina una cámara del sistema por su ID.
+        /// </summary>
+        Task<bool> DeleteCamaraAsync(int id);
     }
 }
-

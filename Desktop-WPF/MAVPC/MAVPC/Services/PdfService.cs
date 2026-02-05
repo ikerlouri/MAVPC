@@ -1,14 +1,13 @@
-﻿using QuestPDF.Fluent;
+﻿using MAVPC.Models;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using ScottPlot;
-using SkiaSharp;
-using MAVPC.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 
-// ALIAS ESTRICTOS
+// ALIAS ESTRICTOS (Necesarios para evitar conflictos entre QuestPDF y ScottPlot)
 using QColors = QuestPDF.Helpers.Colors;
 using QFonts = QuestPDF.Helpers.Fonts;
 using SColors = ScottPlot.Colors;
@@ -17,14 +16,24 @@ using SColor = ScottPlot.Color;
 
 namespace MAVPC.Services
 {
+    /// <summary>
+    /// Implementación del servicio de reportes usando QuestPDF para el documento
+    /// y ScottPlot 5 para la generación de gráficos estadísticos.
+    /// </summary>
     public class PdfService : IPdfService
     {
+        #region Configuración y Paleta
+
         // Paleta Corporativa
         private static readonly string HexPrimary = "#2C3E50"; // Azul Oscuro
         private static readonly string HexAccent = "#3498DB";  // Azul Brillante
         private static readonly string HexDanger = "#E74C3C";  // Rojo
         private static readonly string HexSuccess = "#27AE60"; // Verde
         private static readonly string HexLight = "#F8F9FA";   // Fondo Gris
+
+        #endregion
+
+        #region Implementación Principal
 
         public void GenerateFullReport(string filePath, List<Incidencia> datos)
         {
@@ -33,6 +42,7 @@ namespace MAVPC.Services
             // KPIs Globales
             int total = datos.Count;
             int criticas = datos.Count(x => x.IncidenceLevel == "Rojo");
+
             var topProvincia = datos.GroupBy(x => x.Province ?? "N/A")
                                     .OrderByDescending(g => g.Count())
                                     .Select(g => new { Nombre = g.Key, Cantidad = g.Count() })
@@ -52,8 +62,8 @@ namespace MAVPC.Services
 
             // Datos Gráfico Donut (Gravedad)
             var datosGravedad = datos.GroupBy(x => x.IncidenceLevel ?? "Otros")
-                                   .Select(g => new { Nivel = g.Key, Cantidad = g.Count() })
-                                   .OrderByDescending(x => x.Cantidad).ToList();
+                                     .Select(g => new { Nivel = g.Key, Cantidad = g.Count() })
+                                     .OrderByDescending(x => x.Cantidad).ToList();
 
             // Datos Gráfico Barras (Top 5 Causas)
             var datosCausas = datos.GroupBy(x => x.Cause ?? "Otros")
@@ -77,14 +87,14 @@ namespace MAVPC.Services
                                  .Select(g => new { Fecha = g.Key.ToString("dd/MM"), Count = (double)g.Count() })
                                  .ToList();
 
-            // --- 2. GENERACIÓN DE GRÁFICOS ---
+            // --- 2. GENERACIÓN DE GRÁFICOS (Memoria) ---
 
             byte[] imgTendencia = GenerarAreaChart(tendencia.Select(x => x.Fecha).ToArray(), tendencia.Select(x => x.Count).ToArray());
             byte[] imgGravedad = GenerarDonutChart(datosGravedad);
             byte[] imgCausas = GenerarBarChart(datosCausas);
 
 
-            // --- 3. MAQUETACIÓN MULTIPÁGINA ---
+            // --- 3. MAQUETACIÓN MULTIPÁGINA (QuestPDF) ---
 
             Document.Create(container =>
             {
@@ -156,7 +166,7 @@ namespace MAVPC.Services
 
                         col.Item().PaddingVertical(30).LineHorizontal(1).LineColor(QColors.Grey.Lighten3);
 
-                        // Insights Simulados
+                        // Insights Simulados (Texto generado dinámicamente)
                         col.Item().Background(HexLight).Padding(15).Column(c => {
                             c.Item().Text("INSIGHTS AUTOMÁTICOS").FontSize(10).Bold().FontColor(HexAccent);
                             double porcentajeCritico = total > 0 ? ((double)criticas / total) * 100 : 0;
@@ -191,7 +201,9 @@ namespace MAVPC.Services
             .GeneratePdf(filePath);
         }
 
-        // --- MÉTODOS VISUALES ---
+        #endregion
+
+        #region Métodos de Maquetación (QuestPDF)
 
         void ComposeHeader(IContainer container)
         {
@@ -218,7 +230,6 @@ namespace MAVPC.Services
                 .Padding(15)
                 .Column(c => {
                     c.Item().Text(value).FontSize(24).Bold().FontColor(HexPrimary);
-                    // CORRECCIÓN: label.ToUpper() es C#, no QuestPDF.
                     c.Item().Text(label.ToUpper()).FontSize(8).SemiBold().FontColor(QColors.Grey.Darken1);
                 });
         }
@@ -249,13 +260,8 @@ namespace MAVPC.Services
                     string bg = (i % 2 == 0) ? QColors.White : HexLight;
 
                     table.Cell().Element(e => CellStyle(e, bg)).Text(i.ToString()).FontColor(QColors.Grey.Medium);
-
-                    // CORRECCIÓN: Casting explícito a (string) para que .SemiBold() funcione
                     table.Cell().Element(e => CellStyle(e, bg)).Text((string)item.Carretera).SemiBold().FontColor(HexPrimary);
-
                     table.Cell().Element(e => CellStyle(e, bg)).Text("Monitorizado").FontSize(9).Italic().FontColor(QColors.Grey.Darken1);
-
-                    // CORRECCIÓN: Interpolación o .ToString() para el número
                     table.Cell().Element(e => CellStyle(e, bg)).AlignRight().Text($"{item.Total}").Bold();
 
                     i++;
@@ -266,8 +272,9 @@ namespace MAVPC.Services
         static IContainer HeaderStyle(IContainer c) => c.BorderBottom(2).BorderColor(HexPrimary).Padding(8).DefaultTextStyle(x => x.SemiBold().FontSize(10).FontColor(HexPrimary));
         static IContainer CellStyle(IContainer c, string bg) => c.BorderBottom(1).BorderColor(QColors.Grey.Lighten4).Background(bg).Padding(8).DefaultTextStyle(x => x.FontSize(10));
 
+        #endregion
 
-        // --- GRÁFICOS (SCOTTPLOT 5) ---
+        #region Generación de Gráficos (ScottPlot 5)
 
         private byte[] GenerarAreaChart(string[] fechas, double[] valores)
         {
@@ -337,34 +344,31 @@ namespace MAVPC.Services
                 string rawNivel = item.Nivel.ToString();
                 string cleanLabel = rawNivel;
                 SColor colorActual;
-                bool semanticoEncontrado = false;
 
                 // 3. LÓGICA DE ASIGNACIÓN
                 if (rawNivel.Contains("Rojo", StringComparison.OrdinalIgnoreCase))
                 {
-                    cleanLabel = "Nivel Rojo"; colorActual = cRojo; semanticoEncontrado = true;
+                    cleanLabel = "Nivel Rojo"; colorActual = cRojo;
                 }
                 else if (rawNivel.Contains("Naran", StringComparison.OrdinalIgnoreCase))
                 {
-                    cleanLabel = "Nivel Naranja"; colorActual = cNaranja; semanticoEncontrado = true;
+                    cleanLabel = "Nivel Naranja"; colorActual = cNaranja;
                 }
                 else if (rawNivel.Contains("Amar", StringComparison.OrdinalIgnoreCase))
                 {
-                    cleanLabel = "Nivel Amarillo"; colorActual = cAmarillo; semanticoEncontrado = true;
+                    cleanLabel = "Nivel Amarillo"; colorActual = cAmarillo;
                 }
                 else if (rawNivel.Contains("Blan", StringComparison.OrdinalIgnoreCase))
                 {
-                    cleanLabel = "Nivel Blanco"; colorActual = cBlanco; semanticoEncontrado = true;
+                    cleanLabel = "Nivel Blanco"; colorActual = cBlanco;
                 }
                 else if (rawNivel.Contains("Verd", StringComparison.OrdinalIgnoreCase) || rawNivel.Contains("Fluido"))
                 {
-                    cleanLabel = "Nivel Verde"; colorActual = cVerde; semanticoEncontrado = true;
+                    cleanLabel = "Nivel Verde"; colorActual = cVerde;
                 }
                 else
                 {
-                    // === AQUÍ ESTÁ EL CAMBIO ===
                     // Si no reconocemos el color, usamos uno de la paleta rotatoria
-                    // en lugar de usar siempre el mismo azul oscuro.
                     colorActual = paletaFallback[idx % paletaFallback.Length];
 
                     // Limpiamos la etiqueta si es muy larga
@@ -380,7 +384,7 @@ namespace MAVPC.Services
             var pie = myPlot.Add.Pie(slices);
             pie.DonutFraction = 0.6;
 
-            // Borde blanco (si tu versión de ScottPlot lo soporta, si no, borra estas 2 líneas)
+            // Borde blanco
             pie.LineStyle.Width = 2;
             pie.LineStyle.Color = SColors.White;
 
@@ -396,6 +400,7 @@ namespace MAVPC.Services
 
             return myPlot.GetImageBytes(500, 300, SImageFormat.Png);
         }
+
         private byte[] GenerarBarChart(dynamic datos)
         {
             ScottPlot.Plot myPlot = new();
@@ -425,7 +430,7 @@ namespace MAVPC.Services
                 bar.Label = item.Cantidad.ToString();
                 bars.Add(bar);
 
-                // --- EL CAMBIO: NO CORTAMOS EL NOMBRE ---
+                // NO CORTAMOS EL NOMBRE
                 string label = item.Causa.ToString();
                 ticks.Add(new Tick(i, label));
                 i++;
@@ -441,18 +446,17 @@ namespace MAVPC.Services
             myPlot.Axes.Bottom.TickLabelStyle.FontSize = 11;
             myPlot.Axes.Bottom.TickLabelStyle.ForeColor = SColor.FromHex("#2C3E50");
 
-            // Rotamos a -45 grados: Es la única forma de que nombres como "Mantenimiento" 
-            // no se pisen con los de al lado.
+            // Rotamos a -45 grados
             myPlot.Axes.Bottom.TickLabelStyle.Rotation = -45;
             myPlot.Axes.Bottom.TickLabelStyle.Alignment = Alignment.MiddleRight;
 
             // --- EL MARGEN FUNDAMENTAL ---
-            // Al dar un 0.4 abajo, reservamos casi la mitad de la imagen para que quepan los nombres
+            // Reservamos espacio abajo para que quepan los nombres largos
             myPlot.Axes.Margins(bottom: 0.45, top: 0.2);
 
             return myPlot.GetImageBytes(500, 350, SImageFormat.Png);
         }
+
+        #endregion
     }
 }
-
-

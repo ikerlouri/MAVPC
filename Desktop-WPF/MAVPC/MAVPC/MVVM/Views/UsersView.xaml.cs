@@ -1,9 +1,13 @@
 ﻿using System.Windows.Controls;
 using System.Windows.Input;
-using MAVPC.MVVM.ViewModels; // Asegúrate de tener este using
+using MAVPC.MVVM.ViewModels;
 
 namespace MAVPC.MVVM.Views
 {
+    /// <summary>
+    /// Lógica de interacción para UsersView.xaml.
+    /// Gestiona eventos de ratón para el comportamiento del diálogo modal.
+    /// </summary>
     public partial class UsersView : UserControl
     {
         public UsersView()
@@ -11,20 +15,28 @@ namespace MAVPC.MVVM.Views
             InitializeComponent();
         }
 
-        // Si hacen click en el fondo oscuro (Overlay)
+        /// <summary>
+        /// Detecta el clic en el fondo oscuro (Overlay) para cerrar el diálogo.
+        /// </summary>
         private void Overlay_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is UsersViewModel vm)
             {
-                vm.CloseDialogCommand.Execute(null);
+                // Ejecutamos el comando de cerrar diálogo del ViewModel
+                if (vm.CloseDialogCommand.CanExecute(null))
+                {
+                    vm.CloseDialogCommand.Execute(null);
+                }
             }
         }
 
-        // Si hacen click dentro de la tarjeta, DETENEMOS el evento para que no llegue al fondo
+        /// <summary>
+        /// Detiene la propagación del evento clic cuando se pulsa DENTRO de la tarjeta.
+        /// Esto evita que el Overlay_MouseDown se dispare y cierre el diálogo accidentalmente.
+        /// </summary>
         private void Card_MouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
         }
     }
 }
-

@@ -6,7 +6,7 @@ using MAVPC.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq; // Necesario para GroupBy en el PDF
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -17,17 +17,17 @@ namespace MAVPC.MVVM.ViewModels
     public partial class DashboardViewModel : ObservableObject
     {
         private readonly ITrafficService _trafficService;
-        private readonly IPdfService _pdfService; // <--- NUEVO SERVICIO
+        private readonly IPdfService _pdfService;
 
         // --- COLECCIONES ---
         [ObservableProperty] private ObservableCollection<Camara> _cameras;
         [ObservableProperty] private ObservableCollection<Incidencia> _incidencias;
 
-        // VISTA FILTRABLE PARA EL XAML
+        // Vista filtrable para rendimiento en búsqueda
         public ICollectionView CamerasView { get; private set; }
 
-        // TEXTO DE BÚSQUEDA
-        private string _searchText;
+        // --- BÚSQUEDA ---
+        private string _searchText = string.Empty;
         public string SearchText
         {
             get => _searchText;
@@ -40,65 +40,56 @@ namespace MAVPC.MVVM.ViewModels
             }
         }
 
-        // --- KPIs Y ESTADO ---
+        // --- KPIs ---
         [ObservableProperty] private int _totalCameras;
         [ObservableProperty] private int _activeIncidents;
         [ObservableProperty] private string _systemStatus = "CONECTADO";
         [ObservableProperty] private bool _isLoading;
 
-        // CONSTRUCTOR ACTUALIZADO: Recibe ahora AMBOS servicios
         public DashboardViewModel(ITrafficService trafficService, IPdfService pdfService)
         {
             _trafficService = trafficService;
-            _pdfService = pdfService; // <--- ASIGNACIÓN
+            _pdfService = pdfService;
 
             Cameras = new ObservableCollection<Camara>();
             Incidencias = new ObservableCollection<Incidencia>();
 
-            // Carga inicial
-            LoadDataCommand.Execute(null);
+            // Inicialización asíncrona segura (Fire and Forget controlado)
+            _ = LoadData();
         }
 
         [RelayCommand]
         private async Task LoadData()
         {
             if (IsLoading) return;
-            IsLoading = true;
-            SystemStatus = "SINCRONIZANDO...";
 
             try
             {
-                // 1. Cargar Cámaras
-                var dataCam = await _trafficService.GetCamarasAsync();
-                Cameras.Clear();
-                if (dataCam != null) foreach (var item in dataCam) Cameras.Add(item);
+                IsLoading = true;
+                SystemStatus = "SINCRONIZANDO...";
 
-                // Inicializar la Vista Filtrable
-                if (CamerasView == null)
-                {
-                    CamerasView = CollectionViewSource.GetDefaultView(Cameras);
-                    CamerasView.Filter = FilterCameras;
-                }
-                else
-                {
-                    CamerasView.Refresh();
-                }
-                OnPropertyChanged(nameof(CamerasView));
+                // 1. Carga paralela para velocidad
+                var taskCam = _trafficService.GetCamarasAsync();
+                var taskInc = _trafficService.GetIncidenciasAsync();
 
-                // 2. Cargar Incidencias
-                var dataInc = await _trafficService.GetIncidenciasAsync();
-                Incidencias.Clear();
-                if (dataInc != null) foreach (var item in dataInc) Incidencias.Add(item);
+                await Task.WhenAll(taskCam, taskInc);
 
-                // 3. Actualizar KPIs
+                var dataCam = await taskCam;
+                var dataInc = await taskInc;
+
+                // 2. Actualizar UI en hilo principal
+                UpdateCameras(dataCam);
+                UpdateIncidencias(dataInc);
+
+                // 3. KPIs
                 TotalCameras = Cameras.Count;
                 ActiveIncidents = Incidencias.Count;
                 SystemStatus = "EN LÍNEA";
             }
             catch (Exception ex)
             {
-                SystemStatus = "ERROR DE RED";
-                MessageBox.Show($"Error al cargar datos: {ex.Message}");
+                SystemStatus = "ERROR RED";
+                MessageBox.Show($"Error de sincronización: {ex.Message}");
             }
             finally
             {
@@ -106,130 +97,156 @@ namespace MAVPC.MVVM.ViewModels
             }
         }
 
-        // LÓGICA DEL FILTRO
+        private void UpdateCameras(System.Collections.Generic.IEnumerable<Camara>? data)
+        {
+            Cameras.Clear();
+            if (data != null)
+            {
+                foreach (var item in data) Cameras.Add(item);
+            }
+
+            if (CamerasView == null)
+            {
+                CamerasView = CollectionViewSource.GetDefaultView(Cameras);
+                CamerasView.Filter = FilterCameras;
+            }
+            CamerasView.Refresh();
+            OnPropertyChanged(nameof(CamerasView));
+        }
+
+        private void UpdateIncidencias(System.Collections.Generic.IEnumerable<Incidencia>? data)
+        {
+            Incidencias.Clear();
+            if (data != null)
+            {
+                foreach (var item in data) Incidencias.Add(item);
+            }
+        }
+
         private bool FilterCameras(object item)
         {
-            if (item is Camara cam)
-            {
-                if (string.IsNullOrWhiteSpace(SearchText))
-                    return true;
+            if (string.IsNullOrWhiteSpace(SearchText)) return true;
+            if (item is not Camara cam) return false;
 
-                string search = SearchText.ToLower();
+            // Búsqueda optimizada (Case Insensitive sin crear strings nuevos)
+            return (cam.Nombre?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||
+                   (cam.Carretera?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true) ||
+                   (cam.Kilometro?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) == true);
+        }
 
-                return (cam.Nombre != null && cam.Nombre.ToLower().Contains(search)) ||
-                       (cam.Carretera != null && cam.Carretera.ToLower().Contains(search)) ||
-                       (cam.Kilometro != null && cam.Kilometro.ToString().Contains(search));
-            }
-            return false;
+        // --- COMANDOS DE ACCIÓN ---
+
+        [RelayCommand]
+        private void ViewCamera(Camara camara)
+        {
+            if (camara == null) return;
+
+            // Abrimos la ventana de detalle (CameraWindow debe existir en Views)
+            var ventana = new CameraWindow(camara); // Asegúrate que CameraWindow tiene este constructor
+            ventana.Owner = Application.Current.MainWindow;
+            ventana.ShowDialog();
         }
 
         [RelayCommand]
-        private async Task DeleteCamera(object parameter)
+        private async Task DeleteCamera(Camara camara)
         {
-            if (parameter is not Camara camara) return;
+            if (camara == null) return;
 
             var result = MessageBox.Show(
-                $"¿Estás seguro de que deseas eliminar la cámara '{camara.Nombre}'?\nEsta acción es irreversible.",
-                "Confirmar Eliminación",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+                $"¿Eliminar cámara '{camara.Nombre}'?",
+                "Confirmar", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result != MessageBoxResult.Yes) return;
 
             try
             {
                 bool exito = await _trafficService.DeleteCamaraAsync(camara.Id);
-
                 if (exito)
                 {
                     Cameras.Remove(camara);
-                    TotalCameras = Cameras.Count;
-                    CamerasView?.Refresh();
+                    CamerasView.Refresh();
+                    TotalCameras--;
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo eliminar la cámara. Verifica la API.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Error al eliminar en el servidor.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error crítico al eliminar: {ex.Message}", "Excepción", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error: {ex.Message}");
             }
         }
 
         [RelayCommand]
         private async Task OpenAddForm()
         {
+            // Creamos una ventana contenedora limpia para el UserControl AddItemView
             var window = new Window
             {
-                Title = "Añadir Nuevo Punto",
+                Title = "Añadir Punto",
                 SizeToContent = SizeToContent.WidthAndHeight,
                 ResizeMode = ResizeMode.NoResize,
                 WindowStyle = WindowStyle.None,
                 AllowsTransparency = true,
                 Background = Brushes.Transparent,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                Owner = Application.Current.MainWindow
             };
 
-            Action closeAction = () => window.Close();
-
-            // Pasamos el trafficService
-            var addItemVm = new AddItemViewModel(_trafficService, closeAction);
-            var view = new AddItemView { DataContext = addItemVm };
-
+            // Inyectamos dependencias
+            var vm = new AddItemViewModel(_trafficService, () => window.Close());
+            var view = new AddItemView { DataContext = vm };
             window.Content = view;
+
             window.ShowDialog();
 
+            // Recargamos datos al cerrar por si hubo cambios
             await LoadData();
         }
 
-        // --- EXPORTAR PDF IMPLEMENTADO ---
         [RelayCommand]
         private async Task ExportPdf()
         {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "PDF Files (*.pdf)|*.pdf",
+                FileName = $"Reporte_MAVPC_{DateTime.Now:yyyyMMdd_HHmm}.pdf"
+            };
+
+            if (dialog.ShowDialog() != true) return;
+
             try
             {
-                var dialog = new Microsoft.Win32.SaveFileDialog
+                SystemStatus = "GENERANDO PDF...";
+                IsLoading = true;
+
+                // Obtenemos historial completo para el reporte
+                var historial = await _trafficService.GetAllIncidenciasAsync();
+
+                if (historial == null || !historial.Any())
                 {
-                    Filter = "PDF Files (*.pdf)|*.pdf",
-                    FileName = $"Informe_Ejecutivo_{DateTime.Now:yyyyMMdd_HHmm}.pdf"
-                };
-
-                if (dialog.ShowDialog() == true)
-                {
-                    // 1. AVISAR AL USUARIO (Porque descargar el histórico puede tardar un segundo)
-                    SystemStatus = "GENERANDO PDF...";
-
-                    // 2. DESCARGAR DATOS HISTÓRICOS (Aquí llamamos al NUEVO endpoint)
-                    var historialCompleto = await _trafficService.GetAllIncidenciasAsync();
-
-                    if (historialCompleto == null || historialCompleto.Count == 0)
-                    {
-                        MessageBox.Show("No se pudo descargar el historial para el reporte.", "Error");
-                        SystemStatus = "EN LÍNEA";
-                        return;
-                    }
-
-                    // 3. GENERAR EL REPORTE CON EL HISTORIAL
-                    // (El PdfService "Pro" que hicimos antes procesará todos estos datos)
-                    await Task.Run(() => _pdfService.GenerateFullReport(dialog.FileName, historialCompleto));
-
-                    SystemStatus = "EN LÍNEA";
-
-                    // 4. ABRIR
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = dialog.FileName,
-                        UseShellExecute = true
-                    });
+                    MessageBox.Show("No hay datos históricos para generar el reporte.");
+                    return;
                 }
+
+                // Generación en segundo plano (CPU bound)
+                await Task.Run(() => _pdfService.GenerateFullReport(dialog.FileName, historial));
+
+                // Abrir PDF resultante
+                var p = new System.Diagnostics.Process();
+                p.StartInfo = new System.Diagnostics.ProcessStartInfo(dialog.FileName) { UseShellExecute = true };
+                p.Start();
             }
             catch (Exception ex)
             {
-                SystemStatus = "ERROR";
                 MessageBox.Show($"Error generando PDF: {ex.Message}");
+            }
+            finally
+            {
+                IsLoading = false;
+                SystemStatus = "EN LÍNEA";
             }
         }
     }
 }
-

@@ -1,24 +1,52 @@
-﻿/* Configuración base */
+﻿/* ============================================================
+   MAVPC - HOJA DE ESTILOS (UI NEÓN / MODO OSCURO)
+   ============================================================
+   Stack: CSS3 Nativo + Leaflet Overrides
+   Theme: Cyberpunk / High Contrast
+   ============================================================ */
+
+:root {
+    /* PALETA DE COLORES (Variables para mantenimiento fácil) */
+    --color-neon-blue: #00F0FF;
+    --color-neon-red:  #FF003C;
+    --color-neon-orange: #FFA500;
+    --color-text-white: #ffffff;
+    
+    /* FONDOS Y PANELES */
+    --bg-dark: #111111;
+    --bg-panel: rgba(10, 10, 15, 0.95); /* Cristal Oscuro */
+    --bg-panel-hover: rgba(0, 240, 255, 0.1);
+
+    /* SOMBRAS */
+    --shadow-neon: 0 0 15px rgba(0, 240, 255, 0.2);
+    
+    /* CAPAS (Z-INDEX HIERARCHY) */
+    --z-map: 0;
+    --z-ui-controls: 1000;
+    --z-pin-hover: 1500;
+    --z-search-results: 2000;
+}
+
+/* 1. CONFIGURACIÓN BASE Y RESET */
 body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    background-color: #111;
-    font-family: 'Segoe UI', sans-serif;
-    overflow: hidden; /* Evita barras de scroll */
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    background-color: var(--bg-dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden; /* Evita scrollbars globales indeseados */
 }
 
-#map {
-    height: 100%;
-    width: 100%;
-}
+#map { height: 100%; width: 100%; z-index: var(--z-map); }
 
-/* --- TOOLTIPS (La cajita al pasar el ratón) --- */
+/* Scrollbar personalizado para listas internas (WebKit) */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #222; }
+::-webkit-scrollbar-thumb { background: var(--color-neon-blue); border-radius: 3px; }
+
+/* 2. COMPONENTE: TOOLTIPS (Información flotante) */
 .leaflet-tooltip.custom-tooltip {
-    background-color: rgba(20, 20, 30, 0.95);
-    border: 1px solid #00F0FF; /* Borde Cyan Neon */
-    color: white;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--color-neon-blue);
+    color: var(--color-text-white);
     font-weight: bold;
     font-size: 12px;
     border-radius: 4px;
@@ -26,372 +54,191 @@ body, html {
     padding: 4px 8px;
 }
 
-.leaflet-tooltip-top:before {
-    border-top-color: #00F0FF;
-}
+.leaflet-tooltip-top:before { border-top-color: var(--color-neon-blue); }
 
-/* --- MARCADORES PERSONALIZADOS --- */
+/* 3. COMPONENTE: MARCADORES (Pines individuales) */
 .custom-pin {
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 14px;
+    display: flex; justify-content: center; align-items: center;
+    color: white; font-size: 14px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
     border: 2px solid white;
-    transition: transform 0.2s;
-    background-color: #444; /* Default */
+    background-color: #444;
+    
+    /* Animación suave para hover */
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
 }
 
-    .custom-pin:hover {
-        transform: scale(1.2);
-        z-index: 1000 !important;
-        cursor: pointer;
-    }
-
-/* Colores por tipo */
-.pin-camara {
-    background-color: #0088cc;
-    border-color: #00F0FF;
+.custom-pin:hover {
+    transform: scale(1.3);
+    z-index: var(--z-pin-hover) !important;
+    cursor: pointer;
+    box-shadow: 0 0 15px white;
 }
 
-.pin-obra {
-    background-color: #ff9900;
-    border-color: #ffe600;
-    color: #000;
-}
+/* Variantes por tipo (Mapping con lógica JS) */
+.pin-camara     { background-color: #0088cc; border-color: var(--color-neon-blue); }
+.pin-obra       { background-color: #ff9900; border-color: #ffe600; color: #000; }
+.pin-nieve      { background-color: #ffffff; border-color: #aaddff; color: #0066cc; }
 
-.pin-nieve {
-    background-color: #ffffff;
-    border-color: #aaddff;
-    color: #0066cc;
-}
-
-/* INCIDENCIAS: Rojo con animación */
-.pin-incidencia {
-    background-color: #D50000;
-    border-color: #FF003C;
-    animation: pulse-red 2s infinite;
+.pin-incidencia { 
+    background-color: #D50000; 
+    border-color: var(--color-neon-red); 
+    animation: pulse-red 2s infinite; 
+    will-change: box-shadow; /* Optimización GPU */
 }
 
 @keyframes pulse-red {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7);
-    }
-
-    70% {
-        box-shadow: 0 0 0 10px rgba(255, 0, 60, 0);
-    }
-
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 0, 60, 0);
-    }
+    0%   { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0.7); }
+    70%  { box-shadow: 0 0 0 10px rgba(255, 0, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 60, 0); }
 }
 
-/* --- CONTROL DE CAPAS (El selector Mapa/Satélite) --- */
-.leaflet-control-layers {
-    background-color: rgba(10, 10, 15, 0.9) !important;
-    border: 1px solid #00F0FF !important;
-    border-radius: 8px !important;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2) !important;
-    color: white !important;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 10px !important;
+/* 4. COMPONENTE: CLUSTERS (Grupos de puntos) */
+.custom-cluster-icon { background: transparent; border: none; }
+
+.cluster-blob {
+    width: 35px; height: 35px;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-weight: bold; color: white;
+    border: 2px solid rgba(255,255,255,0.5);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease;
 }
 
-.leaflet-control-layers-base label {
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
+.cluster-blob:hover { transform: scale(1.1); }
+
+/* Colores de las bolas agrupadas */
+.blob-camara     { background-color: #0088cc; box-shadow: 0 0 15px var(--color-neon-blue); }
+.blob-obra       { background-color: #FF8C00; box-shadow: 0 0 15px var(--color-neon-orange); } 
+.blob-nieve      { background-color: #607D8B; box-shadow: 0 0 15px white; }      
+.blob-incidencia { background-color: #D50000; box-shadow: 0 0 15px var(--color-neon-red); }
+
+/* 5. UI: BUSCADOR (Top-Left) */
+.search-wrapper { position: relative; z-index: var(--z-ui-controls); }
+
+.search-container {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--color-neon-blue);
+    border-radius: 8px; padding: 8px;
+    box-shadow: var(--shadow-neon);
+    display: flex; align-items: center;
+    width: 250px;
+    backdrop-filter: blur(4px); /* Efecto vidrio */
 }
 
-    .leaflet-control-layers-base label:hover {
-        color: #00F0FF;
-    }
-
-/* Ajuste para que los controles de Leaflet no se peguen al borde */
-.leaflet-left .leaflet-control {
-    margin-left: 20px;
-    margin-bottom: 20px;
+.search-input {
+    background: transparent; border: none; color: white;
+    width: 100%; margin-left: 10px; outline: none;
+    font-size: 14px;
 }
+.search-input::placeholder { color: rgba(255,255,255,0.5); }
+.search-icon { color: var(--color-neon-blue); }
 
-/* --- PANEL DE FILTROS (Arriba Derecha) --- */
-.filter-panel {
-    background-color: rgba(10, 10, 15, 0.95);
-    border: 1px solid #00F0FF;
+.search-results {
+    position: absolute; top: 105%; left: 0; width: 100%;
+    background-color: rgba(10, 10, 15, 0.98);
+    border: 1px solid var(--color-neon-blue);
     border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-    min-width: 150px;
+    max-height: 300px; overflow-y: auto;
+    display: none; z-index: var(--z-search-results);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.result-item {
+    padding: 10px; border-bottom: 1px solid #333;
+    color: #ccc; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; transition: 0.2s;
+}
+
+.result-item:last-child { border-bottom: none; }
+
+.result-item:hover {
+    background-color: var(--bg-panel-hover);
+    color: white; padding-left: 15px;
+}
+
+/* 6. UI: PANEL DE FILTROS (Top-Right) */
+.filter-panel {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--color-neon-blue);
+    border-radius: 8px; padding: 10px;
+    min-width: 150px; box-shadow: var(--shadow-neon);
+    backdrop-filter: blur(4px);
 }
 
 .filter-title {
-    color: #00F0FF;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    border-bottom: 1px solid #444;
-    padding-bottom: 5px;
+    color: var(--color-neon-blue); font-size: 11px; font-weight: bold;
+    text-transform: uppercase; margin-bottom: 8px;
+    border-bottom: 1px solid #444; padding-bottom: 5px;
     letter-spacing: 1px;
 }
 
 .filter-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    cursor: pointer;
-    color: #888;
-    transition: all 0.3s ease;
+    display: flex; align-items: center;
+    margin-bottom: 8px; cursor: pointer;
+    color: #888; transition: 0.3s;
+    user-select: none;
 }
 
-    .filter-item:last-child {
-        margin-bottom: 0;
-    }
-
-    .filter-item:hover {
-        color: white;
-    }
+.filter-item:hover { color: #ccc; }
+.filter-item.active { color: white; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
 .filter-check {
-    width: 14px;
-    height: 14px;
-    border: 1px solid #666;
-    margin-right: 10px;
-    border-radius: 3px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: transparent;
-}
-
-.filter-item.active {
-    color: white;
-    text-shadow: 0 0 5px rgba(255,255,255,0.5);
-}
-
-    .filter-item.active .filter-check {
-        background-color: #00F0FF;
-        border-color: #00F0FF;
-        box-shadow: 0 0 8px #00F0FF;
-    }
-
-.filter-check i {
-    font-size: 10px;
-    color: black;
-    display: none;
-}
-
-.filter-item.active .filter-check i {
-    display: block;
-}
-
-/* --- BUSCADOR DINÁMICO (Arriba Izquierda) --- */
-.search-container {
-    background-color: rgba(10, 10, 15, 0.95);
-    border: 1px solid #00F0FF;
-    border-radius: 8px;
-    padding: 8px;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-    display: flex;
-    align-items: center;
-    width: 250px;
-    transition: width 0.3s ease;
-}
-
-.search-input {
-    background: transparent;
-    border: none;
-    color: white;
-    width: 100%;
-    margin-left: 10px;
-    outline: none;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 14px;
-}
-
-    .search-input::placeholder {
-        color: #555;
-    }
-
-.search-icon {
-    color: #00F0FF;
-}
-
-/* LISTA DE RESULTADOS */
-.search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    background-color: rgba(10, 10, 15, 0.98);
-    border: 1px solid #00F0FF;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    max-height: 300px;
-    overflow-y: auto;
-    display: none;
-    z-index: 2000;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-}
-
-.result-item {
-    padding: 10px;
-    border-bottom: 1px solid #333;
-    color: #ccc;
-    cursor: pointer;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
+    width: 14px; height: 14px; border: 1px solid #666;
+    margin-right: 10px; border-radius: 3px;
+    display: flex; justify-content: center; align-items: center;
     transition: all 0.2s;
 }
 
-    .result-item:hover {
-        background-color: rgba(0, 240, 255, 0.1);
-        color: white;
-        padding-left: 15px;
-    }
-
-    .result-item i {
-        margin-right: 10px;
-        width: 20px;
-        text-align: center;
-    }
-
-.search-results::-webkit-scrollbar {
-    width: 6px;
+.filter-item.active .filter-check {
+    background-color: var(--color-neon-blue); 
+    border-color: var(--color-neon-blue);
+    box-shadow: 0 0 8px var(--color-neon-blue);
 }
 
-.search-results::-webkit-scrollbar-thumb {
-    background: #444;
-    border-radius: 3px;
-}
+.filter-check i { font-size: 10px; color: black; display: none; }
+.filter-item.active .filter-check i { display: block; }
 
-    .search-results::-webkit-scrollbar-thumb:hover {
-        background: #00F0FF;
-    }
-
-/* --- NUEVA BARRA DE NAVEGACIÓN --- */
+/* 7. UI: NAVEGACIÓN Y TELEMETRÍA (Bottom) */
 .nav-bar {
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     background-color: rgba(10, 10, 15, 0.9);
-    border: 1px solid #00F0FF;
-    border-radius: 4px;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-    margin-bottom: 5px;
+    border: 1px solid var(--color-neon-blue); border-radius: 4px;
+    overflow: hidden; margin-bottom: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 .nav-btn {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    cursor: pointer;
-    border-bottom: 1px solid #333;
-    transition: background 0.2s;
-    font-size: 14px;
+    width: 36px; height: 36px;
+    display: flex; justify-content: center; align-items: center;
+    color: white; cursor: pointer; border-bottom: 1px solid #333;
+    transition: 0.2s;
 }
+.nav-btn:last-child { border-bottom: none; }
+.nav-btn:hover { background-color: var(--color-neon-blue); color: black; }
 
-    .nav-btn:last-child {
-        border-bottom: none;
-    }
-
-    .nav-btn:hover {
-        background-color: #00F0FF;
-        color: black;
-    }
-
-/* --- TELEMETRÍA (Coordenadas y Escala) --- */
 .telemetry-bar {
-    background-color: rgba(0, 0, 0, 0.7);
-    color: #00F0FF;
-    font-family: 'Consolas', monospace;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px solid #333;
-    pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: var(--color-neon-blue); font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 11px; padding: 4px 8px;
+    border-radius: 4px; border: 1px solid #333;
+    letter-spacing: 1px;
 }
 
-/* Personalizar la escala de Leaflet */
-.leaflet-control-scale {
-    margin-left: 10px !important;
-    margin-bottom: 5px !important;
-    border: none !important;
+/* Sobrescritura de Leaflet nativo (Hack para unificar estilos) */
+.leaflet-control-layers {
+    background-color: rgba(10, 10, 15, 0.9) !important;
+    border: 1px solid var(--color-neon-blue) !important;
+    color: white !important;
+    border-radius: 4px !important;
 }
 
 .leaflet-control-scale-line {
     background: rgba(0, 0, 0, 0.6) !important;
-    border-color: #555 !important;
-    color: #aaa !important;
+    color: var(--color-neon-blue) !important;
+    border-color: var(--color-neon-blue) !important;
     font-family: 'Consolas', monospace;
 }
-
-/* --- ESTILOS DE CLUSTERS (MODO OSCURO/NEON) --- */
-/* NOTA: He mantenido tus estilos antiguos para evitar romper nada, 
-   pero he añadido los nuevos .cluster-blob que usa el JS actualizado */
-
-.marker-cluster-small,
-.marker-cluster-medium,
-.marker-cluster-large {
-    background-color: rgba(20, 20, 30, 0.85); /* Fondo oscuro */
-    border: 2px solid #555;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    font-weight: bold;
-    border-radius: 50%;
-}
-
-.marker-cluster-small { border-color: #00F0FF; box-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
-.marker-cluster-small div { background-color: transparent; }
-
-.marker-cluster-medium { border-color: #FFA500; box-shadow: 0 0 10px rgba(255, 165, 0, 0.4); }
-.marker-cluster-medium div { background-color: transparent; }
-
-.marker-cluster-large { border-color: #FF003C; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); }
-.marker-cluster-large div { background-color: transparent; }
-
-.marker-cluster div {
-    width: 30px;
-    height: 30px;
-    margin: 0;
-    text-align: center;
-    line-height: 26px;
-    font-size: 14px;
-}
-
-/* --- NUEVOS CLUSTERS POR TIPO (AÑADIDO PARA COLORES SEPARADOS) --- */
-.custom-cluster-icon {
-    background: transparent;
-    border: none;
-}
-
-.cluster-blob {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    border: 2px solid rgba(255,255,255,0.5);
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-}
-
-/* Colores específicos de las bolas agrupadas */
-.blob-camara { background-color: #0088cc; box-shadow: 0 0 15px #00F0FF; }
-.blob-obra { background-color: #FF8C00; box-shadow: 0 0 15px #FFA500; } 
-.blob-nieve { background-color: #607D8B; box-shadow: 0 0 15px white; }    
-.blob-incidencia { background-color: #D50000; box-shadow: 0 0 15px #FF003C; }
