@@ -11,4 +11,9 @@ public interface CamaraFavoritaUsuarioDao extends JpaRepository<CamaraFavoritaUs
 	//Funcion que devuelve las camaras favoritas de un usuario
 	List<CamaraFavoritaUsuario> findByIdUsuario(int idUsuario);
 	
+	@jakarta.transaction.Transactional
+    void deleteByIdUsuarioAndIdCamara(int idUsuario, int idCamara);
+	
+	
+	
 }

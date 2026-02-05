@@ -71,8 +71,8 @@ public class UsuarioController {
 	
 	// Elimina una cámara de la lista de favoritos mediante el ID del registro
 	@DeleteMapping("/favoritos")
-	public void borrarFavoritos(@RequestParam int id) {
-		camaraFavoritaUsuarioDao.deleteById(id);	
+	public void borrarFavoritos(@RequestParam int idUsuario, @RequestParam int idCamara ) {
+		camaraFavoritaUsuarioDao.deleteByIdUsuarioAndIdCamara(idUsuario, idCamara);	
 	}
  	
 	// Valida las credenciales (login) comprobando si existen usuario y contraseña
