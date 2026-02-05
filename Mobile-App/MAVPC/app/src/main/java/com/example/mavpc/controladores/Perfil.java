@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,7 +26,6 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.example.mavpc.R;
-
 import com.example.mavpc.database.DbHelper;
 import com.example.mavpc.modelos.Usuario;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -44,29 +44,31 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-
 public class Perfil extends BaseActivity {
 
     private BottomNavigationView navbar;
     private EditText etUsername, etEmail, etPassword;
     private ImageView ivPfp;
-    private String pfpBase64;
-    private Button btnEditProfile, btnLogout;
+
+    // Inicializamos a null para saber si el usuario tocó la imagen o no
+    private String pfpBase64 = null;
+
+    private Button btnEditProfile, btnLogout, btnEliminarCuenta;
     private LinearLayout layoutEditButtons;
     private View btnDeletePfp, btnChangePfp;
 
     private boolean isEditing = false;
 
-    // abre la galería nativa del movil
+    // Abre la galería nativa del movil
     private final ActivityResultLauncher<String> openGalleryLauncher =
             registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
                 if (uri != null) {
-                    // una vez elegida la foto, lanzamos el editor
+                    // Una vez elegida la foto, lanzamos el editor
                     startUCrop(uri);
                 }
             });
 
-    // maneja el resultado del recorte
+    // Maneja el resultado del recorte
     private final ActivityResultLauncher<Intent> uCropLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -76,7 +78,7 @@ public class Perfil extends BaseActivity {
                     }
                 } else if (result.getResultCode() == UCrop.RESULT_ERROR) {
                     final Throwable cropError = UCrop.getError(result.getData());
-                    Toast.makeText(this, "Error: " + cropError.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error recuadro: " + cropError.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -89,7 +91,10 @@ public class Perfil extends BaseActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         ivPfp = findViewById(R.id.ivPfp);
+
         btnLogout = findViewById(R.id.btnLogout);
+        btnLogout.setOnClickListener(v -> logout());
+
         layoutEditButtons = findViewById(R.id.layoutEditButtons);
 
         navbar = findViewById(R.id.bottomNav);
@@ -106,43 +111,102 @@ public class Perfil extends BaseActivity {
 
         btnChangePfp = findViewById(R.id.btnChangePfp);
         btnChangePfp.setOnClickListener(v -> {
-            // abre la galería
             openGalleryLauncher.launch("image/*");
         });
 
         btnDeletePfp = findViewById(R.id.btnDeletePfp);
         btnDeletePfp.setOnClickListener(v -> {
-            // cambios en la imageview
+            // Ponemos la imagen por defecto
             ivPfp.setImageResource(R.drawable.ic_user);
             ivPfp.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+
+            // IMPORTANTE: Marcamos que se quiere borrar la imagen enviando string vacío
+            pfpBase64 = "";
         });
 
-        btnLogout.setOnClickListener(v -> logout());
+        btnEliminarCuenta = findViewById(R.id.btnEliminarCuenta);
+        btnEliminarCuenta.setOnClickListener(v -> btnEliminarCuenta());
 
         cargarDatosPerfil();
 
-        // TIENE QUE SER EL FINAL DEL onCreate!! fuerza al Navbar a no tener relleno inferior
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
-    private void logout() {
-        // Crear Builder
+    private void btnEliminarCuenta() {
         AlertDialog.Builder builder = new AlertDialog.Builder(Perfil.this);
-        // Inflar el diseño personalizado
         LayoutInflater inflater = getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_logout, null);
+        View view = inflater.inflate(R.layout.dialog_deleteaccount, null);
+        builder.setView(view);
 
-        builder.setView(view); // Asignamos la vista (estilo) al dialog
-
-        // Crear el Dialog pero NO mostrarlo todavía
         AlertDialog dialog = builder.create();
-
-        // Fondo transparente
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
 
-        // Configurar los botones del diseño propio
+        Button btnConfiElim = view.findViewById(R.id.btnConfiElim);
+        btnConfiElim.setOnClickListener(v -> {
+            DbHelper dbHelper = new DbHelper(Perfil.this);
+            Usuario currentUser = dbHelper.getUsuarioSesion();
+
+            if (currentUser == null) {
+                Toast.makeText(Perfil.this, "Error: No se detecta usuario.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String BASE_URL = "https://mavpc.up.railway.app/api/";
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+            ApiService service = retrofit.create(ApiService.class);
+
+            btnConfiElim.setEnabled(false);
+            Toast.makeText(Perfil.this, "Eliminando cuenta...", Toast.LENGTH_SHORT).show();
+
+            service.eliminarUsuario(currentUser.getId()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    btnConfiElim.setEnabled(true);
+
+                    if (response.isSuccessful()) {
+                        dbHelper.logoff();
+                        Intent intent = new Intent(Perfil.this, Login.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0);
+                        dialog.dismiss();
+                    } else {
+                        Log.e("API", "Error al eliminar: " + response.code());
+                        Toast.makeText(Perfil.this, "Error al eliminar cuenta (" + response.code() + ")", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    btnConfiElim.setEnabled(true);
+                    Log.e("API", "Fallo de conexión: " + t.getMessage());
+                    Toast.makeText(Perfil.this, "Error de conexión.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        });
+
+        Button btnCancelar = view.findViewById(R.id.btnCancelar);
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
+    }
+
+    private void logout() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(Perfil.this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_logout, null);
+        builder.setView(view);
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
         Button btnSalir = view.findViewById(R.id.btnSalir);
         btnSalir.setOnClickListener(v -> {
             DbHelper dbHelper = new DbHelper(Perfil.this);
@@ -152,27 +216,20 @@ public class Perfil extends BaseActivity {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             overridePendingTransition(0, 0);
-
             dialog.dismiss();
         });
 
         Button btnCancelar = view.findViewById(R.id.btnCancelar);
-        btnCancelar.setOnClickListener(v -> {
-            dialog.dismiss();
-        });
+        btnCancelar.setOnClickListener(v -> dialog.dismiss());
 
-        // Mostrar
         dialog.show();
     }
 
-    // ventana de ajuste de pfp
     private void startUCrop(Uri sourceUri) {
         String destinationFileName = "pfp_cropped.jpg";
         Uri destinationUri = Uri.fromFile(new File(getCacheDir(), destinationFileName));
 
         UCrop.Options options = new UCrop.Options();
-
-        // ajustes esteticos
         options.setCircleDimmedLayer(true);
         options.setShowCropFrame(false);
         options.setShowCropGrid(false);
@@ -182,46 +239,49 @@ public class Perfil extends BaseActivity {
         options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.cake_green));
         options.setToolbarWidgetColor(ContextCompat.getColor(this, R.color.white));
 
-        // preparamos un Intent normal de uCrop
         Intent uCropIntent = UCrop.of(sourceUri, destinationUri)
                 .withAspectRatio(1, 1)
-                .withMaxResultSize(1000, 1000)
+                .withMaxResultSize(800, 800)
                 .withOptions(options)
                 .getIntent(this);
 
-        // forzamos a que use AjustePfp que esta en modo inmersivo
         uCropIntent.setClass(this, AjustePfp.class);
-
         uCropLauncher.launch(uCropIntent);
     }
 
     private void cambiarFotoPerfil(Uri imageUri) {
         try {
-            // cambios en la imageview
             ivPfp.setImageTintList(null);
             ivPfp.clearColorFilter();
             ivPfp.setImageDrawable(null);
             ivPfp.setImageURI(imageUri);
+
             pfpBase64 = convertirUriABase64(imageUri);
+
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Error al cargar la imagen", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error al procesar la imagen", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void activarEdicion(boolean activar) {
         isEditing = activar;
         configurarEditText(etUsername, activar);
-        configurarEditText(etEmail, activar);
         configurarEditText(etPassword, activar);
 
         if (activar) {
             layoutEditButtons.setVisibility(View.VISIBLE);
-            btnEditProfile.setText("Guardar Cambios");
+
+            btnLogout.setVisibility(View.GONE);
+
+            btnEditProfile.setText("Confirmar Cambios");
             btnEditProfile.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.cake_green));
             btnEditProfile.setTextColor(getResources().getColor(R.color.black));
         } else {
             layoutEditButtons.setVisibility(View.GONE);
+
+            btnLogout.setVisibility(View.VISIBLE);
+
             btnEditProfile.setText("Editar Perfil");
             btnEditProfile.setBackgroundTintList(ContextCompat.getColorStateList(this, R.color.dark_grey));
             btnEditProfile.setTextColor(getResources().getColor(R.color.white));
@@ -240,34 +300,73 @@ public class Perfil extends BaseActivity {
         DbHelper dbHelper = new DbHelper(Perfil.this);
         Usuario currentUser = dbHelper.getUsuarioSesion();
 
-        etUsername.setText(currentUser.getUsername());
-        etEmail.setText(currentUser.getEmail());
-        etPassword.setText(currentUser.getPassword());
+        if (currentUser != null) {
+            etUsername.setText(currentUser.getUsername());
+            etEmail.setText(currentUser.getEmail());
+            etPassword.setText(currentUser.getPassword());
 
-        String urlImagen = currentUser.getPfpUrl();
-        // Usar Glide para cargarla
-        if (urlImagen != null && !urlImagen.isEmpty()) {
-            Glide.with(this)
-                    .load(urlImagen)
-                    .placeholder(R.drawable.ic_user) // imagen mientras carga
-                    .error(R.drawable.ic_user)       // imagen si falla la carga o la URL está rota
-                    .circleCrop()                    // la recorta en círculo
-                    .into(ivPfp);
+            String datosImagen = currentUser.getPfpUrl();
+
+            // --- IMPORTANTE: LIMPIAR EL TINTE BLANCO SIEMPRE ---
+            ivPfp.setImageTintList(null);       // Quita el color sólido
+            ivPfp.clearColorFilter();           // Limpia filtros
+            // ---------------------------------------------------
+
+            if (datosImagen != null && !datosImagen.isEmpty()) {
+
+                // Caso A: Es URL (http...)
+                if (datosImagen.startsWith("http") || datosImagen.startsWith("https")) {
+                    Glide.with(this)
+                            .load(datosImagen)
+                            .placeholder(R.drawable.ic_user)
+                            .error(R.drawable.ic_user)
+                            .circleCrop()
+                            .into(ivPfp);
+                }
+                // Caso B: Es Base64 (lo que tienes en SQLite)
+                else {
+                    try {
+                        String cleanBase64 = datosImagen;
+                        if (datosImagen.contains(",")) {
+                            cleanBase64 = datosImagen.substring(datosImagen.indexOf(",") + 1);
+                        }
+
+                        byte[] imageBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+                        Glide.with(this)
+                                .asBitmap() // Forzamos que lo trate como Bitmap
+                                .load(imageBytes)
+                                .placeholder(R.drawable.ic_user)
+                                .error(R.drawable.ic_user)
+                                .circleCrop()
+                                .into(ivPfp);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        ivPfp.setImageResource(R.drawable.ic_user);
+                        // Si falla, aquí sí podríamos querer el tinte blanco si tu icono es negro
+                        // ivPfp.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+                    }
+                }
+            } else {
+                // Si no hay foto, ponemos el icono por defecto
+                ivPfp.setImageResource(R.drawable.ic_user);
+                // Opcional: Si tu icono es negro y el fondo oscuro, aquí sí querrías ponerlo blanco de nuevo
+                ivPfp.setImageTintList(ColorStateList.valueOf(getResources().getColor(R.color.white)));
+            }
         }
     }
 
     private void actualizarPerfil() {
         String nuevoUsername = etUsername.getText().toString().trim();
         String nuevoEmail = etEmail.getText().toString().trim();
-        String nuevaPassword = etPassword.getText().toString().trim();
+        String inputPassword = etPassword.getText().toString().trim();
 
-        // Validaciones básicas
-        if (nuevoUsername.isEmpty() || nuevoEmail.isEmpty() ||nuevaPassword.isEmpty()) {
+        if (nuevoUsername.isEmpty() || nuevoEmail.isEmpty() || inputPassword.isEmpty()) {
             Toast.makeText(this, "No puedes dejar ningún campo vacío", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Recuperar el usuario actual para mantener su id
         DbHelper dbHelper = new DbHelper(Perfil.this);
         Usuario usuarioActual = dbHelper.getUsuarioSesion();
         if (usuarioActual == null) {
@@ -275,18 +374,28 @@ public class Perfil extends BaseActivity {
             return;
         }
 
-        String passwordFinal = hashearPassword(nuevaPassword);
+        // --- CONTRASEÑA ---
+        // Volvemos a la lógica simple solicitada: Hasheamos SIEMPRE lo que hay en el EditText.
+        String passwordFinal = hashearPassword(inputPassword);
 
-        // Crear el usuario con los datos nuevos
+        // --- IMAGEN SEGURA (Fix Error 500) ---
+        String imagenFinalEnviar;
+        if (pfpBase64 != null) {
+            // El usuario eligió foto nueva (datos) o borró (vacío)
+            imagenFinalEnviar = pfpBase64;
+        } else {
+            // El usuario NO tocó nada. Recuperamos lo que se ve en pantalla para no enviar null
+            imagenFinalEnviar = obtenerImagenActualDePantalla();
+        }
+
         Usuario usuarioActualizado = new Usuario(
-                usuarioActual.getId(), // el id no debe cambiar
+                usuarioActual.getId(),
                 nuevoUsername,
                 nuevoEmail,
                 passwordFinal,
-                pfpBase64
+                imagenFinalEnviar
         );
 
-        // Actualizar en la api
         String BASE_URL = "https://mavpc.up.railway.app/api/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -294,37 +403,32 @@ public class Perfil extends BaseActivity {
                 .build();
         ApiService service = retrofit.create(ApiService.class);
 
-        Call<Void> call = service.actualizarUsuario(usuarioActualizado);
-        call.enqueue(new Callback<Void>() {
+        btnEditProfile.setEnabled(false);
+
+        service.actualizarUsuario(usuarioActualizado).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                btnEditProfile.setEnabled(true);
+
                 if (response.isSuccessful()) {
                     // Actualizar en sqlite
                     dbHelper.insertUsuarioSesion(usuarioActualizado);
-
                     Toast.makeText(Perfil.this, "Perfil actualizado correctamente", Toast.LENGTH_SHORT).show();
-                    // Reemplaza el bloque else dentro de onResponse con este código:
                 } else {
-                    // 1. Obtener el código de estado (ej: 400, 404, 500)
                     int statusCode = response.code();
-
-                    // 2. Intentar leer el cuerpo del error (lo que el servidor dice que salió mal)
                     String errorMsg = "Error desconocido";
                     try {
                         if (response.errorBody() != null) {
                             errorMsg = response.errorBody().string();
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    } catch (IOException e) { e.printStackTrace(); }
 
                     Log.e("API_ERROR", "Código: " + statusCode + " | Mensaje: " + errorMsg);
 
-                    // Sugerencia visual para el usuario
                     if (statusCode == 400) {
-                        Toast.makeText(Perfil.this, "Datos inválidos. Revisa el formato.", Toast.LENGTH_LONG).show();
-                    } else if (statusCode == 405) {
-                        Toast.makeText(Perfil.this, "Método PUT no permitido en esta ruta.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(Perfil.this, "Datos inválidos.", Toast.LENGTH_LONG).show();
+                    } else if (statusCode == 413) {
+                        Toast.makeText(Perfil.this, "La imagen es demasiado grande.", Toast.LENGTH_LONG).show();
                     } else {
                         Toast.makeText(Perfil.this, "Error del servidor: " + statusCode, Toast.LENGTH_LONG).show();
                     }
@@ -333,6 +437,7 @@ public class Perfil extends BaseActivity {
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                btnEditProfile.setEnabled(true);
                 Toast.makeText(Perfil.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -340,20 +445,14 @@ public class Perfil extends BaseActivity {
 
     private String hashearPassword(String txtPassword) {
         try {
-            // crear instancia de SHA-256
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-            // pasar a byes y hashear
             byte[] hash = digest.digest(txtPassword.getBytes());
-
-            // convertir a hexadecimal
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
                 if (hex.length() == 1) hexString.append('0');
                 hexString.append(hex);
             }
-
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -361,33 +460,65 @@ public class Perfil extends BaseActivity {
         }
     }
 
-    private String convertirUriABase64(Uri uri) {
+    // --- NUEVO METODO PARA EVITAR NULL/ERROR 500 ---
+    private String obtenerImagenActualDePantalla() {
         try {
-            // Abrir el archivo desde la URI
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            if (ivPfp.getDrawable() == null) return null;
 
-            // Comprimir la imagen (Importante para no enviar un texto kilométrico)
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            // Comprimimos a JPEG con calidad 50% para reducir tamaño
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-            byte[] imagenBytes = outputStream.toByteArray();
+            Bitmap bitmap;
+            // Si es un BitmapDrawable (normalmente lo es con Glide o setImageURI)
+            if (ivPfp.getDrawable() instanceof BitmapDrawable) {
+                bitmap = ((BitmapDrawable) ivPfp.getDrawable()).getBitmap();
+            } else {
+                return null;
+            }
 
-            // Convertir bytes a String Base64
-            // El flag NO_WRAP evita saltos de línea que rompen el JSON
-            return Base64.encodeToString(imagenBytes, Base64.NO_WRAP);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+            byte[] imageBytes = baos.toByteArray();
+            return Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+
         } catch (Exception e) {
             e.printStackTrace();
-            return null; // Si falla, devolvemos null
+            return null;
+        }
+    }
+
+    private String convertirUriABase64(Uri uri) {
+        try {
+            InputStream imageStream = getContentResolver().openInputStream(uri);
+            Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+
+            // Redimensionar a Max 800px para evitar Error 500
+            int maxWidth = 800;
+            int maxHeight = 800;
+            if (selectedImage.getWidth() > maxWidth || selectedImage.getHeight() > maxHeight) {
+                float scale = Math.min(((float)maxWidth / selectedImage.getWidth()), ((float)maxHeight / selectedImage.getHeight()));
+
+                android.graphics.Matrix matrix = new android.graphics.Matrix();
+                matrix.postScale(scale, scale);
+
+                Bitmap resizedBitmap = Bitmap.createBitmap(selectedImage, 0, 0, selectedImage.getWidth(), selectedImage.getHeight(), matrix, true);
+                selectedImage = resizedBitmap;
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            selectedImage.compress(Bitmap.CompressFormat.JPEG, 70, baos);
+            byte[] imageBytes = baos.toByteArray();
+
+            return Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error al procesar imagen", Toast.LENGTH_SHORT).show();
+            return null;
         }
     }
 
     private void setupBottomNav() {
         navbar.setSelectedItemId(R.id.nav_perfil);
-
         navbar.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-
             if (id == R.id.nav_explorar) {
                 Intent intent = new Intent(Perfil.this, Explorar.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -406,8 +537,7 @@ public class Perfil extends BaseActivity {
                 startActivity(intent);
                 overridePendingTransition(0, 0);
             }
-            if (id == R.id.nav_perfil) return true;
-            return false;
+            return id == R.id.nav_perfil;
         });
     }
 }

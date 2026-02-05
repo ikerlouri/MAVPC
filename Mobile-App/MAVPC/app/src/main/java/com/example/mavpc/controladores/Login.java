@@ -86,11 +86,16 @@ public class Login extends BaseActivity {
 
                                     // Cargar Cámaras Favoritas
                                     Call<List<Camara>> callCams = service.cargarCamsFavoritasUsuario(usuarioLogueado.getId());
-
                                     callCams.enqueue(new Callback<List<Camara>>() {
                                         @Override
                                         public void onResponse(Call<List<Camara>> call, Response<List<Camara>> responseCams) {
                                             if (responseCams.isSuccessful() && responseCams.body() != null) {
+                                                List<Camara> camaras = responseCams.body();
+                                                if (!camaras.isEmpty()) {
+                                                    Camara c = camaras.get(0);
+                                                    Log.d("DEBUG_API", "Llega de internet -> ID: " + c.getId() + " Name: " + c.getName() + " URL: " + c.getUrlImage());
+                                                }
+
                                                 dbHelper.insertCamList(responseCams.body());
                                             }
 

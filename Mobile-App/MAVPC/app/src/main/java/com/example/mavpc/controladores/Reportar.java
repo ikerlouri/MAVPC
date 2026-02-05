@@ -146,6 +146,24 @@ public class Reportar extends BaseActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(Reportar.this, "Incidencia reportada con éxito", Toast.LENGTH_LONG).show();
                     limpiarFormulario();
+
+                    Intent intent = new Intent(Reportar.this, Explorar.class);
+
+                    try {
+                        double lat = Double.parseDouble(nuevaIncidencia.getLatitude());
+                        double lon = Double.parseDouble(nuevaIncidencia.getLongitude());
+
+                        intent.putExtra("LAT_DESTINO", lat);
+                        intent.putExtra("LON_DESTINO", lon);
+                        intent.putExtra("ACTUALIZAR_MAPA", true);
+
+                        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                        startActivity(intent);
+                        overridePendingTransition(0, 0);
+                        finish();
+                    } catch (NumberFormatException | NullPointerException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     Log.e("API_ERROR", String.valueOf(response.code()));
                     Toast.makeText(Reportar.this, "Error en el servidor.", Toast.LENGTH_LONG).show();
@@ -176,10 +194,6 @@ public class Reportar extends BaseActivity {
         // Resetear selectores de fecha y hora
         marcarFechaActualSpinners();
         marcarHoraActualSpinners();
-
-        // Devolver el foco al primer campo y mover el Scroll al inicio
-        etCausa.clearFocus();
-        sv.fullScroll(View.FOCUS_UP);
     }
 
     private boolean validarDatos() {

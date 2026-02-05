@@ -35,6 +35,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.example.mavpc.R;
 import com.example.mavpc.database.DbHelper;
+import com.example.mavpc.modelos.CamFavoritaUsuario;
 import com.example.mavpc.modelos.Camara;
 import com.example.mavpc.modelos.Incidencia;
 import com.example.mavpc.modelos.Usuario;
@@ -170,15 +171,26 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         super.onResume();
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null && extras.containsKey("LAT_DESTINO")) {
-            double lat = extras.getDouble("LAT_DESTINO");
-            double lon = extras.getDouble("LON_DESTINO");
+        if (extras != null){
+            // hay que actualizar el mapa porque se ha creado una nueva incidencia
+            if (extras.containsKey("ACTUALIZAR_MAPA")){
+                if (gMap != null) {
+                    gMap.clear();
+                    marcarIncidenciasMapa();
+                    marcarCamarasMapa();
+                }
+            }
 
-            LatLng ubicacionActual = new LatLng(lat, lon);
-            gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionActual, 16.5f));
+            if (extras.containsKey("LAT_DESTINO")) {
+                double lat = extras.getDouble("LAT_DESTINO");
+                double lon = extras.getDouble("LON_DESTINO");
 
-            // Limpiar el intent para que no lo haga cada vez que rotes la pantalla
-            getIntent().removeExtra("LAT_DESTINO");
+                LatLng ubicacionActual = new LatLng(lat, lon);
+                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionActual, 16.5f));
+
+                // Limpiar el intent para que no lo haga cada vez que rotes la pantalla
+                getIntent().removeExtra("LAT_DESTINO");
+            }
         }
     }
 
@@ -194,7 +206,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             DbHelper dbHelper = new DbHelper(Explorar.this);
             Usuario currentUser = dbHelper.getUsuarioSesion();
 
-            // 1. SEGURIDAD: Aunque los logs digan que se guardó, si por lo que sea es null, evitamos el cierre
+            // Aunque los logs digan que se guardó, si por lo que sea es null, evitamos el cierre
             if (currentUser == null) {
                 Toast.makeText(this, "Error: Sesión no encontrada. Reinicia la app.", Toast.LENGTH_SHORT).show();
                 return;
@@ -202,25 +214,26 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
             boolean esFavorita = dbHelper.isFavourite(c);
 
-            // Conf Retrofit
+            // Retrofit
             String BASE_URL = "https://mavpc.up.railway.app/api/";
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
+
             ApiService service = retrofit.create(ApiService.class);
 
             if (esFavorita) {
-                // --- BORRAR ---
-
-                // 1. SQLite
+                // primero borrar de sqlite para que se refleje rapido en la aplicacion
                 dbHelper.deleteFavCam(c);
 
-                // 2. API (Con enqueue para evitar bloqueos)
-                service.eliminarCamFavorita(c.getId()).enqueue(new Callback<Void>() {
+                // borrar de API
+                service.eliminarCamFavorita(c.getId(), currentUser.getId()).enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        if(!response.isSuccessful()) Log.e("API", "Error al borrar en nube: " + response.code());
+                        if(!response.isSuccessful()){
+                            Log.e("API", "Error al borrar en nube: " + response.code());
+                        }
                     }
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
@@ -228,35 +241,41 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                     }
                 });
 
-                // 3. UI
+                // UI
                 btnFavorito.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.dark_grey)));
                 Toast.makeText(this, "Eliminada de favoritos", Toast.LENGTH_SHORT).show();
-
             } else {
-                // --- AÑADIR ---
+                CamFavoritaUsuario camFav = new CamFavoritaUsuario();
+                camFav.setIdCamara(c.getId());
+                camFav.setIdUsuario(currentUser.getId());
 
-                // 1. SQLite
+                // añadir a SQLite primero para que se refleje rapido en la app
                 dbHelper.insertCam(c);
 
-                // 2. API
-                service.guardarCamFavorita(c.getId(), currentUser.getId()).enqueue(new Callback<Void>() {
+                // añadir a API
+                service.guardarCamFavorita(camFav).enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        if(!response.isSuccessful()) Log.e("API", "Error al guardar en nube: " + response.code());
+                        if (response.isSuccessful()) {
+                            Log.d("API", "Guardado correcto en nube");
+                        } else {
+                            Log.e("API", "Error servidor: " + response.code());
+                        }
                     }
+
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        Log.e("API", "Fallo de red al guardar: " + t.getMessage());
+                        Log.e("API", "Fallo de red: " + t.getMessage());
                     }
                 });
 
-                // 3. UI
+                // UI
                 btnFavorito.setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(this, R.color.cake_green)));
                 Toast.makeText(this, "Añadida a favoritos", Toast.LENGTH_SHORT).show();
             }
 
         } catch (Exception e) {
-            // ESTO EVITARÁ QUE SE CIERRE LA APP SI HAY OTRO ERROR
+            // evita que se cierre la app
             Log.e("CRASH_EVITADO", "Error en alternarFavCam: " + e.getMessage());
             e.printStackTrace();
             Toast.makeText(this, "Ocurrió un error interno", Toast.LENGTH_SHORT).show();

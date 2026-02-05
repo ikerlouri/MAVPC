@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mavpc.R;
+import com.example.mavpc.database.DbHelper;
 import com.example.mavpc.modelos.Usuario;
 
 import java.security.MessageDigest;
@@ -75,7 +76,6 @@ public class Registro extends BaseActivity {
 
         // llamada a la api
         Call<Boolean> call = service.comprobarUsuarioRegistro(usuario, email);
-
         call.enqueue(new Callback<Boolean>() {
             @Override
             public void onResponse(Call<Boolean> call, Response<Boolean> response) {
@@ -115,6 +115,8 @@ public class Registro extends BaseActivity {
                 // solo comprobamos el código HTTP (200-299)
                 if (response.isSuccessful()) {
                     Toast.makeText(Registro.this, "¡Registro completado!", Toast.LENGTH_LONG).show();
+                    DbHelper dbHelper = new DbHelper(Registro.this);
+                    dbHelper.insertUsuarioSesion(nuevoUsuario);
 
                     Intent intent = new Intent(Registro.this, Explorar.class);
                     startActivity(intent);

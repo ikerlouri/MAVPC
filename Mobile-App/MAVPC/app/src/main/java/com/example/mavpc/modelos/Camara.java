@@ -1,9 +1,10 @@
 package com.example.mavpc.modelos;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Camara {
-    @SerializedName("id")
     private int id;
     @SerializedName("cameraName")
     private String name;
@@ -25,6 +26,14 @@ public class Camara {
         this.road = road;
         this.km = km;
         this.direction = direction;
+    }
+
+    public Camara() {}
+
+    @NonNull
+    @Override
+    public String toString() {
+        return id + "-" + name + "-" + urlImage + "-" + latitude + "-" + longitude + "-" + road + "-" + km + "-" + direction + "-";
     }
 
     public int getId() {

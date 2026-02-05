@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DbHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "UserYCamFavs.db";
 
     // Nombres de Tablas
@@ -189,16 +189,32 @@ public class DbHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
+                // 1. Obtenemos los índices de las columnas por su nombre
+                // (Asegúrate de que estos nombres coinciden EXACTAMENTE con tu CREATE TABLE)
+                int indexId = cursor.getColumnIndex("id");
+                int indexName = cursor.getColumnIndex("name");
+                int indexUrl = cursor.getColumnIndex("urlImage");
+                int indexLat = cursor.getColumnIndex("latitude");
+                int indexLon = cursor.getColumnIndex("longitude");
+                int indexRoad = cursor.getColumnIndex("road");
+                int indexKm = cursor.getColumnIndex("km");
+                int indexDir = cursor.getColumnIndex("direction");
+
+                // 2. Leemos usando esos índices
+                // Nota: getColumnIndex devuelve -1 si no encuentra la columna,
+                // por eso es bueno comprobar o asegurarse que los nombres están bien.
+
                 Camara c = new Camara(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getString(3),
-                        cursor.getString(4),
-                        cursor.getString(5),
-                        cursor.getString(6),
-                        cursor.getString(7)
+                        cursor.getInt(indexId),
+                        cursor.getString(indexName),
+                        cursor.getString(indexUrl),
+                        cursor.getString(indexLat),
+                        cursor.getString(indexLon),
+                        cursor.getString(indexRoad),
+                        cursor.getString(indexKm),
+                        cursor.getString(indexDir)
                 );
+
                 lista.add(c);
             } while (cursor.moveToNext());
         }

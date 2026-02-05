@@ -1,6 +1,7 @@
 package com.example.mavpc.controladores;
 
 // modelos
+import com.example.mavpc.modelos.CamFavoritaUsuario;
 import com.example.mavpc.modelos.Camara;
 import com.example.mavpc.modelos.Incidencia;
 import com.example.mavpc.modelos.Usuario;
@@ -36,12 +37,12 @@ public interface ApiService {
     @GET("usuarios/favoritos")
     Call<List<Camara>> cargarCamsFavoritasUsuario(@Query("idUsuario") int idUsuario);
     @POST("usuarios/favoritos")
-    Call<Void> guardarCamFavorita(
-            @Query("idCamara") int idCamara,
-            @Query("idUsuario") int idUsuario);
+    Call<Void> guardarCamFavorita(@Body CamFavoritaUsuario camFav);
     @DELETE("usuarios/favoritos")
-    Call<Void> eliminarCamFavorita(@Body int idCamaraUsuario);
-
+    Call<Void> eliminarCamFavorita(
+            @Query("idUsuario") int idUsuario,
+            @Query("idCamara") int idCamara
+    );
 
     //usuarios
     @GET("usuarios/comprobarUsuario")
@@ -61,5 +62,5 @@ public interface ApiService {
     @PUT("usuarios")
     Call<Void> actualizarUsuario(@Body Usuario usuario);
     @DELETE("usuarios")
-    Call<Void> eliminarUsuario(@Body int idUsuario);
+    Call<Void> eliminarUsuario(@Query("idUsuario") int idUsuario);
 }
