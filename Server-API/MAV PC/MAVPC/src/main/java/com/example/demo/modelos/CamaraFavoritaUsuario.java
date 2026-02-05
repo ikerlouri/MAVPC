@@ -1,6 +1,7 @@
 package com.example.demo.modelos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,13 +17,12 @@ public class CamaraFavoritaUsuario {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@Column(name = "id")
 	private int id;
 	
-	@Column(name = "id_camara")
 	private int idCamara;
 	
-	@Column(name = "id_usuario")
 	private int idUsuario;
 
 	public CamaraFavoritaUsuario() {
