@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -18,6 +21,7 @@ import android.widget.Toast;
 // para el formulario de los filtros
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,6 +75,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 // Import para poner marcadores
 import com.google.android.gms.maps.model.MarkerOptions;
 
+// Controlador de la ventana "explorar", la del mapa
 public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     private GoogleMap gMap;
@@ -124,6 +129,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             // consumir click para no cerrar
         });
 
+        // Fondo transparente para diferenciar las ventanas que se superponen
         darkBackground = findViewById(R.id.darkBackground);
         darkBackground.setOnClickListener(v -> {
             filterWindow.setVisibility(View.GONE);
@@ -131,15 +137,19 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             darkBackground.setVisibility(View.GONE);
         });
 
+        // Boton para abrir el formulario de filtros
         btnFiltros = findViewById(R.id.btnFiltros);
         btnFiltros.setOnClickListener(v -> {
             filterWindow.setVisibility(View.VISIBLE);
             darkBackground.setVisibility(View.VISIBLE);
         });
 
+        // Contenido del fomulario de filtros
         spinDia = findViewById(R.id.spinDia);
         spinMes = findViewById(R.id.spinMes);
         spinAno = findViewById(R.id.spinAno);
+        // inicializar spinners de fecha
+        inicializarSpinnersFecha();
 
         cbAlava = findViewById(R.id.cbAlava);
         cbVizcaya = findViewById(R.id.cbVizcaya);
@@ -168,6 +178,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             darkBackground.setVisibility(View.GONE);
         });
 
+        // Boton para marcar o desmarcar camara como favorita
         btnFavorito = findViewById(R.id.btnFavorito);
 
         // inicializar mapa
@@ -176,13 +187,11 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        // inicializar spinners de fecha
-        inicializarSpinnersFecha();
-
         // TIENE QUE SER EL FINAL DEL onCreate!! fuerza al Navbar a no tener relleno inferior
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    // metodo que aplica los filtros elegidos en el formulario
     private void aplicarFiltros() {
         filterWindow.setVisibility(View.GONE);
         darkBackground.setVisibility(View.GONE);
@@ -200,6 +209,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         ApiService service = retrofit.create(ApiService.class);
 
+        // llamada a la api que devuelve las incidencias de un dia concreto
         Call<List<Incidencia>> call = service.obtenerIncidenciasFecha(datos.getAnio(), datos.getMes(), datos.getDia());
         call.enqueue(new Callback<List<Incidencia>>() {
             @Override
@@ -208,11 +218,11 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                     List<Incidencia> listaOriginal = response.body(); // Lista completa que llega de la API
                     List<Incidencia> listaFiltrada = new ArrayList<>(); // Lista vacía donde meteremos las que pasen el filtro
 
-                    // 1. Limpiar mapa
+                    // Limpiar mapa
                     gMap.clear();
 
-                    // 2. Si se quieren ver las cámaras, enseñarlas
-                    if(cbCamara.isChecked()){
+                    // Si se quieren ver las cámaras, enseñarlas
+                    if (cbCamara.isChecked()) {
                         marcarCamarasMapa();
                     }
 
@@ -222,13 +232,12 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                         for (Incidencia i : listaOriginal) {
                             boolean pasaElFiltro = true;
 
-                            // --- PROTECCIÓN CONTRA NULL ---
                             // Si algún dato viene null de la API, evitamos el crash usando cadenas vacías
                             String tipo = (i.getType() != null) ? i.getType().toLowerCase().trim() : "";
                             String provincia = (i.getProvince() != null) ? i.getProvince().toLowerCase().trim() : "";
                             String gravedad = (i.getLevel() != null) ? i.getLevel().toLowerCase().trim() : "";
 
-                            // --- FILTRO DE TIPO ---
+                            // Filtro de tipo
                             boolean esObra = tipo.contains("obra") || tipo.contains("mantenimiento");
 
                             // Si es obra y el checkbox de obras está apagado -> FUERA
@@ -237,8 +246,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                             // Si NO es obra (es accidente) y el checkbox de accidentes está apagado -> FUERA
                             if (!esObra && !cbIncidencia.isChecked()) pasaElFiltro = false;
 
-
-                            // --- FILTRO DE PROVINCIA ---
+                            // Filtro de provincia
                             boolean esAlava = provincia.contains("álava") || provincia.contains("alava") || provincia.contains("araba");
                             boolean esVizcaya = provincia.contains("vizcaya") || provincia.contains("bizkaia");
                             boolean esGuipuzcoa = provincia.contains("guipúzcoa") || provincia.contains("gipuzkoa");
@@ -249,9 +257,12 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
 
                             // --- FILTRO DE GRAVEDAD ---
-                            if (gravedad.contains("grave") && !cbGrave.isChecked()) pasaElFiltro = false;
-                            if (gravedad.contains("medio") && !cbMedio.isChecked()) pasaElFiltro = false;
-                            if (gravedad.contains("leve") && !cbLeve.isChecked()) pasaElFiltro = false;
+                            if (gravedad.contains("grave") && !cbGrave.isChecked())
+                                pasaElFiltro = false;
+                            if (gravedad.contains("medio") && !cbMedio.isChecked())
+                                pasaElFiltro = false;
+                            if (gravedad.contains("leve") && !cbLeve.isChecked())
+                                pasaElFiltro = false;
 
 
                             // --- RESULTADO FINAL ---
@@ -281,6 +292,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
+    // se recogen el filtrado deseado
     private FiltrosData recogerInputsFiltros() {
         FiltrosData datos = new FiltrosData();
 
@@ -307,15 +319,15 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         return datos;
     }
 
-    // por si viene con unas coordenadas que enseñar
+    // por si viene con unas coordenadas que enseñar como al volver a la ventana pasa por el estado onresume se enseñan aqui
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 
         Bundle extras = getIntent().getExtras();
-        if (extras != null){
+        if (extras != null) {
             // hay que actualizar el mapa porque se ha creado una nueva incidencia
-            if (extras.containsKey("ACTUALIZAR_MAPA")){
+            if (extras.containsKey("ACTUALIZAR_MAPA")) {
                 if (gMap != null) {
                     gMap.clear();
                     marcarIncidenciasActuales();
@@ -336,13 +348,14 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
-    // Esto actualiza el Intent de la actividad para cuando se abre el mapa desde una camara favorita abrirlo en sus coordenadas
+    // esto actualiza el Intent de la actividad para cuando se abre el mapa desde una camara favorita abrirlo en sus coordenadas
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
     }
 
+    // para marcar o desmarcar camara como favorita
     private void alternarFavCam(Camara c) {
         try {
             DbHelper dbHelper = new DbHelper(Explorar.this);
@@ -373,10 +386,11 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                 service.eliminarCamFavorita(c.getId(), currentUser.getId()).enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        if(!response.isSuccessful()){
+                        if (!response.isSuccessful()) {
                             Log.e("API", "Error al borrar en nube: " + response.code());
                         }
                     }
+
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         Log.e("API", "Fallo de red al borrar: " + t.getMessage());
@@ -423,37 +437,47 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             Toast.makeText(this, "Ocurrió un error interno", Toast.LENGTH_SHORT).show();
         }
     }
-    
+
+    // enseña la ventana emergente de creacion de incidencia al mantener pulsado cualquier punto d qel mapa
     private void mostrarDialogoCrearIncidencia(LatLng latLng) {
-        new AlertDialog.Builder(Explorar.this)
-                .setTitle("Nueva Incidencia")
-                .setMessage("Crear incidencia en este punto")
-                .setPositiveButton("Crear", (dialog, which) -> {
-                    // se pulsa si -> formulario de creación
-                    Intent intent = new Intent(Explorar.this, Reportar.class);
+        AlertDialog.Builder builder = new AlertDialog.Builder(Explorar.this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_createincidence, null);
+        builder.setView(dialogView);
 
-                    // Pasamos las coordenadas
-                    intent.putExtra("LATITUD", latLng.latitude);
-                    intent.putExtra("LONGITUD", latLng.longitude);
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
 
-                    intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                    startActivity(intent);
-                    overridePendingTransition(0, 0);
+        // Esto se ejecuta SIEMPRE que el diálogo se cierre (por botón o por click fuera)
+        dialog.setOnDismissListener(d -> {
+            if (marcadorTemporal != null) {
+                marcadorTemporal.remove();
+                marcadorTemporal = null;
+            }
+        });
 
-                    // borrar el marcador temporal al irnos
-                    if (marcadorTemporal != null) {
-                        marcadorTemporal.remove();
-                        marcadorTemporal = null;
-                    }
-                })
-                .setNegativeButton("Cancelar", (dialog, which) -> {
-                    // se pulsa no -> borrar marcador temporal
-                    if (marcadorTemporal != null) {
-                        marcadorTemporal.remove();
-                        marcadorTemporal = null;
-                    }
-                })
-                .show();
+        Button btnCrear = dialogView.findViewById(R.id.btnCrearDialog);
+        Button btnCancelar = dialogView.findViewById(R.id.btnCancelarDialog);
+
+        btnCrear.setOnClickListener(v -> {
+            // Solo la lógica de ir a la otra pantalla
+            Intent intent = new Intent(Explorar.this, Reportar.class);
+            intent.putExtra("LATITUD", latLng.latitude);
+            intent.putExtra("LONGITUD", latLng.longitude);
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+
+            dialog.dismiss(); // Al llamar a esto, se activa el setOnDismissListener de arriba automáticamente
+        });
+
+        btnCancelar.setOnClickListener(v -> {
+            dialog.dismiss(); // Al llamar a esto, también se activa el listener y borra el marcador
+        });
+
+        dialog.show();
     }
 
     @Override
@@ -492,8 +516,8 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             // 2. Añadimos un marcador visual donde el usuario pulsó
             marcadorTemporal = gMap.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .title("Nueva incidencia")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET))); // Color distinto
+                    .title("Crear incidencia")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))); // Color distinto
 
             // 3. Mostramos el diálogo de confirmación
             mostrarDialogoCrearIncidencia(latLng);
@@ -711,7 +735,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                 // Color VERDE
                 int color = ContextCompat.getColor(this, R.color.cake_green);
                 btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
-            }else {
+            } else {
                 int color = ContextCompat.getColor(this, R.color.dark_grey);
                 btnFavorito.setBackgroundTintList(ColorStateList.valueOf(color));
             }
@@ -721,23 +745,23 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
             String camInfo = "";
             String carretera = cam.getRoad();
-            if (carretera != null){
+            if (carretera != null) {
                 camInfo += "Carretera: " + carretera + "\n" + "\n";
             }
             String direccion = cam.getDirection();
-            if (direccion != null){
+            if (direccion != null) {
                 camInfo += "Dirección: " + direccion + "\n" + "\n";
             }
             String km = cam.getKm();
-            if (km != null){
+            if (km != null) {
                 camInfo += "Kilómetro: " + km + "\n" + "\n";
             }
             String latitude = cam.getLatitude();
-            if (latitude != null){
+            if (latitude != null) {
                 camInfo += "Latitud: " + latitude + "\n" + "\n";
             }
             String longitud = cam.getLongitude();
-            if (longitud != null){
+            if (longitud != null) {
                 camInfo += "Longitud: " + longitud;
             }
             tvInfoDetalles.setText(camInfo);
@@ -758,40 +782,40 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             btnFavorito.setVisibility(View.GONE);
 
             String titulo = inc.getType();
-            if(titulo == null || titulo.toLowerCase().trim().contains("otro")){
+            if (titulo == null || titulo.toLowerCase().trim().contains("otro")) {
                 titulo = "Otro";
-            } else{
+            } else {
                 titulo = inc.getType();
             }
             tvTituloDetalles.setText(titulo);
 
             String infoInc = "";
             String gravedad = inc.getLevel();
-            if (gravedad != null && !gravedad.isEmpty()){
+            if (gravedad != null && !gravedad.isEmpty()) {
                 infoInc += "Gravedad: " + gravedad + "\n" + "\n";
             }
             String causa = inc.getCause();
-            if (causa != null && !causa.isEmpty()){
+            if (causa != null && !causa.isEmpty()) {
                 infoInc += "Causa: " + causa + "\n" + "\n";
             }
             String ciudad = inc.getCityTown();
-            if (ciudad != null && !ciudad.isEmpty()){
+            if (ciudad != null && !ciudad.isEmpty()) {
                 infoInc += "Ciudad: " + ciudad + "\n" + "\n";
             }
             String carretera = inc.getRoad();
-            if (carretera != null && !carretera.isEmpty()){
+            if (carretera != null && !carretera.isEmpty()) {
                 infoInc += "Carretera: " + carretera + "\n" + "\n";
             }
             String direccion = inc.getDirection();
-            if (direccion != null && !direccion.isEmpty()){
+            if (direccion != null && !direccion.isEmpty()) {
                 infoInc += "Dirección: " + direccion + "\n" + "\n";
             }
             String latitud = inc.getLatitude();
-            if (latitud != null && !latitud.isEmpty()){
+            if (latitud != null && !latitud.isEmpty()) {
                 infoInc += "Latitud: " + latitud + "\n" + "\n";
             }
             String longitud = inc.getLongitude();
-            if (longitud != null && !longitud.isEmpty()){
+            if (longitud != null && !longitud.isEmpty()) {
                 infoInc += "Longitud: " + longitud;
             }
 
@@ -864,15 +888,15 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         // dia (1-31)
         List<String> dias = new ArrayList<>();
-        for(int i=1; i<=31; i++) dias.add(String.format("%02d", i));
+        for (int i = 1; i <= 31; i++) dias.add(String.format("%02d", i));
 
         // mes (1-12)
         List<String> meses = new ArrayList<>();
-        for(int i=1; i<=12; i++) meses.add(String.format("%02d", i));
+        for (int i = 1; i <= 12; i++) meses.add(String.format("%02d", i));
 
         // año (2008-2026)
         List<String> anos = new ArrayList<>();
-        for(int i=2025; i<=2026; i++) anos.add(String.valueOf(i));
+        for (int i = 2025; i <= 2026; i++) anos.add(String.valueOf(i));
 
         // adaptadores
         ArrayAdapter<String> adapterDia = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dias);
@@ -897,7 +921,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         // verificamos que el año actual esté dentro del rango para que no falle
         if (indiceAno > 0 && indiceAno < anos.size()) {
             spinAno.setSelection(indiceAno);
-        } else{
+        } else {
             spinAno.setSelection(anos.size() - 1);
         }
     }

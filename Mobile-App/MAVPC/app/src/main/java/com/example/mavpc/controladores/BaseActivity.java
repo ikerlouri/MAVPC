@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.mavpc.R;
 
+// clase que fuerza el modo inmersivo (ocultar barra superior e inferior de la ui del propio movil)
 public class BaseActivity extends AppCompatActivity {
 
     @Override

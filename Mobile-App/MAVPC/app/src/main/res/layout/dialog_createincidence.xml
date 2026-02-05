@@ -4,41 +4,40 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="20dp"
-    app:cardCornerRadius="30dp"
-    app:cardElevation="8dp"
-    app:cardBackgroundColor="@color/dark_grey">
+    app:cardBackgroundColor="@color/dark_grey"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
+        android:padding="25dp"
         android:gravity="center">
 
         <ImageView
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:src="@drawable/ic_delete"
-            app:tint="#FF4444"
+            android:src="@drawable/ic_newincidence"
+            app:tint="@color/cake_green"
             android:layout_marginBottom="16dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Eliminar cuenta"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:text="Crear Incidencia"
             android:textColor="@color/white"
-            android:layout_marginBottom="8dp"/>
+            android:textSize="22sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="¿Seguro que quieres eliminar la cuenta?"
-            android:gravity="center"
-            android:textSize="16sp"
-            android:textColor="@color/white"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="25dp"
+            android:text="¿Quieres crear una nueva incidencia en esta ubicación?"
+            android:textColor="#DDDDDD"
+            android:textSize="16sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -47,7 +46,7 @@
             android:weightSum="2">
 
             <Button
-                android:id="@+id/btnCancelar"
+                android:id="@+id/btnCancelarDialog"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -57,16 +56,15 @@
                 android:layout_marginEnd="8dp"/>
 
             <Button
-                android:id="@+id/btnConfiElim"
+                android:id="@+id/btnCrearDialog"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Eliminar"
-                android:backgroundTint="#FF4444"
-                android:textColor="@color/white"
+                android:text="Crear"
+                android:backgroundTint="@color/cake_green"
+                android:textColor="@color/black"
+                android:textStyle="bold"
                 android:layout_marginStart="8dp"/>
         </LinearLayout>
-
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>

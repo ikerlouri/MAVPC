@@ -22,6 +22,7 @@ import com.example.mavpc.model.Camara; // Importa tu modelo
 
 import java.util.List;
 
+// Adaptador para el listview de las camaras favoritas
 public class FavoritosAdapter extends ArrayAdapter<Camara> {
 
     private Context context;
@@ -33,7 +34,7 @@ public class FavoritosAdapter extends ArrayAdapter<Camara> {
         this.listaCamaras = lista;
     }
 
-    // el metodo en si es un for each
+    // El metodo en si es un for each
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -61,6 +62,7 @@ public class FavoritosAdapter extends ArrayAdapter<Camara> {
                     .into(ivImagen);
         }
 
+        // Boton para abrir mapa en la posicion de la camara
         btnIr.setOnClickListener(v -> {
             Intent intent = new Intent(context, Explorar.class);
 
