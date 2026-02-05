@@ -160,3 +160,6 @@ namespace MAVPC.MVVM.ViewModels
         }
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\MVVM\ViewModels\MapViewModel.cs
+============================================================

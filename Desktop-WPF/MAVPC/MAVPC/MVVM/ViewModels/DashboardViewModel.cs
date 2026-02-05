@@ -6,6 +6,7 @@ using MAVPC.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq; // Necesario para GroupBy en el PDF
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Data;
@@ -16,6 +17,7 @@ namespace MAVPC.MVVM.ViewModels
     public partial class DashboardViewModel : ObservableObject
     {
         private readonly ITrafficService _trafficService;
+        private readonly IPdfService _pdfService; // <--- NUEVO SERVICIO
 
         // --- COLECCIONES ---
         [ObservableProperty] private ObservableCollection<Camara> _cameras;
@@ -44,9 +46,12 @@ namespace MAVPC.MVVM.ViewModels
         [ObservableProperty] private string _systemStatus = "CONECTADO";
         [ObservableProperty] private bool _isLoading;
 
-        public DashboardViewModel(ITrafficService trafficService)
+        // CONSTRUCTOR ACTUALIZADO: Recibe ahora AMBOS servicios
+        public DashboardViewModel(ITrafficService trafficService, IPdfService pdfService)
         {
             _trafficService = trafficService;
+            _pdfService = pdfService; // <--- ASIGNACIÓN
+
             Cameras = new ObservableCollection<Camara>();
             Incidencias = new ObservableCollection<Incidencia>();
 
@@ -118,12 +123,9 @@ namespace MAVPC.MVVM.ViewModels
             return false;
         }
 
-        // --- COMANDO ELIMINAR CORREGIDO ---
-        // Cambiamos el parámetro a 'object' para evitar crash de tipos en el binding XAML
         [RelayCommand]
         private async Task DeleteCamera(object parameter)
         {
-            // Verificamos y convertimos manualmente para mayor seguridad
             if (parameter is not Camara camara) return;
 
             var result = MessageBox.Show(
@@ -136,19 +138,12 @@ namespace MAVPC.MVVM.ViewModels
 
             try
             {
-                // Llamada a la API
                 bool exito = await _trafficService.DeleteCamaraAsync(camara.Id);
 
                 if (exito)
                 {
-                    // Importante: Eliminar de la colección principal
                     Cameras.Remove(camara);
-
-                    // Actualizar contadores
                     TotalCameras = Cameras.Count;
-
-                    // Opcional: Refrescar la vista si usas filtros complejos, 
-                    // aunque ObservableCollection suele notificarlo solo.
                     CamerasView?.Refresh();
                 }
                 else
@@ -158,7 +153,6 @@ namespace MAVPC.MVVM.ViewModels
             }
             catch (Exception ex)
             {
-                // ESTE CATCH ES EL QUE FALTABA PARA EVITAR QUE LA APP CIERRE SI FALLA EL SERVICIO
                 MessageBox.Show($"Error crítico al eliminar: {ex.Message}", "Excepción", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -179,21 +173,65 @@ namespace MAVPC.MVVM.ViewModels
 
             Action closeAction = () => window.Close();
 
-            // Asegúrate de pasar el servicio correctamente
+            // Pasamos el trafficService
             var addItemVm = new AddItemViewModel(_trafficService, closeAction);
             var view = new AddItemView { DataContext = addItemVm };
 
             window.Content = view;
             window.ShowDialog();
 
-            // Recargar datos al cerrar la ventana
             await LoadData();
         }
 
+        // --- EXPORTAR PDF IMPLEMENTADO ---
         [RelayCommand]
-        private void ExportPdf()
+        private async Task ExportPdf()
         {
-            MessageBox.Show("Función de PDF pendiente de implementar.", "Info");
+            try
+            {
+                var dialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "PDF Files (*.pdf)|*.pdf",
+                    FileName = $"Informe_Ejecutivo_{DateTime.Now:yyyyMMdd_HHmm}.pdf"
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    // 1. AVISAR AL USUARIO (Porque descargar el histórico puede tardar un segundo)
+                    SystemStatus = "GENERANDO PDF...";
+
+                    // 2. DESCARGAR DATOS HISTÓRICOS (Aquí llamamos al NUEVO endpoint)
+                    var historialCompleto = await _trafficService.GetAllIncidenciasAsync();
+
+                    if (historialCompleto == null || historialCompleto.Count == 0)
+                    {
+                        MessageBox.Show("No se pudo descargar el historial para el reporte.", "Error");
+                        SystemStatus = "EN LÍNEA";
+                        return;
+                    }
+
+                    // 3. GENERAR EL REPORTE CON EL HISTORIAL
+                    // (El PdfService "Pro" que hicimos antes procesará todos estos datos)
+                    await Task.Run(() => _pdfService.GenerateFullReport(dialog.FileName, historialCompleto));
+
+                    SystemStatus = "EN LÍNEA";
+
+                    // 4. ABRIR
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = dialog.FileName,
+                        UseShellExecute = true
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                SystemStatus = "ERROR";
+                MessageBox.Show($"Error generando PDF: {ex.Message}");
+            }
         }
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\MVVM\ViewModels\DashboardViewModel.cs
+============================================================

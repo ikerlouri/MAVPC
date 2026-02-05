@@ -22,3 +22,6 @@ namespace MAVPC
         }
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\MainWindow.xaml.cs
+============================================================

@@ -63,3 +63,6 @@ namespace MAVPC.MVVM.Converters
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\MVVM\Converters\DashboardConverters.cs
+============================================================

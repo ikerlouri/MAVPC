@@ -8,11 +8,19 @@ namespace MAVPC.Services
     {
         // Métodos de Lectura (GET)
         Task<List<Camara>> GetCamarasAsync();
+
+        // El actual (solo activas)
         Task<List<Incidencia>> GetIncidenciasAsync();
 
-        // Métodos de Escritura (POST)
+        // --- NUEVO: El que trae todo el historial (api/incidencias) ---
+        Task<List<Incidencia>> GetAllIncidenciasAsync();
+
+        // Métodos de Escritura (POST/DELETE)
         Task<bool> AddCamaraAsync(Camara nuevaCamara);
         Task<bool> AddIncidenciaAsync(Incidencia nuevaIncidencia);
         Task<bool> DeleteCamaraAsync(string id);
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Services\ITrafficService.cs
+============================================================

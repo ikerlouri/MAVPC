@@ -35,3 +35,6 @@ namespace MAVPC.Models
         public string Longitud { get; set; } = string.Empty;
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Models\Camara.cs
+============================================================

@@ -123,3 +123,6 @@ namespace MAVPC.MVVM.Views
         }
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\MVVM\Views\MapView.xaml.cs
+============================================================

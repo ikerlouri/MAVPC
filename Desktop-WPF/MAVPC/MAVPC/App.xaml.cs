@@ -2,6 +2,7 @@
 using MAVPC.MVVM.Views;
 using MAVPC.Services;
 using Microsoft.Extensions.DependencyInjection;
+using QuestPDF.Infrastructure; // <--- IMPORTANTE
 using System.Windows;
 
 namespace MAVPC
@@ -21,21 +22,19 @@ namespace MAVPC
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<ITrafficService, TrafficService>();
 
+            // --- NUEVO: REGISTRAR EL SERVICIO DE PDF ---
+            services.AddSingleton<IPdfService, PdfService>();
+            // -------------------------------------------
+
             // ViewModels
             services.AddSingleton<MainViewModel>();
             services.AddTransient<LoginViewModel>();
-            services.AddTransient<DashboardViewModel>();
+            services.AddTransient<DashboardViewModel>(); // Se inyectará IPdfService automáticamente aquí
             services.AddTransient<MapViewModel>();
             services.AddTransient<StatsViewModel>();
-
-            // --- IMPORTANTE: AÑADIR ESTA LÍNEA ---
             services.AddTransient<UsersViewModel>();
-            // -------------------------------------
 
             // Vistas
-            // Nota: Solo registramos MainView porque es la única que instanciamos 
-            // manualmente al inicio. Las otras (Dashboard, Users, etc.) se resuelven 
-            // solas por los DataTemplates de XAML.
             services.AddSingleton<MainView>(provider => new MainView
             {
                 DataContext = provider.GetRequiredService<MainViewModel>()
@@ -46,8 +45,15 @@ namespace MAVPC
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
+            // --- NUEVO: LICENCIA QUESTPDF (Requerido) ---
+            QuestPDF.Settings.License = LicenseType.Community;
+            // --------------------------------------------
+
             var mainWindow = _serviceProvider.GetRequiredService<MainView>();
             mainWindow.Show();
         }
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\App.xaml.cs
+============================================================

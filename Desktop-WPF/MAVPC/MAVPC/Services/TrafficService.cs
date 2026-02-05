@@ -23,11 +23,11 @@ namespace MAVPC.Services
             {
                 PropertyNameCaseInsensitive = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                // IMPORTANTE: Esto permite que "incidenceId": "12345" se lea como int 12345
-                // sin que tu modelo tenga que cambiar a string.
                 NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
         }
+
+        // --- MÉTODOS EXISTENTES ---
 
         public async Task<List<Camara>> GetCamarasAsync()
         {
@@ -44,57 +44,50 @@ namespace MAVPC.Services
 
         public async Task<List<Incidencia>> GetIncidenciasAsync()
         {
+            // Este llama a /listarActual (Solo lo que está pasando AHORA)
+            return await FetchIncidencias($"{BASE_URL}incidencias/listarActual");
+        }
+
+        // --- NUEVO MÉTODO: HISTORIAL COMPLETO ---
+        public async Task<List<Incidencia>> GetAllIncidenciasAsync()
+        {
+            // Este llama a /incidencias (Histórico completo para reportes)
+            return await FetchIncidencias($"{BASE_URL}incidencias");
+        }
+
+        // He refactorizado la lógica de fetch para no repetir código, 
+        // ya que ambos endpoints devuelven la misma estructura JSON.
+        private async Task<List<Incidencia>> FetchIncidencias(string url)
+        {
             try
             {
-                string url = $"{BASE_URL}incidencias/listarActual";
-
-                // 1. Descargamos el texto crudo para ver si llega algo
                 var response = await _httpClient.GetAsync(url);
                 var jsonString = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error HTTP: {response.StatusCode} - {jsonString}");
+                    System.Diagnostics.Debug.WriteLine($"Error HTTP: {response.StatusCode}");
                     return new List<Incidencia>();
                 }
 
-                // 2. Configuramos las opciones A MANO aquí mismo para asegurar que traga con el ID string -> int
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    NumberHandling = JsonNumberHandling.AllowReadingFromString, // CLAVE: Permite leer "123" como 123
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                };
-
-                // 3. Intentamos convertir
-                var lista = JsonSerializer.Deserialize<List<Incidencia>>(jsonString, options);
+                var lista = JsonSerializer.Deserialize<List<Incidencia>>(jsonString, _jsonOptions);
 
                 if (lista != null)
                 {
-                    // Filtro para quitar las que tienen latitud 0 (que vienen muchas en tu JSON)
-                    var filtradas = lista.FindAll(x => x.Latitude != null && x.Latitude != 0);
-                    System.Diagnostics.Debug.WriteLine($"Incidencias cargadas: {filtradas.Count} (Originales: {lista.Count})");
-                    return filtradas;
+                    // Filtramos latitud 0 o nula para evitar basura en el mapa/reporte
+                    return lista.FindAll(x => x.Latitude != null && x.Latitude != 0);
                 }
 
                 return new List<Incidencia>();
             }
             catch (Exception ex)
             {
-                // --- AQUÍ VERÁS EL ERROR REAL ---
-                System.Diagnostics.Debug.WriteLine("--------------------------------------------------");
-                System.Diagnostics.Debug.WriteLine($"ERROR DESERIALIZANDO INCIDENCIAS: {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    System.Diagnostics.Debug.WriteLine($"INNER ERROR: {ex.InnerException.Message}");
-                }
-                System.Diagnostics.Debug.WriteLine("--------------------------------------------------");
-
+                System.Diagnostics.Debug.WriteLine($"ERROR FETCH: {ex.Message}");
                 return new List<Incidencia>();
             }
         }
 
-        // --- MÉTODOS DE ESCRITURA (Sin cambios de lógica) ---
+        // --- MÉTODOS DE ESCRITURA ---
 
         public async Task<bool> AddCamaraAsync(Camara nuevaCamara)
         {
@@ -127,3 +120,6 @@ namespace MAVPC.Services
         }
     }
 }
+============================================================
+ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Services\TrafficService.cs
+============================================================
