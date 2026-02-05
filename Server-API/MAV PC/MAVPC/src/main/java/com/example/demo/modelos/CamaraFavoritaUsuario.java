@@ -19,7 +19,7 @@ public class CamaraFavoritaUsuario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	@Column(name = "id")
-	private int id;
+	private Integer id;
 	
 	private int idCamara;
 	
@@ -28,11 +28,11 @@ public class CamaraFavoritaUsuario {
 	public CamaraFavoritaUsuario() {
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 

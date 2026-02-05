@@ -65,7 +65,7 @@ public class UsuarioController {
 	// Vincula una cámara como favorita a un usuario concreto
 	@PostMapping("/favoritos")
 	public void guardarFavoritos(@RequestBody CamaraFavoritaUsuario camaraFavoritaUsuario) {
-
+	camaraFavoritaUsuario.setId(null);
 	camaraFavoritaUsuarioDao.save(camaraFavoritaUsuario);	
 	}
 	
