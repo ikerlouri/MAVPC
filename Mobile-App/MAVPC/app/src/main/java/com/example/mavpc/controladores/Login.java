@@ -26,10 +26,24 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Login extends BaseActivity {
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // inicia sesion directamente con la cuenta que ya hay, si es que la hay
+        DbHelper dbHelper = new DbHelper(this);
+
+        if (dbHelper.getUsuarioSesion() != null) {
+            Intent intent = new Intent(Login.this, Explorar.class);
+            startActivity(intent);
+
+            // Cerramos Login para que si le da "Atrás" en Explorar, se salga de la app en vez de volver al formulario de login
+            finish();
+
+            return; // Evita que se siga cargando el diseño del Login
+        }
+
         setContentView(R.layout.login);
 
         Button btnLogin = (Button) findViewById(R.id.btnLogin);
