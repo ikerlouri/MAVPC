@@ -4,20 +4,15 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             
              xmlns:vm="clr-namespace:MAVPC.MVVM.ViewModels" 
-             
              mc:Ignorable="d" 
              d:DesignHeight="750" d:DesignWidth="800">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-
         <vm:InverseBoolConverter x:Key="InverseBoolConverter"/>
-
         <SolidColorBrush x:Key="NeonCyan" Color="#00FFFF"/>
         <SolidColorBrush x:Key="NeonPink" Color="#FF007F"/>
-
         <Style x:Key="InverseVisibility" TargetType="FrameworkElement">
             <Setter Property="Visibility" Value="Collapsed"/>
             <Style.Triggers>
@@ -49,7 +44,6 @@
                     <materialDesign:PackIcon Kind="DatabasePlus" Foreground="{Binding CurrentColor}" Width="28" Height="28" Margin="0,0,10,0"/>
                     <TextBlock Text="NUEVO REGISTRO" FontSize="22" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                 </StackPanel>
-
                 <Button HorizontalAlignment="Right" Command="{Binding CloseCommand}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                         Style="{StaticResource MaterialDesignIconForegroundButton}" Foreground="Gray">
                     <materialDesign:PackIcon Kind="Close" Width="28" Height="28"/>
@@ -61,7 +55,6 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-
                 <Button Command="{Binding SwitchModeCommand}" CommandParameter="Camera" Height="55" Margin="0,0,10,0" 
                         Background="Transparent" BorderBrush="{x:Null}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}">
                     <Button.Style>
@@ -80,7 +73,6 @@
                         <TextBlock Text="CÁMARA VIAL" Foreground="White" FontSize="12" FontWeight="SemiBold" Margin="0,5,0,0"/>
                     </StackPanel>
                 </Button>
-
                 <Button Grid.Column="1" Command="{Binding SwitchModeCommand}" CommandParameter="Incidence" Height="55" Margin="10,0,0,0" 
                         Background="Transparent" BorderBrush="{x:Null}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}">
                     <Button.Style>
@@ -103,39 +95,59 @@
 
             <Grid Grid.Row="2">
                 <StackPanel Visibility="{Binding IsCameraSelected, Converter={StaticResource BoolToVis}}">
-                    <TextBox materialDesign:HintAssist.Hint="Identificador" Text="{Binding NombreCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" CaretBrush="{StaticResource NeonCyan}" Margin="0,0,0,15"/>
-                    <TextBox materialDesign:HintAssist.Hint="URL Stream" Text="{Binding UrlCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" CaretBrush="{StaticResource NeonCyan}" Margin="0,0,0,15"/>
+                    <TextBox materialDesign:HintAssist.Hint="Identificador / Nombre" Text="{Binding NombreCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" CaretBrush="{StaticResource NeonCyan}" Margin="0,0,0,15"/>
+                    <TextBox materialDesign:HintAssist.Hint="URL Stream / Imagen" Text="{Binding UrlCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" CaretBrush="{StaticResource NeonCyan}" Margin="0,0,0,15"/>
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBox materialDesign:HintAssist.Hint="Carretera" Text="{Binding CarreteraCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Margin="0,0,15,0"/>
-                        <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="KM" Text="{Binding KmCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White"/>
+
+                        <ComboBox materialDesign:HintAssist.Hint="Carretera (ej: BI-637)" 
+                                  Text="{Binding CarreteraCamara}" 
+                                  ItemsSource="{Binding SugerenciasVias}"
+                                  IsEditable="True"
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
+                                  Foreground="White" Margin="0,0,15,0"/>
+
+                        <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="KM (ej: 008+500)" Text="{Binding KmCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White"/>
                     </Grid>
-                    <TextBox materialDesign:HintAssist.Hint="Dirección" Text="{Binding DireccionCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Margin="0,0,0,15"/>
+                    <TextBox materialDesign:HintAssist.Hint="Dirección / Ubicación" Text="{Binding DireccionCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Margin="0,0,0,15"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox materialDesign:HintAssist.Hint="Latitud" Text="{Binding LatitudCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Margin="0,0,15,0"/>
                         <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Longitud" Text="{Binding LongitudCamara}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White"/>
+
+                        <Button Grid.Column="2" Command="{Binding PasteCoordinatesCommand}" 
+                                Style="{StaticResource MaterialDesignIconButton}" 
+                                ToolTip="Pegar coordenadas"
+                                Foreground="{StaticResource NeonCyan}" Margin="5,10,0,0">
+                            <materialDesign:PackIcon Kind="ContentPaste" Width="24" Height="24"/>
+                        </Button>
                     </Grid>
                 </StackPanel>
 
                 <StackPanel Style="{StaticResource InverseVisibility}">
+
+                    <Grid Margin="0,0,0,15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <DatePicker materialDesign:HintAssist.Hint="Fecha" SelectedDate="{Binding SelectedDate}" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" Foreground="White" Margin="0,0,15,0"/>
+                        <materialDesign:TimePicker Grid.Column="1" materialDesign:HintAssist.Hint="Hora" SelectedTime="{Binding SelectedTime}" Is24Hours="True" Style="{StaticResource MaterialDesignFloatingHintTimePicker}" Foreground="White"/>
+                    </Grid>
+
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <ComboBox materialDesign:HintAssist.Hint="Tipo" Text="{Binding TypeIncidence}" IsEditable="True" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Foreground="White" Margin="0,0,15,0">
-                            <ComboBoxItem Content="Accidente"/>
-                            <ComboBoxItem Content="Obras"/>
-                            <ComboBoxItem Content="Retención"/>
-                            <ComboBoxItem Content="Meteo"/>
-                        </ComboBox>
+                        <ComboBox materialDesign:HintAssist.Hint="Tipo" Text="{Binding TypeIncidence}" ItemsSource="{Binding IncidenceTypes}" IsEditable="True" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Foreground="White" Margin="0,0,15,0"/>
                         <ComboBox Grid.Column="1" materialDesign:HintAssist.Hint="Gravedad" Text="{Binding IncidenceLevel}" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Foreground="White">
                             <ComboBoxItem Content="Verde" Foreground="LightGreen"/>
                             <ComboBoxItem Content="Amarillo" Foreground="Yellow"/>
@@ -143,12 +155,20 @@
                             <ComboBoxItem Content="Negro" Foreground="Gray"/>
                         </ComboBox>
                     </Grid>
+
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBox materialDesign:HintAssist.Hint="Vía" Text="{Binding RoadIncidence}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Margin="0,0,15,0"/>
+
+                        <ComboBox materialDesign:HintAssist.Hint="Vía" 
+                                  Text="{Binding RoadIncidence}" 
+                                  ItemsSource="{Binding SugerenciasVias}"
+                                  IsEditable="True"
+                                  Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
+                                  Foreground="White" Margin="0,0,15,0"/>
+
                         <ComboBox Grid.Column="1" materialDesign:HintAssist.Hint="Sentido" Text="{Binding DirectionIncidence}" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Foreground="White">
                             <ComboBoxItem Content="Ambos"/>
                             <ComboBoxItem Content="Norte"/>
@@ -157,6 +177,7 @@
                             <ComboBoxItem Content="Oeste"/>
                         </ComboBox>
                     </Grid>
+
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
@@ -165,15 +186,30 @@
                         <ComboBox materialDesign:HintAssist.Hint="Ciudad" Text="{Binding CityIncidence}" IsEditable="True" ItemsSource="{Binding SugerenciasCiudades}" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Foreground="White" Margin="0,0,15,0"/>
                         <ComboBox Grid.Column="1" materialDesign:HintAssist.Hint="Provincia" Text="{Binding ProvinceIncidence}" IsEditable="True" ItemsSource="{Binding SugerenciasProvincias}" Style="{StaticResource MaterialDesignFloatingHintComboBox}" Foreground="White"/>
                     </Grid>
+
                     <Grid Margin="0,0,0,15">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <TextBox materialDesign:HintAssist.Hint="Latitud" Text="{Binding LatitudInc}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Margin="0,0,15,0"/>
                         <TextBox Grid.Column="1" materialDesign:HintAssist.Hint="Longitud" Text="{Binding LongitudInc}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White"/>
+
+                        <Button Grid.Column="2" Command="{Binding PasteCoordinatesCommand}" 
+                                Style="{StaticResource MaterialDesignIconButton}" 
+                                ToolTip="Pegar coordenadas"
+                                Foreground="{StaticResource NeonPink}" Margin="5,10,0,0">
+                            <materialDesign:PackIcon Kind="ContentPaste" Width="24" Height="24"/>
+                        </Button>
                     </Grid>
-                    <TextBox materialDesign:HintAssist.Hint="Descripción" Text="{Binding DescriptionIncidence}" Style="{StaticResource MaterialDesignFloatingHintTextBox}" Foreground="White" Height="50" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"/>
+
+                    <ComboBox materialDesign:HintAssist.Hint="Causa / Descripción" 
+                              Text="{Binding DescriptionIncidence}" 
+                              ItemsSource="{Binding IncidenceCauses}"
+                              IsEditable="True" 
+                              Style="{StaticResource MaterialDesignFloatingHintComboBox}" 
+                              Foreground="White" Height="50"/>
                 </StackPanel>
             </Grid>
 
@@ -181,17 +217,14 @@
                 <ProgressBar IsIndeterminate="True" Height="4" Margin="0,0,0,10" 
                              Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" 
                              Foreground="{Binding CurrentColor}" Background="Transparent"/>
-
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
-
                     <Button Command="{Binding CloseCommand}" Content="CANCELAR" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
                             Style="{StaticResource MaterialDesignOutlinedButton}" Foreground="Gray" BorderBrush="Gray" Height="50" FontSize="14"/>
-
                     <Button Grid.Column="2" Command="{Binding SubmitCommand}" Content="GUARDAR" 
                             Height="50" FontSize="14" FontWeight="Bold"
                             Background="{Binding CurrentColor}" BorderBrush="{Binding CurrentColor}">
@@ -204,4 +237,3 @@
         </Grid>
     </Border>
 </UserControl>
-

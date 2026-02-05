@@ -1,10 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using LiveCharts;
 using LiveCharts.Wpf;
+using MAVPC.Models;
 using MAVPC.Services;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace MAVPC.MVVM.ViewModels
 {
@@ -12,34 +13,44 @@ namespace MAVPC.MVVM.ViewModels
     {
         private readonly ITrafficService _trafficService;
 
-        // Propiedades de Datos
+        // --- KPIS ---
+        [ObservableProperty] private string _kpiTotal = "0";
+        [ObservableProperty] private string _kpiCriticas = "0";
+        [ObservableProperty] private string _kpiTopCausa = "-";
+        [ObservableProperty] private string _kpiTopZona = "-";
+
+        // --- PROPIEDADES GRÁFICOS ---
         [ObservableProperty] private SeriesCollection _incidenciasSeries;
         [ObservableProperty] private SeriesCollection _camarasSeries;
         [ObservableProperty] private SeriesCollection _carreterasSeries;
 
         [ObservableProperty] private string[] _labels;
         [ObservableProperty] private string[] _carreterasLabels;
-
         [ObservableProperty] private Func<double, string> _formatter;
 
-        public StatsViewModel(ITrafficService trafficService)
+        // --- NUEVO: CONSTRUCTOR VACÍO DE SEGURIDAD ---
+        // Esto evita que el XAML explote si intenta crear el VM sin pasarle el servicio
+        public StatsViewModel()
         {
-            _trafficService = trafficService;
-
-            // Inicializar para evitar nulos
+            // Inicializamos listas para que no de error de "Null Reference" al pintar
             IncidenciasSeries = new SeriesCollection();
             CamarasSeries = new SeriesCollection();
             CarreterasSeries = new SeriesCollection();
-
-            // Formateador: Convierte 10.0 en "10"
             Formatter = value => value.ToString("N0");
+        }
 
-            // Cargamos los datos (async void es aceptable en constructor/eventos de UI)
+        // --- CONSTRUCTOR PRINCIPAL ---
+        public StatsViewModel(ITrafficService trafficService) : this() // Llama al vacío primero para inicializar listas
+        {
+            _trafficService = trafficService;
             LoadStats();
         }
 
         private async void LoadStats()
         {
+            // NUEVO: Comprobación de seguridad
+            if (_trafficService == null) return;
+
             try
             {
                 var incidencias = await _trafficService.GetIncidenciasAsync();
@@ -47,50 +58,57 @@ namespace MAVPC.MVVM.ViewModels
 
                 if (incidencias == null || camaras == null) return;
 
-                // ==========================================
-                // 1. GRÁFICO CIRCULAR (Por Tipo de Incidencia)
-                // ==========================================
-                // CAMBIO: Usamos 'IncidenceType' en lugar de 'Tipo'
-                var incidenciasPorTipo = incidencias
-                    .GroupBy(x => x.IncidenceType ?? "OTROS") // Agrupamos, si es null ponemos OTROS
-                    .Select(g => new { Tipo = g.Key, Cantidad = g.Count() });
+                // 1. CÁLCULO DE KPIS
+                KpiTotal = incidencias.Count.ToString();
+                KpiCriticas = incidencias.Count(x => x.IncidenceLevel == "Rojo").ToString();
 
+                var topCausaGroup = incidencias
+                    .Where(x => !string.IsNullOrEmpty(x.Cause) && x.Cause != "Var")
+                    .GroupBy(x => x.Cause)
+                    .OrderByDescending(g => g.Count())
+                    .FirstOrDefault();
+                KpiTopCausa = topCausaGroup?.Key ?? "N/A";
+
+                var topZonaGroup = incidencias
+                    .Where(x => !string.IsNullOrEmpty(x.Province))
+                    .GroupBy(x => x.Province)
+                    .OrderByDescending(g => g.Count())
+                    .FirstOrDefault();
+                KpiTopZona = topZonaGroup?.Key ?? "N/A";
+
+                // 2. DONUT TIPOS
                 var pieSeries = new SeriesCollection();
-                foreach (var item in incidenciasPorTipo)
+                var rawTipos = incidencias
+                    .GroupBy(x => x.IncidenceType ?? "OTROS")
+                    .Select(g => new { Tipo = g.Key, Cantidad = g.Count() })
+                    .OrderByDescending(x => x.Cantidad);
+
+                var colores = new[] { "#00FFFF", "#FF007F", "#FFA500", "#FFFFFF", "#32CD32" };
+                int i = 0;
+
+                foreach (var item in rawTipos)
                 {
+                    var colorHex = colores[i % colores.Length];
                     pieSeries.Add(new PieSeries
                     {
                         Title = item.Tipo,
                         Values = new ChartValues<int> { item.Cantidad },
                         DataLabels = true,
-                        LabelPoint = chartPoint => string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation)
+                        LabelPoint = point => "",
+                        Fill = (SolidColorBrush)new BrushConverter().ConvertFromString(colorHex),
+                        StrokeThickness = 2,
+                        Stroke = Brushes.Black
                     });
+                    i++;
                 }
                 IncidenciasSeries = pieSeries;
 
-                // ==========================================
-                // 2. GRÁFICO COLUMNAS (Totales)
-                // ==========================================
-                CamarasSeries = new SeriesCollection
-                {
-                    new ColumnSeries
-                    {
-                        Title = "Total",
-                        Values = new ChartValues<int> { camaras.Count, incidencias.Count },
-                        Fill = System.Windows.Media.Brushes.OrangeRed
-                    }
-                };
-                Labels = new[] { "Cámaras", "Incidencias" };
-
-                // ==========================================
-                // 3. GRÁFICO BARRAS HORIZONTALES (Top 5 Carreteras)
-                // ==========================================
-                // CAMBIO: Usamos 'Road' en lugar de 'Carretera'
+                // 3. BARRAS CARRETERAS
                 var topRoads = incidencias
-                    .Where(x => !string.IsNullOrEmpty(x.Road)) // Filtramos nulos
+                    .Where(x => !string.IsNullOrEmpty(x.Road))
                     .GroupBy(x => x.Road)
                     .OrderByDescending(g => g.Count())
-                    .Take(5)
+                    .Take(7)
                     .Select(g => new { Carretera = g.Key, Cantidad = g.Count() })
                     .ToList();
 
@@ -100,18 +118,31 @@ namespace MAVPC.MVVM.ViewModels
                     {
                         Title = "Incidencias",
                         Values = new ChartValues<int>(topRoads.Select(x => x.Cantidad)),
-                        Fill = System.Windows.Media.Brushes.DodgerBlue
+                        Fill = (SolidColorBrush)new BrushConverter().ConvertFromString("#00FFFF"),
+                        DataLabels = true,
+                        LabelPoint = p => p.X.ToString()
                     }
                 };
-
-                // Asignamos las etiquetas (eje Y) con los nombres de las carreteras
                 CarreterasLabels = topRoads.Select(x => x.Carretera).ToArray();
+
+                // 4. COLUMNAS ACTIVOS
+                CamarasSeries = new SeriesCollection
+                {
+                    new ColumnSeries
+                    {
+                        Title = "Activos",
+                        Values = new ChartValues<int> { camaras.Count, incidencias.Count },
+                        Fill = (SolidColorBrush)new BrushConverter().ConvertFromString("#FF007F"),
+                        DataLabels = true,
+                        MaxColumnWidth = 50
+                    }
+                };
+                Labels = new[] { "Cámaras", "Incidencias" };
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error cargando estadísticas: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error stats: {ex.Message}");
             }
         }
     }
 }
-

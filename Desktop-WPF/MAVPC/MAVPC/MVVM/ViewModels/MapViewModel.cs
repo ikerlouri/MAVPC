@@ -154,8 +154,26 @@ namespace MAVPC.MVVM.ViewModels
         {
             string t = (tipo ?? "").ToLower();
             string c = (causa ?? "").ToLower();
-            if (t.Contains("obra") || c.Contains("obra")) return "obra";
-            if (t.Contains("nieve") || c.Contains("nieve")) return "nieve";
+
+            // 1. OBRAS
+            if (t.Contains("obra") || c.Contains("obra") || c.Contains("mantenimiento"))
+                return "obra";
+
+            // 2. METEOROLOGÍA (Aquí estaba el fallo: faltaban los términos de la API)
+            if (t.Contains("nieve") || c.Contains("nieve") ||
+                t.Contains("hielo") || c.Contains("hielo") ||
+                t.Contains("invernal") ||          // <--- CLAVE: "Vialidad invernal tramos"
+                t.Contains("montaña") ||           // <--- CLAVE: "Puertos de montaña"
+                t.Contains("lluvia") || c.Contains("lluvia") ||
+                t.Contains("viento") ||
+                t.Contains("niebla") ||
+                t.Contains("meteo"))
+                return "meteo";
+
+            // 3. CÁMARAS
+            if (t.Contains("camara")) return "camara";
+
+            // 4. RESTO (Accidentes, Seguridad vial, etc.)
             return "incidencia";
         }
     }

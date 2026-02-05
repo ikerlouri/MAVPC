@@ -20,22 +20,50 @@ document.addEventListener("DOMContentLoaded", function () {
         layers: [capaOscura]
     }).setView([INITIAL_VIEW.lat, INITIAL_VIEW.lon], INITIAL_VIEW.zoom);
 
-    // 3. INICIALIZAR GRUPOS CON CLUSTERING
-    // Configuración: agrupar puntos cercanos
-    var clusterOptions = {
-        disableClusteringAtZoom: 15, // A mucho zoom, ver iconos sueltos
-        spiderfyOnMaxZoom: true,     // Efecto araña si están en el mismo sitio
-        showCoverageOnHover: false,  // Quitar sombra azul al pasar ratón
-        maxClusterRadius: 60         // Radio de agrupación
+    // 3. INICIALIZAR GRUPOS CON CLUSTERING (MODIFICADO PARA COLORES)
+    
+    // Configuración base
+    var baseClusterOptions = {
+        disableClusteringAtZoom: 15, 
+        spiderfyOnMaxZoom: true,     
+        showCoverageOnHover: false,  
+        maxClusterRadius: 60         
     };
 
-    // Creamos los grupos especiales
-    layerCamaras = L.markerClusterGroup(clusterOptions).addTo(map);
-    layerObras = L.markerClusterGroup(clusterOptions).addTo(map);
-    layerNieve = L.markerClusterGroup(clusterOptions).addTo(map);
-    layerIncidencias = L.markerClusterGroup(clusterOptions).addTo(map);
+    // Función para generar la bola del color correcto
+    function crearIconoCluster(claseCss) {
+        return function(cluster) {
+            return L.divIcon({
+                html: '<div class="cluster-blob ' + claseCss + '">' + cluster.getChildCount() + '</div>',
+                className: 'custom-cluster-icon', // Clase vacía para quitar bordes default
+                iconSize: L.point(40, 40)
+            });
+        };
+    }
 
-    // --- CONTROLES ---
+    // AQUI APLICAMOS LA LÓGICA DE COLORES POR GRUPO
+    layerCamaras = L.markerClusterGroup({
+        ...baseClusterOptions,
+        iconCreateFunction: crearIconoCluster('blob-camara') // Azul
+    }).addTo(map);
+
+    layerObras = L.markerClusterGroup({
+        ...baseClusterOptions,
+        iconCreateFunction: crearIconoCluster('blob-obra')   // Naranja
+    }).addTo(map);
+
+    layerNieve = L.markerClusterGroup({
+        ...baseClusterOptions,
+        iconCreateFunction: crearIconoCluster('blob-nieve')  // Blanco
+    }).addTo(map);
+
+    layerIncidencias = L.markerClusterGroup({
+        ...baseClusterOptions,
+        iconCreateFunction: crearIconoCluster('blob-incidencia') // Rojo
+    }).addTo(map);
+
+
+    // --- CONTROLES (ESTO SIGUE IGUAL) ---
 
     // A. Selector Mapa/Satelite
     L.control.layers({ "MODO OSCURO": capaOscura, "SATÉLITE": capaSatelite }, null, { position: 'bottomright' }).addTo(map);
@@ -275,10 +303,22 @@ function toggleLayer(id) {
 
 function getIconHtml(type) {
     type = (type || "").toLowerCase();
-    if (type.includes('camara')) return { html: '<i class="fa-solid fa-video"></i>', css: 'pin-camara', group: 'camara' };
-    if (type.includes('obra')) return { html: '<i class="fa-solid fa-person-digging"></i>', css: 'pin-obra', group: 'obra' };
-    if (type.includes('nieve') || type.includes('hielo')) return { html: '<i class="fa-solid fa-snowflake"></i>', css: 'pin-nieve', group: 'nieve' };
+    
+    // 1. Cámaras
+    if (type.includes('camara')) 
+        return { html: '<i class="fa-solid fa-video"></i>', css: 'pin-camara', group: 'camara' };
+    
+    // 2. Obras
+    if (type.includes('obra')) 
+        return { html: '<i class="fa-solid fa-person-digging"></i>', css: 'pin-obra', group: 'obra' };
+    
+    // 3. Meteo (Nieve, Hielo, Invernal, Montaña...)
+    // Ahora atrapamos "meteo" (que viene del C#) y también palabras clave por seguridad
+    if (type.includes('nieve') || type.includes('hielo') || 
+        type.includes('meteo') || type.includes('invernal') || 
+        type.includes('montaña') || type.includes('lluvia')) 
+        return { html: '<i class="fa-solid fa-snowflake"></i>', css: 'pin-nieve', group: 'nieve' };
+    
+    // 4. Default -> Incidencias (Rojo)
     return { html: '<i class="fa-solid fa-triangle-exclamation"></i>', css: 'pin-incidencia', group: 'otro' };
 }
-
-function asignarEventosFiltros() { }

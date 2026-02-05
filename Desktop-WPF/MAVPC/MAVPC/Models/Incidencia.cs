@@ -8,6 +8,7 @@ namespace MAVPC.Models
         // --- PROPIEDADES RAW (Coinciden 100% con tu JSON) ---
 
         [JsonPropertyName("incidenceId")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string IncidenceId { get; set; } // CRÍTICO: En el JSON viene con comillas "", es string.
 
         [JsonPropertyName("incidenceType")]

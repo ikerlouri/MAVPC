@@ -338,6 +338,9 @@ body, html {
 }
 
 /* --- ESTILOS DE CLUSTERS (MODO OSCURO/NEON) --- */
+/* NOTA: He mantenido tus estilos antiguos para evitar romper nada, 
+   pero he añadido los nuevos .cluster-blob que usa el JS actualizado */
+
 .marker-cluster-small,
 .marker-cluster-medium,
 .marker-cluster-large {
@@ -349,37 +352,15 @@ body, html {
     border-radius: 50%;
 }
 
-/* Cluster Pequeño - AZUL */
-.marker-cluster-small {
-    border-color: #00F0FF;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-}
+.marker-cluster-small { border-color: #00F0FF; box-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+.marker-cluster-small div { background-color: transparent; }
 
-    .marker-cluster-small div {
-        background-color: transparent;
-    }
+.marker-cluster-medium { border-color: #FFA500; box-shadow: 0 0 10px rgba(255, 165, 0, 0.4); }
+.marker-cluster-medium div { background-color: transparent; }
 
-/* Cluster Mediano - NARANJA */
-.marker-cluster-medium {
-    border-color: #FFA500;
-    box-shadow: 0 0 10px rgba(255, 165, 0, 0.4);
-}
+.marker-cluster-large { border-color: #FF003C; box-shadow: 0 0 10px rgba(255, 0, 60, 0.4); }
+.marker-cluster-large div { background-color: transparent; }
 
-    .marker-cluster-medium div {
-        background-color: transparent;
-    }
-
-/* Cluster Grande - ROJO */
-.marker-cluster-large {
-    border-color: #FF003C;
-    box-shadow: 0 0 10px rgba(255, 0, 60, 0.4);
-}
-
-    .marker-cluster-large div {
-        background-color: transparent;
-    }
-
-/* Texto Cluster */
 .marker-cluster div {
     width: 30px;
     height: 30px;
@@ -388,3 +369,29 @@ body, html {
     line-height: 26px;
     font-size: 14px;
 }
+
+/* --- NUEVOS CLUSTERS POR TIPO (AÑADIDO PARA COLORES SEPARADOS) --- */
+.custom-cluster-icon {
+    background: transparent;
+    border: none;
+}
+
+.cluster-blob {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    border: 2px solid rgba(255,255,255,0.5);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* Colores específicos de las bolas agrupadas */
+.blob-camara { background-color: #0088cc; box-shadow: 0 0 15px #00F0FF; }
+.blob-obra { background-color: #FF8C00; box-shadow: 0 0 15px #FFA500; } 
+.blob-nieve { background-color: #607D8B; box-shadow: 0 0 15px white; }    
+.blob-incidencia { background-color: #D50000; box-shadow: 0 0 15px #FF003C; }

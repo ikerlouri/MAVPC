@@ -99,14 +99,42 @@ namespace MAVPC.Services
             catch { return false; }
         }
 
-        public async Task<bool> AddIncidenciaAsync(Incidencia nuevaIncidencia)
+        public async Task<bool> AddIncidenciaAsync(Incidencia item)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}incidencias", nuevaIncidencia, _jsonOptions);
+                // EL TRUCO QUE FUNCIONÓ:
+                var paqueteParaEnviar = new
+                {
+                    // Forzamos fecha ISO 8601 limpia
+                    startDate = $"{item.StartDate:yyyy-MM-ddTHH:mm:ss}",
+
+                    // Resto de datos
+                    incidenceType = item.IncidenceType,
+                    incidenceLevel = item.IncidenceLevel,
+                    autonomousRegion = "Euskadi",
+                    road = item.Road,
+                    cityTown = item.CityTown,
+                    province = item.Province,
+                    cause = item.Cause,
+                    direction = item.Direction,
+                    latitude = item.Latitude,
+                    longitude = item.Longitude
+                    // SIN incidenceId
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}incidencias", paqueteParaEnviar);
+
+                // Solo devolvemos true si es 200-299.
+                // Si falla, el ViewModel se encargará de avisar al usuario si quiere.
                 return response.IsSuccessStatusCode;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                // Loguear el error en consola por si acaso
+                System.Diagnostics.Debug.WriteLine($"Error al guardar: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<bool> DeleteCamaraAsync(string id)
