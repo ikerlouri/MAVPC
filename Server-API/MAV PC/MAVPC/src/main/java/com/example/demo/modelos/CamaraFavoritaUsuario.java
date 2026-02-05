@@ -11,7 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "camarasFavoritas_usuarios")
+@Table(name = "camarasfavoritas_usuarios")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CamaraFavoritaUsuario {
 	
