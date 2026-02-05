@@ -21,10 +21,10 @@ public class CamaraFavoritaUsuario {
 	@Column(name = "id")
 	private Integer id;
 	
-	@Column(name = "idCamara")
+	@Column(name = "id_camara")
 	private int idCamara;
 	
-	@Column(name = "idUsuario")
+	@Column(name = "id_usuario")
 	private int idUsuario;
 
 	public CamaraFavoritaUsuario() {
