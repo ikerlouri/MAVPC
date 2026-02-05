@@ -21,6 +21,4 @@ namespace MAVPC.Services
         Task<bool> DeleteCamaraAsync(string id);
     }
 }
-============================================================
-ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Services\ITrafficService.cs
-============================================================
+

@@ -120,6 +120,4 @@ namespace MAVPC.Services
         }
     }
 }
-============================================================
-ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Services\TrafficService.cs
-============================================================
+

@@ -9,6 +9,3 @@ using System.Windows;
                                                 // app, or any theme specific resource dictionaries)
 )]
 
-============================================================
-ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\AssemblyInfo.cs
-============================================================

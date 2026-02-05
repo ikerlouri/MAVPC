@@ -17,6 +17,4 @@
         public object? DataObject { get; set; }
     }
 }
-============================================================
-ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Models\MapMarkerModel.cs
-============================================================
+

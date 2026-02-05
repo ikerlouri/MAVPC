@@ -20,6 +20,4 @@ namespace MAVPC.Models
         public string UrlImage { get; set; }
     }
 }
-============================================================
-ARCHIVO: C:\Users\2dam3\Documents\Retos\MAVPC\Desktop-WPF\MAVPC\MAVPC\Models\Usuario.cs
-============================================================
+
