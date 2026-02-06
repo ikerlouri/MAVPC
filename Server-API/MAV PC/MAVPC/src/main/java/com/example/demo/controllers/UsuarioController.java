@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.daos.CamaraFavoritaUsuarioDao;
 import com.example.demo.daos.UsuarioDao;
+import com.example.demo.modelos.Camara;
 import com.example.demo.modelos.CamaraFavoritaUsuario;
 import com.example.demo.modelos.Usuario;
 import com.example.demo.servicios.EmailSchedulerService;
@@ -58,8 +59,9 @@ public class UsuarioController {
 	
 	// Recupera todas las cámaras marcadas como favoritas por un usuario específico
 	@GetMapping("/favoritos")
-	public List<CamaraFavoritaUsuario> listarFavoritos(@RequestParam int idUsuario) {	
-		return camaraFavoritaUsuarioDao.findByIdUsuario(idUsuario); 
+	public List<Camara> listarFavoritos(@RequestParam int idUsuario) {	
+	    // Llamamos al nuevo método que devuelve objetos Camara
+	    return camaraFavoritaUsuarioDao.findCamarasByUsuarioId(idUsuario); 
 	}
 	
 	// Vincula una cámara como favorita a un usuario concreto

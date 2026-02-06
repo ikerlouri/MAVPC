@@ -1,7 +1,10 @@
 package com.example.demo.daos;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import com.example.demo.modelos.Camara;
 import com.example.demo.modelos.CamaraFavoritaUsuario;
 import java.util.List;
 
@@ -13,6 +16,9 @@ public interface CamaraFavoritaUsuarioDao extends JpaRepository<CamaraFavoritaUs
 	
 	@jakarta.transaction.Transactional
     void deleteByIdUsuarioAndIdCamara(int idUsuario, int idCamara);
+	
+	@Query("SELECT c FROM Camara c JOIN CamaraFavoritaUsuario f ON c.id = f.idCamara WHERE f.idUsuario = :idUsuario")
+    List<Camara> findCamarasByUsuarioId(@Param("idUsuario") int idUsuario);
 	
 	
 	
