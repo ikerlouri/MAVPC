@@ -25,10 +25,12 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+// Controlador de la ventana "registro", la del mapa
 public class Registro extends BaseActivity {
 
     EditText etEmail, etUsername, etPassword;
 
+    // configuracion al crearse la ventana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,9 +44,10 @@ public class Registro extends BaseActivity {
         btnRegister.setOnClickListener(v -> validarInputs());
 
         TextView tvRegister = (TextView) findViewById(R.id.tvLogin);
-        tvRegister.setOnClickListener(v -> login());
+        tvRegister.setOnClickListener(v -> irALogearse());
     }
 
+    // validacion de inputs
     private void validarInputs() {
         quitarFocoYTeclado();
 
@@ -65,6 +68,7 @@ public class Registro extends BaseActivity {
         comprobarDisponibilidad(txtUsername, txtEmail, txtPassword);
     }
 
+    // comprueba la disponibilidad de ese mail y usuario
     private void comprobarDisponibilidad(String usuario, String email, String password) {
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
@@ -100,6 +104,7 @@ public class Registro extends BaseActivity {
         });
     }
 
+    // logica de registro
     private void registrarUsuario(ApiService service, String usuario, String email, String password) {
         Usuario nuevoUsuario = new Usuario();
         nuevoUsuario.setUsername(usuario);
@@ -169,6 +174,7 @@ public class Registro extends BaseActivity {
         });
     }
 
+    // recibe una cadena de texto y la devuelve hasheada
     private String hashearPassword(String password) {
         try {
             // crear instancia de SHA-256
@@ -192,6 +198,7 @@ public class Registro extends BaseActivity {
         }
     }
 
+    // quita el foco del textview si es que esta y esconde el teclado (para dar feedback de que se ha pulsado el boton de login)
     private void quitarFocoYTeclado() {
         View view = this.getCurrentFocus();
 
@@ -206,7 +213,8 @@ public class Registro extends BaseActivity {
         }
     }
 
-    private void login() {
+    // te abre la ventana del login
+    private void irALogearse() {
         Intent intent = new Intent(Registro.this, Login.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);

@@ -34,7 +34,7 @@ public class FavoritosAdapter extends ArrayAdapter<Camara> {
         this.listaCamaras = lista;
     }
 
-    // El metodo en si es un for each
+    // El metodo en si es un for each que recorre la lista que se le de
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

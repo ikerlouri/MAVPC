@@ -14,6 +14,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
+// Controlador de la ventana "favoritos", la del mapa
 public class Favoritos extends BaseActivity {
 
     private ListView lvFavoritos;
@@ -21,6 +22,7 @@ public class Favoritos extends BaseActivity {
     private DbHelper dbHelper;
     private BottomNavigationView navbar;
 
+    // configuracion al crearse la ventana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,7 @@ public class Favoritos extends BaseActivity {
         navbar.setSelectedItemId(R.id.nav_favoritos);
     }
 
+    // carga la lista de objetos "Camara" que tiene el usuario como favoritas
     private void cargarListaFavoritos() {
         List<Camara> lista = dbHelper.getFavCams();
 
@@ -64,6 +67,7 @@ public class Favoritos extends BaseActivity {
         }
     }
 
+    // configuracion del navbar, comun en todas las ventanas
     private void setupBottomNav() {
         navbar.setSelectedItemId(R.id.nav_favoritos);
 

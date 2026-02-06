@@ -32,6 +32,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+// Controlador de la ventana "reportar", la del mapa
 public class Reportar extends BaseActivity {
 
     private BottomNavigationView navbar;
@@ -42,6 +43,7 @@ public class Reportar extends BaseActivity {
     private RadioButton rbObra, rbIncidencia, rbGrave, rbMedio, rbLeve, rbAlava, rbVizcaya, rbGuipuzkoa;
     private Button btnEnviar;
 
+    // configuracion al crearse la ventana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +96,7 @@ public class Reportar extends BaseActivity {
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    // recoge los datos de la incidencia y la inserta
     private void reportarIncidencia() {
         if (!validarDatos()) return; // si no son datos válidos nada
 
@@ -176,6 +179,7 @@ public class Reportar extends BaseActivity {
         });
     }
 
+    // vacia el formulario
     private void limpiarFormulario() {
         // Limpiar EditText
         etCausa.setText("");
@@ -195,6 +199,7 @@ public class Reportar extends BaseActivity {
         marcarHoraActualSpinners();
     }
 
+    // validacion de datos de incidencia
     private boolean validarDatos() {
         // Validar RadioGroups usando su ID de selección (-1 significa nada seleccionado)
         if (rgTipo.getCheckedRadioButtonId() == -1) {
@@ -229,6 +234,7 @@ public class Reportar extends BaseActivity {
         return true;
     }
 
+    // verificar si llega a esta ventana con unas coordenadas
     private void verificarCoordenadasIntent() {
         // si no existen devuelve 0.0
         double lat = getIntent().getDoubleExtra("LATITUD", 0.0);
@@ -241,6 +247,7 @@ public class Reportar extends BaseActivity {
         }
     }
 
+    // poner como default la fecha actual
     private void marcarFechaActualSpinners(){
         // obtencion de fecha actual
         Calendar calendar = Calendar.getInstance();
@@ -348,6 +355,7 @@ public class Reportar extends BaseActivity {
         marcarHoraActualSpinners();
     }
 
+    // configuracion del navbar, comun en todas las ventanas
     private void setupBottomNav() {
         navbar.setSelectedItemId(R.id.nav_reportar);
 

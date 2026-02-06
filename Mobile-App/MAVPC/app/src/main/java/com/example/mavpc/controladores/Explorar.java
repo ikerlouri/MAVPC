@@ -93,6 +93,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
     // codigo para identificar la petición de permisos
     private static final int PERMISSION_REQUEST_CODE = 44;
 
+    // configuraciones al crearse la ventana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -480,6 +481,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         dialog.show();
     }
 
+    // cuando el mapa cargue marcar camaras, incidencias, ubicacion actual, configurar clicks
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         gMap = googleMap;
@@ -524,6 +526,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
+    // obtiene ubicacion actual del dispositivo y la marca
     private void obtenerUbicacionActual() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -551,6 +554,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
+    // marca las incidencias que hay en ese momento
     private void marcarIncidenciasActuales() {
         // 1. Configuración de Retrofit
         String BASE_URL = "https://mavpc.up.railway.app/api/";
@@ -595,6 +599,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
+    // marca las incidencias que se le pasen
     private void marcarIncidenciasMapa(List<Incidencia> lista) {
         if (lista == null || lista.isEmpty()) return;
 
@@ -637,6 +642,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         configurarClickMarcadores();
     }
 
+    // marca las camaras en el mapa
     private void marcarCamarasMapa() {
         // url base
         String BASE_URL = "https://mavpc.up.railway.app/api/";
@@ -691,6 +697,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
+    // abre una ventana con la informacion detallada de la camara o incidencia
     private void configurarClickMarcadores() {
         gMap.setOnMarkerClickListener(marker -> {
             Object tag = marker.getTag();
@@ -712,6 +719,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
+    // muestra una informacion u otra depende de que tipo de marcador se clicke
     private void mostrarDetallesIncidenciaOCam(Object item) {
         TextView tvTituloDetalles = findViewById(R.id.tvTituloDetalles);
         ImageView ivCamara = findViewById(R.id.ivCamara);
@@ -833,6 +841,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         darkBackground.setVisibility(View.VISIBLE);
     }
 
+    // esto salta para pedir permisos de ubicacion, para coger la ubicacion actual del dispositivo
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -846,6 +855,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         }
     }
 
+    // configuracion del navbar, comun en todas las ventanas
     private void setupBottomNav() {
         navbar.setSelectedItemId(R.id.nav_explorar);
 
@@ -875,6 +885,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         });
     }
 
+    // inicializa los spinners de la ventana de filtros
     private void inicializarSpinnersFecha() {
         Spinner spinDia = findViewById(R.id.spinDia);
         Spinner spinMes = findViewById(R.id.spinMes);

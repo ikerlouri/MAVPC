@@ -26,8 +26,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+// Controlador de la ventana "login", la del mapa
 public class Login extends BaseActivity {
-    
+
+    // configuracion al crearse la ventana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +53,10 @@ public class Login extends BaseActivity {
         btnLogin.setOnClickListener(v -> login());
 
         TextView tvRegister = (TextView) findViewById(R.id.tvRegister);
-        tvRegister.setOnClickListener(v -> register());
+        tvRegister.setOnClickListener(v -> irARegistrarse());
     }
 
+    // logica de login
     private void login() {
         quitarFocoYTeclado();
 
@@ -151,7 +154,7 @@ public class Login extends BaseActivity {
         });
     }
 
-    // metodo auixiliar para no repetir codigo
+    // te lleva a la ventana de explorar
     private void irAExplorar() {
         Intent intent = new Intent(Login.this, Explorar.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
@@ -160,6 +163,7 @@ public class Login extends BaseActivity {
         finish();
     }
 
+    // quita el foco del textview si es que esta y esconde el teclado (para dar feedback de que se ha pulsado el boton de login)
     private void quitarFocoYTeclado() {
         View view = this.getCurrentFocus();
 
@@ -174,6 +178,7 @@ public class Login extends BaseActivity {
         }
     }
 
+    // recibe una cadena de texto y la devuelve hasheada
     private String hashearPassword(String txtPassword) {
         try {
             // crear instancia de SHA-256
@@ -197,7 +202,8 @@ public class Login extends BaseActivity {
         }
     }
 
-    private void register() {
+    // te lleva a la ventana de registrarse
+    private void irARegistrarse() {
         Intent intent = new Intent(Login.this, Registro.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);

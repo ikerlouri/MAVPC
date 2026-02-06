@@ -45,6 +45,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+// Controlador de la ventana "perfil", la del mapa
 public class Perfil extends BaseActivity {
 
     private BottomNavigationView navbar;
@@ -83,6 +84,7 @@ public class Perfil extends BaseActivity {
                 }
             });
 
+    // configuracion al crearse la ventana
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,10 +105,10 @@ public class Perfil extends BaseActivity {
 
         btnEditProfile = findViewById(R.id.btnEditProfile);
         btnEditProfile.setOnClickListener(v -> {
-            if (!isEditing) activarEdicion(true);
+            if (!isEditing) activarModoEdicion(true);
             else {
                 actualizarPerfil();
-                activarEdicion(false);
+                activarModoEdicion(false);
             }
         });
 
@@ -133,6 +135,7 @@ public class Perfil extends BaseActivity {
         findViewById(R.id.bottomNav).setOnApplyWindowInsetsListener(null);
     }
 
+    // logica para eliminar usuario
     private void btnEliminarCuenta() {
         AlertDialog.Builder builder = new AlertDialog.Builder(Perfil.this);
         LayoutInflater inflater = getLayoutInflater();
@@ -197,6 +200,7 @@ public class Perfil extends BaseActivity {
         dialog.show();
     }
 
+    // vacia la base de datos sqlite y te lleva al login
     private void logout() {
         AlertDialog.Builder builder = new AlertDialog.Builder(Perfil.this);
         LayoutInflater inflater = getLayoutInflater();
@@ -226,6 +230,7 @@ public class Perfil extends BaseActivity {
         dialog.show();
     }
 
+    // logica de la ventana de edicion de la foto de perfil de un usuario al añadirla
     private void startUCrop(Uri sourceUri) {
         String destinationFileName = "pfp_cropped.jpg";
         Uri destinationUri = Uri.fromFile(new File(getCacheDir(), destinationFileName));
@@ -250,6 +255,7 @@ public class Perfil extends BaseActivity {
         uCropLauncher.launch(uCropIntent);
     }
 
+    // logica para cambiar la imagen de perfil de la vista
     private void cambiarFotoPerfil(Uri imageUri) {
         try {
             ivPfp.setImageTintList(null);
@@ -257,7 +263,7 @@ public class Perfil extends BaseActivity {
             ivPfp.setImageDrawable(null);
             ivPfp.setImageURI(imageUri);
 
-            pfpBase64 = convertirUriABase64(imageUri);
+            pfpBase64 = comprimirYConvertirABase64(imageUri);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -265,7 +271,8 @@ public class Perfil extends BaseActivity {
         }
     }
 
-    private void activarEdicion(boolean activar) {
+    // activa el modo edicion del perfil
+    private void activarModoEdicion(boolean activar) {
         isEditing = activar;
         configurarEditText(etUsername, activar);
         configurarEditText(etPassword, activar);
@@ -289,6 +296,7 @@ public class Perfil extends BaseActivity {
         }
     }
 
+    // activa o desactiva la edicion de los edittext
     private void configurarEditText(EditText et, boolean habilitar) {
         et.setFocusable(habilitar);
         et.setFocusableInTouchMode(habilitar);
@@ -297,6 +305,7 @@ public class Perfil extends BaseActivity {
         if (habilitar) et.setSelection(et.getText().length());
     }
 
+    // carga los datos del usuario de la sesion en los campos correspondientes
     private void cargarDatosPerfil() {
         DbHelper dbHelper = new DbHelper(Perfil.this);
         Usuario currentUser = dbHelper.getUsuarioSesion();
@@ -358,6 +367,7 @@ public class Perfil extends BaseActivity {
         }
     }
 
+    // coge los datos que hay en el perfil y lo actualiza en la api y en sqlite
     private void actualizarPerfil() {
         String nuevoUsername = etUsername.getText().toString().trim();
         String nuevoEmail = etEmail.getText().toString().trim();
@@ -441,6 +451,7 @@ public class Perfil extends BaseActivity {
         });
     }
 
+    // hashea el texto dado y lo devuelve hasheado
     private String hashearPassword(String txtPassword) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -458,6 +469,7 @@ public class Perfil extends BaseActivity {
         }
     }
 
+    // devuelve la imagen de perfil actual como un string
     private String obtenerImagenActualDePantalla() {
         try {
             if (ivPfp.getDrawable() == null) return null;
@@ -474,14 +486,14 @@ public class Perfil extends BaseActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 70, baos);
             byte[] imageBytes = baos.toByteArray();
             return Base64.encodeToString(imageBytes, Base64.NO_WRAP);
-
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private String convertirUriABase64(Uri uri) {
+    // comprime y convierte a base 64 una imagen
+    private String comprimirYConvertirABase64(Uri uri) {
         try {
             InputStream imageStream = getContentResolver().openInputStream(uri);
             Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
@@ -512,6 +524,7 @@ public class Perfil extends BaseActivity {
         }
     }
 
+    // configuracion del navbar, comun en todas las ventanas
     private void setupBottomNav() {
         navbar.setSelectedItemId(R.id.nav_perfil);
         navbar.setOnItemSelectedListener(item -> {
