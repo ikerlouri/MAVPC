@@ -92,7 +92,7 @@
                         <StackPanel Margin="30">
                             <materialDesign:PackIcon Kind="TrafficLight" Width="40" Height="40" Foreground="{StaticResource NeonCyan}" HorizontalAlignment="Center"/>
                             <TextBlock Text="MAVPC" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="White" Margin="0,10,0,0"/>
-                            <TextBlock Text="CONTROL CENTER" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Panel de Control" FontSize="10" Foreground="Gray" HorizontalAlignment="Center"/>
                         </StackPanel>
 
                         <StackPanel Margin="10,20">
@@ -106,7 +106,7 @@
                             <RadioButton Style="{StaticResource MaterialDesignTabRadioButton}" Height="50" Command="{Binding ShowMapCommand}" Foreground="White" Padding="20,0">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="MapMarker" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                                    <TextBlock Text="MAPA VIAL" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    <TextBlock Text="MAPA" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </RadioButton>
 

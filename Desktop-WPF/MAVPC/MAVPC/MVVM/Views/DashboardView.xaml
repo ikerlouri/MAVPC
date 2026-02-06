@@ -31,8 +31,8 @@
 
         <DockPanel Grid.Row="0" Margin="0,0,0,30">
             <StackPanel DockPanel.Dock="Left" Margin="0,0,10,0">
-                <TextBlock Text="PANEL DE GESTIÓN" FontSize="32" FontWeight="Bold" Foreground="White"/>
-                <TextBlock Text="Administración de Puntos de Tráfico y Sensores" FontSize="14" Foreground="Gray"/>
+                <TextBlock Text="DASHBOARD" FontSize="32" FontWeight="Bold" Foreground="White"/>
+                <TextBlock Text="Administración de cámaras e incidencias" FontSize="14" Foreground="Gray"/>
             </StackPanel>
 
             <Border DockPanel.Dock="Right" Background="{StaticResource PanelBg}" CornerRadius="20" Padding="15,5" 
