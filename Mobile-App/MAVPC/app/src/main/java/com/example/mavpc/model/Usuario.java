@@ -20,6 +20,17 @@ public class Usuario {
         this.pfpUrl = pfpUrl;
     }
 
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", pfpUrl='" + pfpUrl + '\'' +
+                '}';
+    }
+
     public Usuario() {}
 
     public int getId() { return id; }

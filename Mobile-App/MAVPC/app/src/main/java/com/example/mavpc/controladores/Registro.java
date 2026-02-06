@@ -116,13 +116,45 @@ public class Registro extends BaseActivity {
                 // solo comprobamos el código HTTP (200-299)
                 if (response.isSuccessful()) {
                     Toast.makeText(Registro.this, "¡Registro completado!", Toast.LENGTH_LONG).show();
-                    DbHelper dbHelper = new DbHelper(Registro.this);
-                    dbHelper.insertUsuarioSesion(nuevoUsuario);
 
-                    Intent intent = new Intent(Registro.this, Explorar.class);
-                    startActivity(intent);
+                    // LLAMADA PARA OBTENER EL USUARIO COMPLETO (ID, PFP, ETC.)
+                    Call<Usuario> callGetUsuario = service.cargarUsuarioPorUsername(usuario);
 
-                    finish();
+                    callGetUsuario.enqueue(new Callback<Usuario>() {
+                        @Override
+                        public void onResponse(Call<Usuario> callUser, Response<Usuario> responseUser) {
+                            if (responseUser.isSuccessful() && responseUser.body() != null) {
+                                Usuario usuarioDesdeApi = responseUser.body();
+
+                                // IMPORTANTE: La API devuelve el user con el ID correcto, pero
+                                // seguramente con la pass hasheada o null.
+                                // Le ponemos la pass plana para el auto-login local.
+                                usuarioDesdeApi.setPassword(password);
+
+                                // Guardamos en SQLite
+                                DbHelper dbHelper = new DbHelper(Registro.this);
+                                dbHelper.insertUsuarioSesion(usuarioDesdeApi);
+
+                                Toast.makeText(Registro.this, "¡Bienvenido " + usuarioDesdeApi.getUsername() + "!", Toast.LENGTH_LONG).show();
+
+                                // Navegamos
+                                Intent intent = new Intent(Registro.this, Explorar.class);
+                                startActivity(intent);
+                                finish(); // Cerramos registro
+
+                            } else {
+                                // Registro bien, pero falló la descarga de datos
+                                Toast.makeText(Registro.this, "Usuario creado, pero error al recuperar datos. Logéate manualmente.", Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Usuario> callUser, Throwable t) {
+                            Log.e("API_ERROR", "Error recuperando usuario: " + t.getMessage());
+                            Toast.makeText(Registro.this, "Error de red tras registro", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 } else {
                     // error del servidor (500 o 400)
                     Toast.makeText(Registro.this, "Error al crear usuario: " + response.code(), Toast.LENGTH_SHORT).show();

@@ -401,6 +401,7 @@ public class Perfil extends BaseActivity {
 
         btnEditProfile.setEnabled(false);
 
+        Log.d("PERFIL", usuarioActualizado.toString());
         service.actualizarUsuario(usuarioActualizado).enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
