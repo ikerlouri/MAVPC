@@ -1,20 +1,12 @@
+<!-- textos usados -->
 <resources>
     <string name="app_name">Bidea</string>
 
-    <!-- login -->
     <string name="login_title">Inicio de Sesión</string>
     <string name="login_username">Usuario</string>
     <string name="login_pass">Contraseña</string>
     <string name="login_enter">Entrar</string>
     <string name="login_register"><u>Registrate</u></string>
-
-    <!-- explorar -->
-    
-    <!-- datos -->
-
-    <!-- favoritos -->
-
-    <!-- incidencias -->
     <string name="incid_title">Crear incidencia</string>
     <string name="incid_type">Tipo de incidencia</string>
     <string name="incid_road">Carretera</string>
@@ -29,4 +21,73 @@
     <string name="incid_endDate">Fecga y Hora final</string>
     <string name="incid_Desc">Descripción</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="crear_incidencia">Crear Incidencia</string>
+    <string name="quieres_crear_una_nueva_incidencia_en_esta_ubicaci_n">¿Quieres crear una nueva incidencia en esta ubicación?</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="crear">Crear</string>
+    <string name="eliminar_cuenta">Eliminar cuenta</string>
+    <string name="seguro_que_quieres_eliminar_la_cuenta">¿Seguro que quieres eliminar la cuenta?</string>
+    <string name="eliminar">Eliminar</string>
+    <string name="cerrar_sesi_n">Cerrar Sesión</string>
+    <string name="seguro_que_quieres_salir_de_la_sesi_n">¿Seguro que quieres salir de la sesión?</string>
+    <string name="salir">Salir</string>
+    <string name="filtrar_mapa">Filtrar mapa</string>
+    <string name="buscar_aqu">Buscar aquí</string>
+    <string name="cambiar_capas">Cambiar capas</string>
+    <string name="filtrar_marcadores">Filtrar Marcadores</string>
+    <string name="fecha">Fecha</string>
+    <string name="marcadores">Marcadores</string>
+    <string name="incidencias">Incidencias</string>
+    <string name="obras">Obras</string>
+    <string name="c_maras">Cámaras</string>
+    <string name="provincia">Provincia</string>
+    <string name="lava">Álava</string>
+    <string name="vizcaya">Vizcaya</string>
+    <string name="guip_zcoa">Guipúzcoa</string>
+    <string name="gravedad">Gravedad</string>
+    <string name="grave">Grave</string>
+    <string name="medio">Medio</string>
+    <string name="leve">Leve</string>
+    <string name="aplicar_filtros">Aplicar Filtros</string>
+    <string name="imagen_de_la_c_mara">Imagen de la cámara</string>
+    <string name="c_maras_favoritas">Cámaras Favoritas</string>
+    <string name="todav_a_no_tienes_ninguna_c_mara_guardada">Todavía no tienes ninguna cámara guardada</string>
+    <string name="nombre_c_mara">Nombre Cámara</string>
+    <string name="foto_de_perfil">Foto de perfil</string>
+    <string name="correo_electr_nico">Correo electrónico</string>
+    <string name="este_campo_no_se_puede_actualizar">*Este campo no se puede actualizar*</string>
+    <string name="email">email</string>
+    <string name="nombre_de_usuario">Nombre de usuario</string>
+    <string name="username">username</string>
+    <string name="contrase_a">Contraseña</string>
+    <string name="editar_perfil">Editar Perfil</string>
+    <string name="registro">Registro</string>
+    <string name="mayus_email">Email</string>
+    <string name="usuario">Usuario</string>
+    <string name="registrarse">Registrarse</string>
+    <string name="iniciar_sesi_n">Iniciar sesión</string>
+    <string name="reportar_incidencia">Reportar Incidencia</string>
+    <string name="fecha_report">Fecha*:</string>
+    <string name="hora">Hora*:</string>
+    <string name="tipo">Tipo*:</string>
+    <string name="obra">Obra</string>
+    <string name="incidencia">Incidencia</string>
+    <string name="gravedad_report">Gravedad*:</string>
+    <string name="causa">Causa:</string>
+    <string name="introduzca_una_causa">Introduzca una causa</string>
+    <string name="provincia_report">Provincia*:</string>
+    <string name="municipio">Municipio:</string>
+    <string name="introduzca_municipio">Introduzca municipio</string>
+    <string name="coordenadas">Coordenadas*:</string>
+    <string name="latitud">Latitud</string>
+    <string name="longitud">Longitud</string>
+    <string name="carretera">Carretera:</string>
+    <string name="ej_a9">ej: A9</string>
+    <string name="direcci_n">Dirección:</string>
+    <string name="ej_donosti">ej: Donosti</string>
+    <string name="enviar_reporte">ENVIAR REPORTE</string>
+    <string name="explorar">Explorar</string>
+    <string name="favoritos">Favoritos</string>
+    <string name="reportar">Reportar</string>
+    <string name="perfil">Perfil</string>
 </resources>

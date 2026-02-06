@@ -1,55 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ventana de login -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
-    android:focusable="true"
-    android:focusableInTouchMode="true"
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
 
     android:background="@color/dark_grey"
+    android:fitsSystemWindows="false"
 
-    android:padding="32dp"
+    android:focusable="true"
 
-    android:fitsSystemWindows="false">
+    android:focusableInTouchMode="true"
+
+    android:padding="32dp">
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
+        android:layout_marginBottom="32dp"
+        android:fontFamily="@font/jost_family"
         android:text="@string/login_title"
         android:textColor="@android:color/white"
         android:textSize="36sp"
+
         android:textStyle="bold"
-        android:fontFamily="@font/jost_family"
 
-        android:layout_marginBottom="32dp"
-
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/tvUsername"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/tvUsername"/>
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/tvUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/jost_family"
         android:text="@string/login_username"
         android:textColor="@android:color/white"
+
         android:textSize="20sp"
-        android:fontFamily="@font/jost_family"
 
-        android:layout_marginTop="16dp"
-
+        app:layout_constraintBottom_toTopOf="@+id/etUsername"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
-        app:layout_constraintBottom_toTopOf="@+id/etUsername"/>
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
     <EditText
         android:id="@+id/etUsername"
@@ -57,53 +57,53 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
 
+        android:layout_marginTop="8dp"
+
         android:background="@drawable/bg_yellow_input"
-
-        android:textColor="@android:color/white"
-
-        android:paddingHorizontal="16dp"
 
         android:fontFamily="@font/jost_family"
 
-        android:layout_marginTop="8dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:paddingHorizontal="16dp"
+
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/tvPasswordLabel"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvUsername"
-        app:layout_constraintBottom_toTopOf="@+id/tvPasswordLabel"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvUsername" />
 
     <TextView
         android:id="@+id/tvPasswordLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
+        android:layout_marginTop="24dp"
+        android:fontFamily="@font/jost_family"
         android:text="@string/login_pass"
         android:textColor="@android:color/white"
+
         android:textSize="20sp"
-        android:fontFamily="@font/jost_family"
 
-        android:layout_marginTop="24dp"
-
+        app:layout_constraintBottom_toTopOf="@+id/etPassword"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etUsername"
-        app:layout_constraintBottom_toTopOf="@+id/etPassword"/>
+        app:layout_constraintTop_toBottomOf="@+id/etUsername" />
 
     <EditText
         android:id="@+id/etPassword"
         android:layout_width="0dp"
         android:layout_height="50dp"
 
-        android:background="@drawable/bg_yellow_input"
-        android:inputType="textPassword"
-        android:textColor="@android:color/white"
-        android:paddingHorizontal="16dp"
-        android:fontFamily="@font/jost_family"
-
         android:layout_marginTop="8dp"
+        android:background="@drawable/bg_yellow_input"
+        android:fontFamily="@font/jost_family"
+        android:inputType="textPassword"
+        android:paddingHorizontal="16dp"
 
-        app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@android:color/white"
+
+        app:layout_constraintBottom_toTopOf="@+id/btnLogin"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvPasswordLabel"
-        app:layout_constraintBottom_toTopOf="@+id/btnLogin"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvPasswordLabel" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnLogin"
@@ -111,41 +111,41 @@
         android:layout_width="0dp"
         android:layout_height="50dp"
 
-        android:text="@string/login_enter"
-        android:textColor="#000000"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:fontFamily="@font/jost_family"
-        android:textAllCaps="false"
-
+        android:layout_marginTop="40dp"
         android:background="@drawable/bg_yellow_button"
-        app:backgroundTint="@null"
-
+        android:fontFamily="@font/jost_family"
         android:insetTop="0dp"
         android:insetBottom="0dp"
+        android:text="@string/login_enter"
 
-        android:layout_marginTop="40dp"
+        android:textAllCaps="false"
+        android:textColor="#000000"
 
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="20sp"
+        android:textStyle="bold"
+
+        app:backgroundTint="@null"
+
+        app:layout_constraintBottom_toTopOf="@+id/tvRegister"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etPassword"
-        app:layout_constraintBottom_toTopOf="@+id/tvRegister"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etPassword" />
 
     <TextView
         android:id="@+id/tvRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/jost_family"
+        android:padding="16dp"
         android:text="@string/login_register"
+
         android:textColor="#4287f5"
         android:textSize="20sp"
-        android:fontFamily="@font/jost_family"
 
-        android:padding="16dp"
-        android:layout_marginTop="8dp"
-
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btnLogin"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogin" />
 </androidx.constraintlayout.widget.ConstraintLayout>

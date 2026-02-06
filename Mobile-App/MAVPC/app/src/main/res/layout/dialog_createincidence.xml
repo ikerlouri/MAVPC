@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- dialog para cuando se mantiene pulsado el mapa para añadir una incidencia -->
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -11,21 +13,21 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="25dp"
-        android:gravity="center">
+        android:padding="25dp">
 
         <ImageView
             android:layout_width="60dp"
             android:layout_height="60dp"
+            android:layout_marginBottom="16dp"
             android:src="@drawable/ic_newincidence"
-            app:tint="@color/cake_green"
-            android:layout_marginBottom="16dp"/>
+            app:tint="@color/cake_green" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Crear Incidencia"
+            android:text="@string/crear_incidencia"
             android:textColor="@color/white"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -35,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="25dp"
-            android:text="¿Quieres crear una nueva incidencia en esta ubicación?"
+            android:text="@string/quieres_crear_una_nueva_incidencia_en_esta_ubicaci_n"
             android:textColor="#DDDDDD"
             android:textSize="16sp" />
 
@@ -49,22 +51,22 @@
                 android:id="@+id/btnCancelarDialog"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="Cancelar"
                 android:backgroundTint="@color/light_grey"
-                android:textColor="@color/white"
-                android:layout_marginEnd="8dp"/>
+                android:text="@string/cancelar"
+                android:textColor="@color/white" />
 
             <Button
                 android:id="@+id/btnCrearDialog"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Crear"
                 android:backgroundTint="@color/cake_green"
+                android:text="@string/crear"
                 android:textColor="@color/black"
-                android:textStyle="bold"
-                android:layout_marginStart="8dp"/>
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

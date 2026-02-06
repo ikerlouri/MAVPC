@@ -62,27 +62,25 @@ public class Perfil extends BaseActivity {
     private boolean isEditing = false;
 
     // Abre la galería nativa del movil
-    private final ActivityResultLauncher<String> openGalleryLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
-                if (uri != null) {
-                    // Una vez elegida la foto, lanzamos el editor
-                    startUCrop(uri);
-                }
-            });
+    private final ActivityResultLauncher<String> openGalleryLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+        if (uri != null) {
+            // Una vez elegida la foto, lanzamos el editor
+            startUCrop(uri);
+        }
+    });
 
     // Maneja el resultado del recorte
-    private final ActivityResultLauncher<Intent> uCropLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    final Uri resultUri = UCrop.getOutput(result.getData());
-                    if (resultUri != null) {
-                        cambiarFotoPerfil(resultUri);
-                    }
-                } else if (result.getResultCode() == UCrop.RESULT_ERROR) {
-                    final Throwable cropError = UCrop.getError(result.getData());
-                    Toast.makeText(this, "Error recuadro: " + cropError.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+    private final ActivityResultLauncher<Intent> uCropLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+        if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+            final Uri resultUri = UCrop.getOutput(result.getData());
+            if (resultUri != null) {
+                cambiarFotoPerfil(resultUri);
+            }
+        } else if (result.getResultCode() == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(result.getData());
+            Toast.makeText(this, "Error recuadro: " + cropError.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    });
 
     // configuracion al crearse la ventana
     @Override
@@ -158,10 +156,7 @@ public class Perfil extends BaseActivity {
             }
 
             String BASE_URL = "https://mavpc.up.railway.app/api/";
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
             ApiService service = retrofit.create(ApiService.class);
 
             btnConfiElim.setEnabled(false);
@@ -245,11 +240,7 @@ public class Perfil extends BaseActivity {
         options.setActiveControlsWidgetColor(ContextCompat.getColor(this, R.color.cake_green));
         options.setToolbarWidgetColor(ContextCompat.getColor(this, R.color.white));
 
-        Intent uCropIntent = UCrop.of(sourceUri, destinationUri)
-                .withAspectRatio(1, 1)
-                .withMaxResultSize(800, 800)
-                .withOptions(options)
-                .getIntent(this);
+        Intent uCropIntent = UCrop.of(sourceUri, destinationUri).withAspectRatio(1, 1).withMaxResultSize(800, 800).withOptions(options).getIntent(this);
 
         uCropIntent.setClass(this, AjustePfp.class);
         uCropLauncher.launch(uCropIntent);
@@ -326,12 +317,7 @@ public class Perfil extends BaseActivity {
 
                 // Caso A: Es URL (http...)
                 if (datosImagen.startsWith("http") || datosImagen.startsWith("https")) {
-                    Glide.with(this)
-                            .load(datosImagen)
-                            .placeholder(R.drawable.ic_user)
-                            .error(R.drawable.ic_user)
-                            .circleCrop()
-                            .into(ivPfp);
+                    Glide.with(this).load(datosImagen).placeholder(R.drawable.ic_user).error(R.drawable.ic_user).circleCrop().into(ivPfp);
                 }
                 // Caso B: Es Base64 (lo que tienes en SQLite)
                 else {
@@ -343,13 +329,8 @@ public class Perfil extends BaseActivity {
 
                         byte[] imageBytes = Base64.decode(cleanBase64, Base64.DEFAULT);
 
-                        Glide.with(this)
-                                .asBitmap() // Forzamos que lo trate como Bitmap
-                                .load(imageBytes)
-                                .placeholder(R.drawable.ic_user)
-                                .error(R.drawable.ic_user)
-                                .circleCrop()
-                                .into(ivPfp);
+                        Glide.with(this).asBitmap() // Forzamos que lo trate como Bitmap
+                                .load(imageBytes).placeholder(R.drawable.ic_user).error(R.drawable.ic_user).circleCrop().into(ivPfp);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -394,19 +375,10 @@ public class Perfil extends BaseActivity {
             imagenFinalEnviar = obtenerImagenActualDePantalla();
         }
 
-        Usuario usuarioActualizado = new Usuario(
-                usuarioActual.getId(),
-                nuevoUsername,
-                nuevoEmail,
-                passwordFinal,
-                imagenFinalEnviar
-        );
+        Usuario usuarioActualizado = new Usuario(usuarioActual.getId(), nuevoUsername, nuevoEmail, passwordFinal, imagenFinalEnviar);
 
         String BASE_URL = "https://mavpc.up.railway.app/api/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         ApiService service = retrofit.create(ApiService.class);
 
         btnEditProfile.setEnabled(false);
@@ -429,7 +401,9 @@ public class Perfil extends BaseActivity {
                         if (response.errorBody() != null) {
                             errorMsg = response.errorBody().string();
                         }
-                    } catch (IOException e) { e.printStackTrace(); }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
                     Log.e("API_ERROR", "Código: " + statusCode + " | Mensaje: " + errorMsg);
 
@@ -502,7 +476,7 @@ public class Perfil extends BaseActivity {
             int maxWidth = 800;
             int maxHeight = 800;
             if (selectedImage.getWidth() > maxWidth || selectedImage.getHeight() > maxHeight) {
-                float scale = Math.min(((float)maxWidth / selectedImage.getWidth()), ((float)maxHeight / selectedImage.getHeight()));
+                float scale = Math.min(((float) maxWidth / selectedImage.getWidth()), ((float) maxHeight / selectedImage.getHeight()));
 
                 android.graphics.Matrix matrix = new android.graphics.Matrix();
                 matrix.postScale(scale, scale);

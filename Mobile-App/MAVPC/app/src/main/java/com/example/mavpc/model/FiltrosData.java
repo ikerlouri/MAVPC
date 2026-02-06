@@ -3,6 +3,7 @@ package com.example.mavpc.model;
 import java.util.ArrayList;
 import java.util.List;
 
+// clase para facilitar la recoleccion de los datos de filtrado de marcadores del mapa
 public class FiltrosData {
     private String dia, mes, anio;
     private List<String> provinciasSeleccionadas = new ArrayList<>(); // Guipúzcoa, Álava, Vizcaya

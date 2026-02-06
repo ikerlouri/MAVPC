@@ -2,6 +2,7 @@ package com.example.mavpc.model;
 
 import com.google.gson.annotations.SerializedName;
 
+// representa cada usuario con todos sus datos
 public class Usuario {
     private int id;
     @SerializedName("usuario")
@@ -22,18 +23,15 @@ public class Usuario {
 
     @Override
     public String toString() {
-        return "Usuario{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                ", pfpUrl='" + pfpUrl + '\'' +
-                '}';
+        return "Usuario{" + "id=" + id + ", username='" + username + '\'' + ", email='" + email + '\'' + ", password='" + password + '\'' + ", pfpUrl='" + pfpUrl + '\'' + '}';
     }
 
-    public Usuario() {}
+    public Usuario() {
+    }
 
-    public int getId() { return id; }
+    public int getId() {
+        return id;
+    }
 
     public void setId(int id) {
         this.id = id;

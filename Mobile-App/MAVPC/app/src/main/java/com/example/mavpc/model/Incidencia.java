@@ -2,6 +2,7 @@ package com.example.mavpc.model;
 
 import com.google.gson.annotations.SerializedName;
 
+// representa cada incidencia con todos sus datos
 public class Incidencia {
     @SerializedName("incidenceId")
     private int id;
@@ -42,7 +43,8 @@ public class Incidencia {
         this.id = id;
     }
 
-    public Incidencia() {}
+    public Incidencia() {
+    }
 
     public int getId() {
         return id;

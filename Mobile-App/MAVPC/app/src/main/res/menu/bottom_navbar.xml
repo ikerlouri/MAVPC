@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!-- estructura comun navbar -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- android:icon="@android:drawable/ic_dialog_map" -->
     <item
         android:id="@+id/nav_explorar"
         android:icon="@drawable/ic_explore"
-        android:title="Explorar"/>
+        android:title="@string/explorar" />
 
-    <!-- android:icon="@android:drawable/btn_star" -->
     <item
         android:id="@+id/nav_favoritos"
         android:icon="@drawable/ic_favourite"
-        android:title="Favoritos"/>
+        android:title="@string/favoritos" />
 
     <item
         android:id="@+id/nav_reportar"
         android:icon="@drawable/ic_report"
-        android:title="Reportar"/>
+        android:title="@string/reportar" />
 
     <item
         android:id="@+id/nav_perfil"
         android:icon="@drawable/ic_user"
-        android:title="Perfil"/>
+        android:title="@string/perfil" />
 </menu>

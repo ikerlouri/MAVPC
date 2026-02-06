@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 
+// representa cada camara con todos sus datos
 public class Camara {
     private int id;
     @SerializedName("cameraName")
@@ -28,7 +29,8 @@ public class Camara {
         this.direction = direction;
     }
 
-    public Camara() {}
+    public Camara() {
+    }
 
     @NonNull
     @Override

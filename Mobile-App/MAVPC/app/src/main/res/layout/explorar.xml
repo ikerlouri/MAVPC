@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- ventana de explorar (mapa) -->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
@@ -38,7 +39,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="Filtrar mapa"
+            android:contentDescription="@string/filtrar_mapa"
             android:padding="10dp"
             android:src="@drawable/ic_filter"
             app:tint="@color/white" />
@@ -80,14 +81,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
 
-                android:hint="Buscar aquí"
+                android:hint="@string/buscar_aqu"
                 android:textColor="@android:color/white"
                 android:textColorHint="#B3FFFFFF"
                 android:textSize="16sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- boton capas -->
+    <!-- boton alternar capas -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnMapLayers"
 
@@ -107,13 +108,13 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="Cambiar capas"
+            android:contentDescription="@string/cambiar_capas"
             android:padding="8dp"
             android:src="@drawable/ic_layers"
             app:tint="@android:color/white" />
     </androidx.cardview.widget.CardView>
 
-    <!-- fondo negro para ventanas emergentes -->
+    <!-- fondo negro transparente para ventanas emergentes -->
     <View
         android:id="@+id/darkBackground"
         android:layout_width="match_parent"
@@ -163,7 +164,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
                         android:layout_toStartOf="@+id/btnCloseFilter"
-                        android:text="Filtrar Marcadores"
+                        android:text="@string/filtrar_marcadores"
                         android:textColor="@color/white"
                         android:textSize="24sp"
                         android:textStyle="bold" />
@@ -212,7 +213,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
 
-                            android:text="Fecha"
+                            android:text="@string/fecha"
                             android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -264,7 +265,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
-                            android:text="Marcadores"
+                            android:text="@string/marcadores"
                             android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -279,7 +280,7 @@
 
                             android:checked="true"
 
-                            android:text="Incidencias"
+                            android:text="@string/incidencias"
                             android:textColor="@color/white" />
 
                         <CheckBox
@@ -292,7 +293,7 @@
 
                             android:checked="true"
 
-                            android:text="Obras"
+                            android:text="@string/obras"
                             android:textColor="@color/white" />
 
                         <CheckBox
@@ -305,7 +306,7 @@
 
                             android:checked="true"
 
-                            android:text="Cámaras"
+                            android:text="@string/c_maras"
                             android:textColor="@color/white" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
@@ -329,7 +330,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
-                            android:text="Provincia"
+                            android:text="@string/provincia"
                             android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -354,7 +355,7 @@
 
                                 android:checked="true"
 
-                                android:text="Álava"
+                                android:text="@string/lava"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
 
@@ -369,7 +370,7 @@
 
                                 android:checked="true"
 
-                                android:text="Vizcaya"
+                                android:text="@string/vizcaya"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
 
@@ -383,7 +384,7 @@
 
                                 android:checked="true"
 
-                                android:text="Guipúzcoa"
+                                android:text="@string/guip_zcoa"
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -410,7 +411,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dp"
 
-                            android:text="Gravedad"
+                            android:text="@string/gravedad"
                             android:textColor="@color/white"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -431,7 +432,7 @@
 
                                 android:checked="true"
 
-                                android:text="Grave"
+                                android:text="@string/grave"
                                 android:textColor="@color/white" />
 
                             <CheckBox
@@ -445,7 +446,7 @@
 
                                 android:checked="true"
 
-                                android:text="Medio"
+                                android:text="@string/medio"
                                 android:textColor="@color/white" />
 
                             <CheckBox
@@ -459,7 +460,7 @@
 
                                 android:checked="true"
 
-                                android:text="Leve"
+                                android:text="@string/leve"
                                 android:textColor="@color/white" />
                         </LinearLayout>
                     </LinearLayout>
@@ -471,7 +472,7 @@
                     android:layout_height="55dp"
                     android:layout_marginBottom="10dp"
                     android:backgroundTint="@color/cake_green"
-                    android:text="Aplicar Filtros"
+                    android:text="@string/aplicar_filtros"
                     android:textColor="@color/black"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -516,13 +517,13 @@
 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/btnCerrarDetalles"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/btnCerrarDetalles"
 
                     android:textColor="@color/white"
                     android:textSize="24sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btnCerrarDetalles"
@@ -553,11 +554,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
-                app:contentPadding="15dp"
-
                 app:cardBackgroundColor="@color/dark_grey"
+
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:contentPadding="15dp">
 
                 <TextView
                     android:id="@+id/tvInfoDetalles"
@@ -585,10 +586,10 @@
                     android:id="@+id/ivCamara"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:scaleType="centerCrop"
                     android:background="#EEEEEE"
-                    android:visibility="gone"
-                    android:contentDescription="Imagen de la cámara" />
+                    android:contentDescription="@string/imagen_de_la_c_mara"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
 
                 <Button
                     android:id="@+id/btnFavorito"
@@ -610,12 +611,12 @@
 
                     android:visibility="gone"
 
+                    app:cornerRadius="20dp"
                     app:icon="@drawable/ic_favourite"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
-                    app:iconTint="@color/white"
 
-                    app:cornerRadius="20dp" />
+                    app:iconTint="@color/white" />
             </androidx.cardview.widget.CardView>
         </LinearLayout>
     </androidx.cardview.widget.CardView>

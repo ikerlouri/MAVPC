@@ -56,10 +56,7 @@ public class FavoritosAdapter extends ArrayAdapter<Camara> {
 
         // Cargar imagen
         if (camara.getUrlImage() != null && !camara.getUrlImage().isEmpty()) {
-            Glide.with(context)
-                    .load(camara.getUrlImage())
-                    .placeholder(R.drawable.ic_camera)
-                    .into(ivImagen);
+            Glide.with(context).load(camara.getUrlImage()).placeholder(R.drawable.ic_camera).into(ivImagen);
         }
 
         // Boton para abrir mapa en la posicion de la camara

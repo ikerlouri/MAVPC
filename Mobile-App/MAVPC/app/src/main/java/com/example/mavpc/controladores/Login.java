@@ -74,10 +74,7 @@ public class Login extends BaseActivity {
         String hashedPass = hashearPassword(password);
 
         String BASE_URL = "https://mavpc.up.railway.app/api/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         ApiService service = retrofit.create(ApiService.class);
 
         // Comprobar Login

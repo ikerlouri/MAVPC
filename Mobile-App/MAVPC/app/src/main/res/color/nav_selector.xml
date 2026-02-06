@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- para resaltar en verde la seccion del navbar en la que se esta -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:color="@color/cake_green" android:state_checked="true" />
 

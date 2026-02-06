@@ -13,11 +13,11 @@ import com.example.mavpc.model.Usuario;
 import java.util.ArrayList;
 import java.util.List;
 
+// clase que crea la base de datos y los metodos para llamarla
 public class DbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 6;
     private static final String DATABASE_NAME = "UserYCamFavs.db";
 
-    // Nombres de Tablas
     private static final String TABLA_USUARIO = "usuario_sesion";
     private static final String TABLA_CAMARAS = "camaras_fav";
 
@@ -27,25 +27,12 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Tabla Usuario (Para guardar al que se loguea)
-        String crearTablaUsuario = "CREATE TABLE " + TABLA_USUARIO + "(" +
-                "id INTEGER PRIMARY KEY, " +
-                "username TEXT, " +
-                "email TEXT, " +
-                "password TEXT, " +
-                "pfpUrl TEXT)";
+        // Tabla Usuario (Solo tendrá un usuario a la vez, el que esta en la sesion iniciada)
+        String crearTablaUsuario = "CREATE TABLE " + TABLA_USUARIO + "(" + "id INTEGER PRIMARY KEY, " + "username TEXT, " + "email TEXT, " + "password TEXT, " + "pfpUrl TEXT)";
         db.execSQL(crearTablaUsuario);
 
-        // Tabla Camaras Favoritas
-        String crearTablaCamaras = "CREATE TABLE " + TABLA_CAMARAS + "(" +
-                "id INTEGER PRIMARY KEY, " +
-                "name TEXT, " +
-                "urlImage TEXT, " +
-                "latitude TEXT, " +
-                "longitude TEXT, " +
-                "road TEXT, " +
-                "km TEXT, " +
-                "direction TEXT)";
+        // Tabla Camaras Favoritas (Solo se guardan las camaras favoritas del usuario de la tabla "usuario_sesion")
+        String crearTablaCamaras = "CREATE TABLE " + TABLA_CAMARAS + "(" + "id INTEGER PRIMARY KEY, " + "name TEXT, " + "urlImage TEXT, " + "latitude TEXT, " + "longitude TEXT, " + "road TEXT, " + "km TEXT, " + "direction TEXT)";
         db.execSQL(crearTablaCamaras);
     }
 
@@ -56,7 +43,7 @@ public class DbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Metodos usuario
+    // inserta en sqlite el usuario pasado
     public void insertUsuarioSesion(Usuario usuario) {
         if (usuario == null) return;
 
@@ -85,6 +72,7 @@ public class DbHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // actualiza en sqlite el usuario pasado
     public void updateUsuario(Usuario usuario) {
         if (usuario == null) return;
 
@@ -110,6 +98,7 @@ public class DbHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // devuelve el usuario que hay en sqlite
     public Usuario getUsuarioSesion() {
         SQLiteDatabase db = this.getReadableDatabase();
         Usuario usuario = null;
@@ -117,8 +106,7 @@ public class DbHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLA_USUARIO + " LIMIT 1", null);
 
         if (cursor.moveToFirst()) {
-            usuario = new Usuario(
-                    cursor.getInt(0), // id
+            usuario = new Usuario(cursor.getInt(0), // id
                     cursor.getString(1), // username
                     cursor.getString(2), // email
                     cursor.getString(3), // password
@@ -130,14 +118,15 @@ public class DbHelper extends SQLiteOpenHelper {
         return usuario; // Devuelve null si no hay nadie logueado
     }
 
+    // borra de sqlite el contenido de las dos tablas para cerrar la sesion
     public void logoff() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLA_USUARIO, null, null);
-        db.delete(TABLA_CAMARAS, null, null); // Borramos también sus favoritos
+        db.delete(TABLA_CAMARAS, null, null);
         db.close();
     }
 
-    // Metodos camaras
+    // inserta en sqlite una camara favorita
     public void insertCam(Camara c) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -162,6 +151,7 @@ public class DbHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // inserta en sqlite una lista de camaras favoritas
     public void insertCamList(List<Camara> camList) {
         if (camList == null) return;
 
@@ -201,12 +191,14 @@ public class DbHelper extends SQLiteOpenHelper {
         }
     }
 
+    // elimina de sqlite una camara de la lista de favoritas del usuario
     public void deleteFavCam(Camara c) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLA_CAMARAS, "id = ?", new String[]{String.valueOf(c.getId())});
         db.close();
     }
 
+    // devuelve todas las camaras favoritas del usuario
     public List<Camara> getFavCams() {
         List<Camara> lista = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -229,16 +221,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 // Nota: getColumnIndex devuelve -1 si no encuentra la columna,
                 // por eso es bueno comprobar o asegurarse que los nombres están bien.
 
-                Camara c = new Camara(
-                        cursor.getInt(indexId),
-                        cursor.getString(indexName),
-                        cursor.getString(indexUrl),
-                        cursor.getString(indexLat),
-                        cursor.getString(indexLon),
-                        cursor.getString(indexRoad),
-                        cursor.getString(indexKm),
-                        cursor.getString(indexDir)
-                );
+                Camara c = new Camara(cursor.getInt(indexId), cursor.getString(indexName), cursor.getString(indexUrl), cursor.getString(indexLat), cursor.getString(indexLon), cursor.getString(indexRoad), cursor.getString(indexKm), cursor.getString(indexDir));
 
                 lista.add(c);
             } while (cursor.moveToNext());
@@ -248,15 +231,13 @@ public class DbHelper extends SQLiteOpenHelper {
         return lista;
     }
 
+    // devuelve un booleano que expresa si una camara es favorita o no del usuario
     public boolean isFavourite(Camara c) {
         // Obtener base de datos en modo lectura
         SQLiteDatabase db = this.getReadableDatabase();
 
         // '?' para evitar inyección SQL y errores de formato
-        Cursor cursor = db.rawQuery(
-                "SELECT id FROM " + TABLA_CAMARAS + " WHERE id = ?",
-                new String[]{ String.valueOf(c.getId()) }
-        );
+        Cursor cursor = db.rawQuery("SELECT id FROM " + TABLA_CAMARAS + " WHERE id = ?", new String[]{String.valueOf(c.getId())});
 
         boolean existe = (cursor.getCount() > 0);
 

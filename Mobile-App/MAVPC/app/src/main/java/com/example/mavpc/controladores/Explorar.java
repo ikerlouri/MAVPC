@@ -203,10 +203,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         ApiService service = retrofit.create(ApiService.class);
 
@@ -372,10 +369,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
             // Retrofit
             String BASE_URL = "https://mavpc.up.railway.app/api/";
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+            Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
             ApiService service = retrofit.create(ApiService.class);
 
@@ -488,8 +482,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
         // estilo oscuro
         try {
-            boolean success = googleMap.setMapStyle(
-                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark));
+            boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark));
             if (!success) {
                 Log.e("Explorar", "Error al cargar el estilo del mapa");
             }
@@ -516,10 +509,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             }
 
             // 2. Añadimos un marcador visual donde el usuario pulsó
-            marcadorTemporal = gMap.addMarker(new MarkerOptions()
-                    .position(latLng)
-                    .title("Crear incidencia")
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))); // Color distinto
+            marcadorTemporal = gMap.addMarker(new MarkerOptions().position(latLng).title("Crear incidencia").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))); // Color distinto
 
             // 3. Mostramos el diálogo de confirmación
             mostrarDialogoCrearIncidencia(latLng);
@@ -528,29 +518,25 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
 
     // obtiene ubicacion actual del dispositivo y la marca
     private void obtenerUbicacionActual() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
             gMap.setMyLocationEnabled(true);
 
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                LatLng ubicacionActual = new LatLng(location.getLatitude(), location.getLongitude());
-                                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionActual, 16.5f));
-                            } else {
-                                LatLng ayuntaIrun = new LatLng(43.338140946267735, -1.7889326356543134);
-                                gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ayuntaIrun, 16.5f));
-                            }
-                        }
-                    });
+            fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        LatLng ubicacionActual = new LatLng(location.getLatitude(), location.getLongitude());
+                        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ubicacionActual, 16.5f));
+                    } else {
+                        LatLng ayuntaIrun = new LatLng(43.338140946267735, -1.7889326356543134);
+                        gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(ayuntaIrun, 16.5f));
+                    }
+                }
+            });
 
         } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_REQUEST_CODE);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
         }
     }
 
@@ -559,17 +545,9 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         // 1. Configuración de Retrofit
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).build();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(okHttpClient)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).client(okHttpClient).addConverterFactory(GsonConverterFactory.create()).build();
 
         ApiService service = retrofit.create(ApiService.class);
 
@@ -622,11 +600,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                     }
 
                     // Añadir marcador
-                    Marker marker = gMap.addMarker(new MarkerOptions()
-                            .position(posicion)
-                            .title(i.getType())
-                            .snippet(i.getCityTown())
-                            .icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
+                    Marker marker = gMap.addMarker(new MarkerOptions().position(posicion).title(i.getType()).snippet(i.getCityTown()).icon(BitmapDescriptorFactory.defaultMarker(markerColor)));
 
                     // Guardar objeto en el tag
                     if (marker != null) {
@@ -647,10 +621,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
         // url base
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         ApiService service = retrofit.create(ApiService.class);
 
@@ -671,10 +642,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
                                 LatLng posicion = new LatLng(lat, lng);
 
                                 // colocar marcador azul
-                                Marker marker = gMap.addMarker(new MarkerOptions()
-                                        .position(posicion)
-                                        .title(c.getName())
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                                Marker marker = gMap.addMarker(new MarkerOptions().position(posicion).title(c.getName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
 
                                 // guardamos la camara dentro del marcador para enseñar su informacion
                                 if (marker != null) {
@@ -777,9 +745,7 @@ public class Explorar extends BaseActivity implements OnMapReadyCallback {
             // Cargar imagen con Glide
             String urlImage = cam.getUrlImage();
             if (urlImage != null && !urlImage.isEmpty()) {
-                Glide.with(this)
-                        .load(urlImage)
-                        .placeholder(R.drawable.ic_camera) // Tu placeholder
+                Glide.with(this).load(urlImage).placeholder(R.drawable.ic_camera) // Tu placeholder
                         .error(R.drawable.ic_camera)      // Imagen si falla
                         .into(ivCamara);
             }

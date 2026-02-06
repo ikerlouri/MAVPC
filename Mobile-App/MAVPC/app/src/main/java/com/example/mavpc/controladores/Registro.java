@@ -72,10 +72,7 @@ public class Registro extends BaseActivity {
     private void comprobarDisponibilidad(String usuario, String email, String password) {
         String BASE_URL = "https://mavpc.up.railway.app/api/";
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         ApiService service = retrofit.create(ApiService.class);
 

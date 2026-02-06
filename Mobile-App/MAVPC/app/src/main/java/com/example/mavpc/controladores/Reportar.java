@@ -40,7 +40,6 @@ public class Reportar extends BaseActivity {
     private EditText etLatitud, etLongitud, etCausa, etCiudad, etCarretera, etDireccion;
     private Spinner spinDia, spinMes, spinAno, spinHora, spinMin, spinSeg;
     private RadioGroup rgTipo, rgGravedad, rgProvincia;
-    private RadioButton rbObra, rbIncidencia, rbGrave, rbMedio, rbLeve, rbAlava, rbVizcaya, rbGuipuzkoa;
     private Button btnEnviar;
 
     // configuracion al crearse la ventana
@@ -62,20 +61,12 @@ public class Reportar extends BaseActivity {
         inicializarSpinnersHora();
 
         rgTipo = findViewById(R.id.rgTipo);
-        rbObra = findViewById(R.id.rbObra);
-        rbIncidencia = findViewById(R.id.rbIncidencia);
 
         rgGravedad = findViewById(R.id.rgGravedad);
-        rbGrave = findViewById(R.id.rbGrave);
-        rbMedio = findViewById(R.id.rbMedio);
-        rbLeve = findViewById(R.id.rbLeve);
 
         etCausa = findViewById(R.id.etCausa);
 
         rgProvincia = findViewById(R.id.rgProvincia);
-        rbAlava = findViewById(R.id.rbAlava);
-        rbVizcaya = findViewById(R.id.rbVizcaya);
-        rbGuipuzkoa = findViewById(R.id.rbGuipuzkoa);
 
         etCiudad = findViewById(R.id.etCiudad);
 
@@ -111,13 +102,9 @@ public class Reportar extends BaseActivity {
         String provincia = rbProvSel.getText().toString();
 
         // Construir la fecha y hora (Formato ISO 8601: yyyy-MM-ddTHH:mm:ss)
-        String fecha = spinAno.getSelectedItem().toString() + "-" +
-                spinMes.getSelectedItem().toString() + "-" +
-                spinDia.getSelectedItem().toString();
+        String fecha = spinAno.getSelectedItem().toString() + "-" + spinMes.getSelectedItem().toString() + "-" + spinDia.getSelectedItem().toString();
 
-        String hora = spinHora.getSelectedItem().toString() + ":" +
-                spinMin.getSelectedItem().toString() + ":" +
-                spinSeg.getSelectedItem().toString();
+        String hora = spinHora.getSelectedItem().toString() + ":" + spinMin.getSelectedItem().toString() + ":" + spinSeg.getSelectedItem().toString();
 
         String fechaCompleta = fecha + "T" + hora;
 
@@ -135,10 +122,7 @@ public class Reportar extends BaseActivity {
         nuevaIncidencia.setStartDate(fechaCompleta); // String o Date según tu API
 
         String BASE_URL = "https://mavpc.up.railway.app/api/";
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         ApiService service = retrofit.create(ApiService.class);
 
         Call<Void> call = service.crearIncidencia(nuevaIncidencia);
@@ -171,6 +155,7 @@ public class Reportar extends BaseActivity {
                     Toast.makeText(Reportar.this, "Error en el servidor.", Toast.LENGTH_LONG).show();
                 }
             }
+
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 Log.e("API_FAILURE", "Error en el servidor: " + t.getMessage());
@@ -234,7 +219,7 @@ public class Reportar extends BaseActivity {
         return true;
     }
 
-    // verificar si llega a esta ventana con unas coordenadas
+    // verificar si llega a esta ventana con unas coordenadas para poner en el formulario
     private void verificarCoordenadasIntent() {
         // si no existen devuelve 0.0
         double lat = getIntent().getDoubleExtra("LATITUD", 0.0);
@@ -247,8 +232,8 @@ public class Reportar extends BaseActivity {
         }
     }
 
-    // poner como default la fecha actual
-    private void marcarFechaActualSpinners(){
+    // poner como default la fecha actual en los spinners
+    private void marcarFechaActualSpinners() {
         // obtencion de fecha actual
         Calendar calendar = Calendar.getInstance();
         int diaHoy = calendar.get(Calendar.DAY_OF_MONTH);
@@ -256,24 +241,16 @@ public class Reportar extends BaseActivity {
         int anoHoy = calendar.get(Calendar.YEAR);
 
         // seleccion de la fecha actual como default
-        if (diaHoy <= 31) spinDia.setSelection(diaHoy - 1);
+        spinDia.setSelection(diaHoy - 1);
 
         if (mesHoy <= 12) spinMes.setSelection(mesHoy - 1);
 
         int indiceAno = anoHoy - 2008;
         spinAno.setSelection(indiceAno);
-
-        /*
-        // verificamos que el año actual esté dentro del rango para que no falle
-        if (indiceAno > 0 && indiceAno < anos.size()) {
-            spinAno.setSelection(indiceAno);
-        } else{
-            spinAno.setSelection(anos.size() - 1);
-        }
-        */
     }
 
-    private void marcarHoraActualSpinners(){
+    // poner como default la hora actual en los spinners
+    private void marcarHoraActualSpinners() {
         // la hora actual
         Calendar calendar = Calendar.getInstance();
         int horaActual = calendar.get(Calendar.HOUR_OF_DAY);
@@ -286,6 +263,7 @@ public class Reportar extends BaseActivity {
         spinSeg.setSelection(segundoActual);
     }
 
+    // rellena con formato los spinners de la fecha
     private void inicializarSpinnersFecha() {
         Spinner spinDia = findViewById(R.id.spinDia);
         Spinner spinMes = findViewById(R.id.spinMes);
@@ -293,15 +271,15 @@ public class Reportar extends BaseActivity {
 
         // dia (1-31)
         List<String> dias = new ArrayList<>();
-        for(int i=1; i<=31; i++) dias.add(String.format("%02d", i));
+        for (int i = 1; i <= 31; i++) dias.add(String.format("%02d", i));
 
         // mes (1-12)
         List<String> meses = new ArrayList<>();
-        for(int i=1; i<=12; i++) meses.add(String.format("%02d", i));
+        for (int i = 1; i <= 12; i++) meses.add(String.format("%02d", i));
 
         // año (2008-2026)
         List<String> anos = new ArrayList<>();
-        for(int i=2008; i<=2026; i++) anos.add(String.valueOf(i));
+        for (int i = 2008; i <= 2026; i++) anos.add(String.valueOf(i));
 
         // adaptadores
         ArrayAdapter<String> adapterDia = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, dias);
@@ -319,23 +297,24 @@ public class Reportar extends BaseActivity {
         marcarFechaActualSpinners();
     }
 
+    // rellena con formato los spinners de la hora
     private void inicializarSpinnersHora() {
         // hora (00-23)
         List<String> horas = new ArrayList<>();
-        for(int i=0; i<24; i++) {
+        for (int i = 0; i < 24; i++) {
             // String.format("%02d", i) convierte el 5 en "05", el 10 en "10"
             horas.add(String.format("%02d", i));
         }
 
         // minuto (00-59)
         List<String> minutos = new ArrayList<>();
-        for(int i=0; i<60; i++) {
+        for (int i = 0; i < 60; i++) {
             minutos.add(String.format("%02d", i));
         }
 
         // segundo (00-59)
         List<String> segundos = new ArrayList<>();
-        for(int i=0; i<60; i++) {
+        for (int i = 0; i < 60; i++) {
             segundos.add(String.format("%02d", i));
         }
 

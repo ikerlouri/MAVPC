@@ -1,5 +1,6 @@
 package com.example.mavpc.model;
 
+// representa la relacion de una camara y el usuario que la tenga en favoritos
 public class CamFavoritaUsuario {
     private int id;
     private int idUsuario;
@@ -11,7 +12,8 @@ public class CamFavoritaUsuario {
         this.idCamara = idCamara;
     }
 
-    public CamFavoritaUsuario() {}
+    public CamFavoritaUsuario() {
+    }
 
     public int getId() {
         return id;

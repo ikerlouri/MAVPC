@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- colores usados -->
 <resources>
     <color name="black">#000000</color>
     <color name="dark_grey">#1E2026</color>
     <color name="light_grey">#292E3F</color>
     <color name="cake_green">#66FF78</color>
     <color name="link_blue">#5681ee</color>
-    <color name="white">#ffffffff</color> <!-- #B3FFFFFF mas apagado -->
+    <color name="white">#ffffffff</color>
 </resources>

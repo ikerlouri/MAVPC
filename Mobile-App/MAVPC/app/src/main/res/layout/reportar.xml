@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!-- ventana reportar -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -27,14 +28,15 @@
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
                 android:layout_marginTop="30dp"
+                android:layout_marginBottom="30dp"
 
-                android:text="Reportar Incidencia"
+                android:text="@string/reportar_incidencia"
                 android:textColor="@color/white"
                 android:textSize="28sp"
                 android:textStyle="bold" />
 
+            <!-- seccion fecha y hora -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -53,10 +55,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:text="Fecha*:"
-                        android:textStyle="bold"
+                        android:text="@string/fecha_report"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -92,10 +94,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:text="Hora*:"
-                        android:textStyle="bold"
+                        android:text="@string/hora"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -126,6 +128,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- seccion tipo, gravedad y causa -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -144,17 +147,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Tipo*:"
-                        android:textStyle="bold"
+                        android:text="@string/tipo"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <RadioGroup
                         android:id="@+id/rgTipo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="20dp">
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
 
                         <RadioButton
                             android:id="@+id/rbObra"
@@ -162,7 +165,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="@color/white"
-                            android:text="Obra"
+                            android:text="@string/obra"
                             android:textColor="@color/white" />
 
                         <RadioButton
@@ -171,7 +174,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="@color/white"
-                            android:text="Incidencia"
+                            android:text="@string/incidencia"
                             android:textColor="@color/white" />
                     </RadioGroup>
 
@@ -180,17 +183,17 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
 
-                        android:text="Gravedad*:"
-                        android:textStyle="bold"
+                        android:text="@string/gravedad_report"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <RadioGroup
                         android:id="@+id/rgGravedad"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="20dp">
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
 
                         <RadioButton
                             android:id="@+id/rbGrave"
@@ -198,7 +201,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="#FF4444"
-                            android:text="Grave"
+                            android:text="@string/grave"
                             android:textColor="@color/white" />
 
                         <RadioButton
@@ -207,7 +210,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="#FFBB33"
-                            android:text="Medio"
+                            android:text="@string/medio"
                             android:textColor="@color/white" />
 
                         <RadioButton
@@ -216,7 +219,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="#42bfdb"
-                            android:text="Leve"
+                            android:text="@string/leve"
                             android:textColor="@color/white" />
                     </RadioGroup>
 
@@ -224,25 +227,24 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Causa:"
-                        android:textStyle="bold"
+                        android:text="@string/causa"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/etCausa"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/white"
-                        android:hint="Introduzca una causa"
+                        android:hint="@string/introduzca_una_causa"
                         android:inputType="textCapSentences"
                         android:textColor="@color/white"
                         android:textColorHint="#80FFFFFF" />
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-
+            <!-- seccion provincia y municipio -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -261,17 +263,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Provincia*:"
-                        android:textStyle="bold"
+                        android:text="@string/provincia_report"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <RadioGroup
                         android:id="@+id/rgProvincia"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="20dp">
+                        android:layout_marginBottom="20dp"
+                        android:orientation="horizontal">
 
                         <RadioButton
                             android:id="@+id/rbAlava"
@@ -279,7 +281,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="@color/white"
-                            android:text="Álava"
+                            android:text="@string/lava"
                             android:textColor="@color/white" />
 
                         <RadioButton
@@ -288,7 +290,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="@color/white"
-                            android:text="Vizcaya"
+                            android:text="@string/vizcaya"
                             android:textColor="@color/white" />
 
                         <RadioButton
@@ -297,7 +299,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:buttonTint="@color/white"
-                            android:text="Guipuzkoa"
+                            android:text="@string/guip_zcoa"
                             android:textColor="@color/white" />
                     </RadioGroup>
 
@@ -305,24 +307,24 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Municipio:"
-                        android:textStyle="bold"
+                        android:text="@string/municipio"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/etCiudad"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/white"
-                        android:hint="Introduzca municipio"
+                        android:hint="@string/introduzca_municipio"
                         android:inputType="textCapWords"
                         android:textColor="@color/white"
                         android:textColorHint="#80FFFFFF" />
-
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- seccion coordenadas -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -341,10 +343,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:text="Coordenadas*:"
-                        android:textStyle="bold"
+                        android:text="@string/coordenadas"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -358,7 +360,7 @@
                             android:layout_marginEnd="10dp"
                             android:layout_weight="1"
                             android:backgroundTint="@color/white"
-                            android:hint="Latitud"
+                            android:hint="@string/latitud"
                             android:inputType="numberDecimal|numberSigned"
                             android:textColor="@color/white"
                             android:textColorHint="#80FFFFFF" />
@@ -369,7 +371,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:backgroundTint="@color/white"
-                            android:hint="Longitud"
+                            android:hint="@string/longitud"
                             android:inputType="numberDecimal|numberSigned"
                             android:textColor="@color/white"
                             android:textColorHint="#80FFFFFF" />
@@ -377,7 +379,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-
+            <!-- seccion carretera y direccion -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -396,10 +398,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Carretera:"
-                        android:textStyle="bold"
+                        android:text="@string/carretera"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/etCarretera"
@@ -407,7 +409,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
                         android:backgroundTint="@color/white"
-                        android:hint="ej: A9"
+                        android:hint="@string/ej_a9"
                         android:inputType="textCapCharacters"
                         android:textColor="@color/white"
                         android:textColorHint="#80FFFFFF" />
@@ -416,34 +418,34 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Dirección:"
-                        android:textStyle="bold"
+                        android:text="@string/direcci_n"
                         android:textColor="@color/white"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
 
                     <EditText
                         android:id="@+id/etDireccion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:backgroundTint="@color/white"
-                        android:hint="ej: Donosti"
+                        android:hint="@string/ej_donosti"
                         android:inputType="textCapSentences"
                         android:textColor="@color/white"
                         android:textColorHint="#80FFFFFF" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
+            <!-- boton enviar -->
             <Button
                 android:id="@+id/btnEnviar"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
                 android:layout_marginBottom="40dp"
                 android:backgroundTint="@color/cake_green"
-                android:text="ENVIAR REPORTE"
+                android:text="@string/enviar_reporte"
                 android:textColor="@color/black"
                 android:textSize="16sp"
                 android:textStyle="bold" />
-
         </LinearLayout>
     </ScrollView>
 
