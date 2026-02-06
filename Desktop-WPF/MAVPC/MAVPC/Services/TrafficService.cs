@@ -25,7 +25,7 @@ namespace MAVPC.Services
         {
             _httpClient = httpClient;
 
-            // Configuración robusta para leer JSONs (ignora mayúsculas/minúsculas y nulos)
+            // Configuración para leer JSONs (ignora mayúsculas/minúsculas y nulos)
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -100,14 +100,37 @@ namespace MAVPC.Services
 
         #region Métodos de Escritura (POST/DELETE)
 
-        public async Task<bool> AddCamaraAsync(Camara nuevaCamara)
+        public async Task<bool> AddCamaraAsync(Camara item)
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}camaras", nuevaCamara, _jsonOptions);
+                // Creamos un objeto anónimo SIN el campo 'id'
+                var paqueteLimpio = new
+                {
+                    cameraName = item.Nombre,
+                    urlImage = item.UrlImagen,
+                    road = item.Carretera,
+                    kilometer = item.Kilometro,
+                    address = item.Direccion,
+                    latitude = item.Latitud,
+                    longitude = item.Longitud
+                };
+
+                var response = await _httpClient.PostAsJsonAsync($"{BASE_URL}camaras", paqueteLimpio, _jsonOptions);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"Error API Cámaras: {error}");
+                }
+
                 return response.IsSuccessStatusCode;
             }
-            catch { return false; }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Excepción AddCamara: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<bool> AddIncidenciaAsync(Incidencia item)
